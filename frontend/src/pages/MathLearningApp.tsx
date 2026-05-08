@@ -17,6 +17,7 @@ import * as M from '../lib/mutations';
 import { get } from '../lib/api';
 import { toast } from '../components/Toast';
 import { trackClick, trackUi, track } from '../lib/analytics';
+import { useT } from '../lib/i18n';
 import WrongNoteDetailModal from '../components/WrongNoteDetailModal';
 import RegisterWrongNoteModal from '../components/RegisterWrongNoteModal';
 import MockExamResultModal from '../components/MockExamResultModal';
@@ -112,9 +113,17 @@ export default function MathLearningApp() {
 }
 
 // ============ TOP NAV ============
-function TopNav({ activeNav, setActiveNav }: { activeNav: string; setActiveNav: (v: any) => void }) {
+function TopNav({ activeNav, setActiveNav }: { activeNav: NavKey; setActiveNav: (v: NavKey) => void }) {
   const { user, logout } = useAuth();
-  const items = ['대시보드', '오답노트', '학습', '모의고사', '리포트'] as const;
+  const { t, lang, setLang } = useT();
+  const items: NavKey[] = ['대시보드', '오답노트', '학습', '모의고사', '리포트'];
+  const navLabel = (k: NavKey): string => ({
+    '대시보드': t('nav.dashboard'),
+    '오답노트': t('nav.wrongNotes'),
+    '학습': t('nav.study'),
+    '모의고사': t('nav.mockExam'),
+    '리포트': t('nav.report'),
+  } as const)[k];
 
   return (
     <nav style={{
@@ -124,8 +133,8 @@ function TopNav({ activeNav, setActiveNav }: { activeNav: string; setActiveNav: 
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '20px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-            <span className="serif" style={{ fontSize: '26px', fontWeight: 600, letterSpacing: '-0.03em', fontStyle: 'italic' }}>Mathēma</span>
-            <span style={{ fontSize: '11px', letterSpacing: '0.2em', color: '#8B7E6A', textTransform: 'uppercase' }}>· 입시 수학</span>
+            <span className="serif" style={{ fontSize: '26px', fontWeight: 600, letterSpacing: '-0.03em', fontStyle: 'italic' }}>{t('app.brand')}</span>
+            <span style={{ fontSize: '11px', letterSpacing: '0.2em', color: '#8B7E6A', textTransform: 'uppercase' }}>{t('app.tagline')}</span>
           </div>
           <div style={{ display: 'flex', gap: '4px' }}>
             {items.map(item => (
@@ -136,19 +145,43 @@ function TopNav({ activeNav, setActiveNav }: { activeNav: string; setActiveNav: 
                 backgroundColor: activeNav === item ? '#1F1A1410' : 'transparent',
                 border: 'none', borderRadius: '4px', cursor: 'pointer',
                 transition: 'all 0.2s', fontFamily: 'inherit',
-              }}>{item}</button>
+              }}>{navLabel(item)}</button>
             ))}
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          {/* 🌐 언어 토글 KO / EN */}
+          <div style={{
+            display: 'flex', gap: 0, padding: 2,
+            backgroundColor: '#1F1A1408', borderRadius: 4, border: '1px solid #1F1A1418',
+          }}>
+            {(['ko', 'en'] as const).map((l) => (
+              <button
+                key={l}
+                onClick={() => { trackUi('lang.toggle', { to: l }); setLang(l); }}
+                title={t('common.lang.toggle')}
+                style={{
+                  padding: '4px 10px', fontSize: 11, fontWeight: 600,
+                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                  backgroundColor: lang === l ? '#1F1A14' : 'transparent',
+                  color: lang === l ? '#F2EDE2' : '#6B6354',
+                  border: 'none', borderRadius: 3, cursor: 'pointer',
+                  fontFamily: 'JetBrains Mono, monospace',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {l === 'ko' ? 'KO' : 'EN'}
+              </button>
+            ))}
+          </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: '2px' }}>수능까지</div>
-            <div className="serif mono" style={{ fontSize: '20px', fontWeight: 600, letterSpacing: '-0.02em' }}>D-{user?.dDay ?? '–'}</div>
+            <div style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: '2px' }}>{t('nav.dDayPrefix')}</div>
+            <div className="serif mono" style={{ fontSize: '20px', fontWeight: 600, letterSpacing: '-0.02em' }}>{t('nav.dDay', { days: user?.dDay ?? '–' })}</div>
           </div>
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#1F1A14', color: '#F2EDE2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 600 }}>
             {user?.name?.[0] ?? '?'}
           </div>
-          <button onClick={logout} title="로그아웃" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B6354' }}>
+          <button onClick={logout} title={t('nav.logout')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B6354' }}>
             <LogOut size={16} />
           </button>
         </div>
@@ -159,6 +192,7 @@ function TopNav({ activeNav, setActiveNav }: { activeNav: string; setActiveNav: 
 
 // ============ DASHBOARD ============
 function DashboardPage({ onStartStudy }: { onStartStudy: (sessionId: string) => void }) {
+  const { t } = useT();
   const summary = useQuery({ queryKey: ['dashboard'], queryFn: Q.fetchDashboardSummary });
   const mastery = useQuery({ queryKey: ['mastery'], queryFn: Q.fetchMastery });
   const today = useQuery({ queryKey: ['today'], queryFn: Q.fetchToday });
@@ -195,7 +229,7 @@ function DashboardPage({ onStartStudy }: { onStartStudy: (sessionId: string) => 
       <section style={{ marginBottom: '64px' }} className="fade-up">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
           <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#B45309' }} className="pulse-warm" />
-          <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B7E6A', textTransform: 'uppercase' }}>AI 진단 · 실시간 업데이트</span>
+          <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B7E6A', textTransform: 'uppercase' }}>{t('dashboard.diagnosis.label')}</span>
         </div>
         <h1 className="serif" style={{ fontSize: '48px', lineHeight: 1.15, letterSpacing: '-0.025em', fontWeight: 400, margin: 0, maxWidth: '880px' }}>
           {diagnosis.data?.headline ?? '오늘 23분만 더 투자하면 지난주 놓친 8점을 회복할 수 있어요'}
@@ -205,10 +239,15 @@ function DashboardPage({ onStartStudy }: { onStartStudy: (sessionId: string) => 
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #1F1A1415', borderBottom: '1px solid #1F1A1415' }}>
           {[
-            { label: '오늘 학습', value: String(stats?.todayMinutes ?? 0), unit: '분', sub: `목표 ${stats?.todayGoalMinutes ?? 180}분 · ${Math.round(((stats?.todayMinutes ?? 0) / (stats?.todayGoalMinutes ?? 180)) * 100)}% 달성`, accent: '#B45309', icon: undefined as undefined | string },
-            { label: '연속 학습', value: String(stats?.streakDays ?? 0), unit: '일', sub: '개인 최고 기록 갱신 중', accent: '#4A5D3A', icon: 'Flame' },
-            { label: '주간 정답률', value: String(stats?.weeklyAccuracy ?? 0), unit: '%', sub: `지난주 대비 +${stats?.weeklyAccuracyDelta ?? 0}%p ↑`, accent: '#4A5D3A', icon: undefined },
-            { label: '예상 등급', value: String(stats?.expectedGrade ?? '–'), unit: '등급', sub: `${stats?.expectedGradeFrom ?? 3}등급 → 상승`, accent: '#1F1A14', icon: undefined },
+            { label: t('dashboard.stat.todayStudy'), value: String(stats?.todayMinutes ?? 0), unit: t('common.minute'),
+              sub: t('dashboard.stat.todayGoal', { goal: stats?.todayGoalMinutes ?? 180, pct: Math.round(((stats?.todayMinutes ?? 0) / (stats?.todayGoalMinutes ?? 180)) * 100) }),
+              accent: '#B45309', icon: undefined as undefined | string },
+            { label: t('dashboard.stat.streak'), value: String(stats?.streakDays ?? 0), unit: t('common.day'),
+              sub: t('dashboard.stat.streakBest'), accent: '#4A5D3A', icon: 'Flame' },
+            { label: t('dashboard.stat.weeklyAccuracy'), value: String(stats?.weeklyAccuracy ?? 0), unit: t('common.percent'),
+              sub: t('dashboard.stat.weeklyDelta', { delta: stats?.weeklyAccuracyDelta ?? 0 }), accent: '#4A5D3A', icon: undefined },
+            { label: t('dashboard.stat.expectedGrade'), value: String(stats?.expectedGrade ?? '–'), unit: t('common.grade'),
+              sub: t('dashboard.stat.gradeFrom', { from: stats?.expectedGradeFrom ?? 3 }), accent: '#1F1A14', icon: undefined },
           ].map((stat, i) => (
             <div key={i} style={{ padding: '24px 28px', borderRight: i < 3 ? '1px solid #1F1A1415' : 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
@@ -230,7 +269,7 @@ function DashboardPage({ onStartStudy }: { onStartStudy: (sessionId: string) => 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
             <div>
               <div style={sectionLabelStyle}>No 01 — Mastery Map</div>
-              <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>단원별 숙련도</h2>
+              <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('dashboard.section.masteryMap')}</h2>
             </div>
             {diagnosis.data?.weakUnit && (
               <div style={{ fontSize: '11px', padding: '6px 10px', backgroundColor: '#8B3A1F', color: '#F2EDE2', borderRadius: '2px', letterSpacing: '0.05em' }}>약점 1개 감지</div>
@@ -259,7 +298,7 @@ function DashboardPage({ onStartStudy }: { onStartStudy: (sessionId: string) => 
         <div>
           <div style={{ marginBottom: '20px' }}>
             <div style={sectionLabelStyle}>No 02 — Today</div>
-            <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>오늘의 맞춤 학습</h2>
+            <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('dashboard.section.today')}</h2>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {(today.data ?? []).map((item, i) => (
@@ -300,8 +339,8 @@ function DashboardPage({ onStartStudy }: { onStartStudy: (sessionId: string) => 
           <div>
             <div style={sectionLabelStyle}>No 03 — Wrong Notes</div>
             <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>
-              최근 오답 인사이트
-              <span style={{ fontSize: '14px', color: '#6B6354', marginLeft: '12px', fontFamily: '"Pretendard", sans-serif', fontWeight: 400 }}>AI가 분석한 핵심 오류 패턴</span>
+              {t('dashboard.section.wrongNotes')}
+              <span style={{ fontSize: '14px', color: '#6B6354', marginLeft: '12px', fontFamily: '"Pretendard", sans-serif', fontWeight: 400 }}>{t('dashboard.section.wrongNotes.sub')}</span>
             </h2>
           </div>
         </div>
@@ -330,7 +369,7 @@ function DashboardPage({ onStartStudy }: { onStartStudy: (sessionId: string) => 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
             <div>
               <div style={sectionLabelStyle}>No 04 — Consistency</div>
-              <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>학습 캘린더</h2>
+              <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('dashboard.section.consistency')}</h2>
               <div style={{ fontSize: '12px', color: '#6B6354', marginTop: '4px' }}>지난 12주 · <span style={{ color: '#4A5D3A', fontWeight: 600 }}>현재 {stats?.streakDays ?? 0}일 연속</span></div>
             </div>
             <Flame size={20} color="#B45309" />
@@ -374,8 +413,8 @@ function DashboardPage({ onStartStudy }: { onStartStudy: (sessionId: string) => 
           <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(180,83,9,0.2) 0%, transparent 70%)' }} />
           <div style={{ position: 'relative' }}>
             <div style={{ fontSize: '11px', letterSpacing: '0.2em', color: '#A89684', textTransform: 'uppercase', marginBottom: '6px' }}>No 05 — Error DNA</div>
-            <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0, marginBottom: '4px' }}>나의 오답 유형</h2>
-            <div style={{ fontSize: '12px', color: '#A89684', marginBottom: '28px' }}>최근 30일 분석</div>
+            <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0, marginBottom: '4px' }}>{t('dashboard.section.errorDna')}</h2>
+            <div style={{ fontSize: '12px', color: '#A89684', marginBottom: '28px' }}>{t('dashboard.section.errorDna.sub')}</div>
             <div style={{ marginBottom: '24px' }}>
               {(errorDna.data?.distribution ?? []).map((e, i) => (
                 <div key={i} style={{ marginBottom: '14px' }}>
@@ -415,6 +454,7 @@ function DashboardPage({ onStartStudy }: { onStartStudy: (sessionId: string) => 
 
 // ============ WRONG NOTES PAGE ============
 function WrongNotesPage() {
+  const { t } = useT();
   const [filter, setFilter] = useState<string>('전체');
   const [sort, setSort] = useState<'newest' | 'oldest'>('newest');
   const [sortOpen, setSortOpen] = useState(false);
@@ -445,21 +485,25 @@ function WrongNotesPage() {
       <section style={{ marginBottom: '48px' }} className="fade-up">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
           <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#8B3A1F' }} className="pulse-warm" />
-          <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B7E6A', textTransform: 'uppercase' }}>Wrong Notes Archive</span>
+          <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B7E6A', textTransform: 'uppercase' }}>{t('wn.label')}</span>
         </div>
         <h1 className="serif" style={{ fontSize: '48px', lineHeight: 1.15, letterSpacing: '-0.025em', fontWeight: 400, margin: 0, maxWidth: '880px' }}>
-          <em style={{ color: '#8B3A1F', fontStyle: 'italic', fontWeight: 500 }}>{stats.data?.total ?? 0}</em>개의 오답이<br />
-          <span style={{ color: '#6B6354' }}>분석을 기다리고 있어요</span>
+          <em style={{ color: '#8B3A1F', fontStyle: 'italic', fontWeight: 500 }}>
+            {t('wn.headline.count', { n: stats.data?.total ?? 0 })}
+          </em><br />
+          <span style={{ color: '#6B6354' }}>{t('wn.headline.suffix')}</span>
         </h1>
 
         <div className="deco-line" style={{ height: '1px', marginTop: '32px', marginBottom: '24px' }} />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #1F1A1415', borderBottom: '1px solid #1F1A1415' }}>
           {[
-            { label: '전체 오답', value: String(stats.data?.total ?? 0), unit: '문제', accent: '#1F1A14' },
-            { label: '분석 완료', value: String(stats.data?.analyzed ?? 0), unit: '문제', accent: '#B45309' },
-            { label: '마스터 완료', value: String(stats.data?.mastered ?? 0), unit: '문제', sub: `${stats.data?.masteredPct ?? 0}% 진행`, accent: '#4A5D3A' },
-            { label: '재출제 정답률', value: String(stats.data?.retryAccuracy ?? 0), unit: '%', sub: '같은 유형 재도전', accent: '#4A5D3A' },
+            { label: t('wn.stat.total'), value: String(stats.data?.total ?? 0), unit: t('common.problem'), accent: '#1F1A14' },
+            { label: t('wn.stat.analyzed'), value: String(stats.data?.analyzed ?? 0), unit: t('common.problem'), accent: '#B45309' },
+            { label: t('wn.stat.mastered'), value: String(stats.data?.mastered ?? 0), unit: t('common.problem'),
+              sub: t('wn.stat.masteredPct', { pct: stats.data?.masteredPct ?? 0 }), accent: '#4A5D3A' },
+            { label: t('wn.stat.retry'), value: String(stats.data?.retryAccuracy ?? 0), unit: t('common.percent'),
+              sub: t('wn.stat.retrySub'), accent: '#4A5D3A' },
           ].map((stat, i) => (
             <div key={i} style={{ padding: '24px 28px', borderRight: i < 3 ? '1px solid #1F1A1415' : 'none' }}>
               <div style={{ fontSize: '11px', letterSpacing: '0.18em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: '12px' }}>{stat.label}</div>
@@ -625,7 +669,7 @@ function WrongNotesPage() {
                   opacity: masterMut.isPending ? 0.6 : 1,
                 }}
               >
-                {note.status === 'mastered' ? '마스터 완료' : '마스터하기'} <ArrowRight size={12} />
+                {note.status === 'mastered' ? t('wn.master.completed') : t('wn.master')} <ArrowRight size={12} />
               </button>
             </div>
           </div>
@@ -1155,6 +1199,7 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
 
 // ============ MOCK EXAM PAGE ============
 function MockExamPage({ onStartExam }: { onStartExam: (exam: M.ExamPackage) => void }) {
+  const { t } = useT();
   const summary = useQuery({ queryKey: ['mock-summary'], queryFn: Q.fetchMockSummary });
   const trajectory = useQuery({ queryKey: ['mock-trajectory'], queryFn: Q.fetchTrajectory });
   const results = useQuery({ queryKey: ['mock-results'], queryFn: Q.fetchExamResults });
@@ -1343,6 +1388,7 @@ function MockExamPage({ onStartExam }: { onStartExam: (exam: M.ExamPackage) => v
 
 // ============ REPORT PAGE ============
 function ReportPage() {
+  const { t } = useT();
   const current = useQuery({ queryKey: ['report-current'], queryFn: Q.fetchReportCurrent });
   const tva = useQuery({ queryKey: ['report-tva'], queryFn: Q.fetchTimeVsAccuracy });
   const mastery = useQuery({ queryKey: ['mastery'], queryFn: Q.fetchMastery });
