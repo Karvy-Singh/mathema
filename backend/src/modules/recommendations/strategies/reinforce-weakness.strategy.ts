@@ -1,16 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
+import { Lang } from '../../../common/i18n/current-lang.decorator';
+import { UNIT_NAME_EN, RECOMMENDATION_EN } from '../../../common/i18n/content-en';
 
 /**
  * "약점 보강" — MasterySnapshot 점수가 가장 낮은 단원을 추천.
- * 같은 백분위 학생의 평균 숙련도(상수 71%)와 비교해 격차 표시.
  */
 @Injectable()
 export class ReinforceWeaknessStrategy {
   private static readonly PEER_AVG = 71;
   constructor(private readonly prisma: PrismaService) {}
 
-  async recommend(userId: string, excludeUnitIds: string[] = []) {
+  async recommend(userId: string, excludeUnitIds: string[] = [], lang: Lang = 'ko') {
     const masteries = await this.prisma.masterySnapshot.findMany({
       where: { userId, ...(excludeUnitIds.length ? { unitId: { notIn: excludeUnitIds } } : {}) },
       include: { unit: true },
@@ -23,6 +24,20 @@ export class ReinforceWeaknessStrategy {
     const score = Math.round(weakest.score);
     const gap = ReinforceWeaknessStrategy.PEER_AVG - score;
 
+    if (lang === 'en') {
+      const unitEn = UNIT_NAME_EN[weakest.unit.name] ?? weakest.unit.name;
+      return {
+        tag: RECOMMENDATION_EN.tagWeak,
+        tagColor: '#B45309',
+        unitId: weakest.unitId,
+        unit: RECOMMENDATION_EN.weakUnit(unitEn),
+        title: RECOMMENDATION_EN.weakTitle(unitEn),
+        reason: gap > 0 ? RECOMMENDATION_EN.weakReasonGap(score, gap) : RECOMMENDATION_EN.weakReasonStable(score),
+        time: this.estimateTime(score),
+        type: 'Visualization',
+        icon: 'Eye',
+      };
+    }
     return {
       tag: '약점 보강',
       tagColor: '#B45309',

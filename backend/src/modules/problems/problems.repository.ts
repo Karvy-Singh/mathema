@@ -1,25 +1,38 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { Lang } from '../../common/i18n/current-lang.decorator';
+import { PROBLEM_EN, STEP_PROMPT_EN, CHOICE_EN } from '../../common/i18n/content-en';
 
 /**
  * 학습/응시 시 클라이언트로 전달할 때는 isCorrect/distractorType/rationale은 숨겨야 함.
  * Problem 객체에는 정답 답안 문자열도 포함되므로 fetch 시점에 sanitize.
  *
- * sanitize 규칙:
- *   - choices.isCorrect, distractorType, rationale 삭제
- *   - problem.answer 삭제 (정답 노출 방지)
+ * EN 모드 시 body/prompt/choice text를 영문 사전으로 치환.
  */
-const sanitizeForClient = (p: any) => {
+const sanitizeForClient = (p: any, lang: Lang = 'ko') => {
   if (!p) return p;
   const { answer, ...rest } = p;
+  if (lang === 'en') {
+    const en = PROBLEM_EN[p.source];
+    if (en) rest.body = en.body;
+  }
   if (Array.isArray(rest.steps)) {
-    rest.steps = rest.steps.map((s: any) => ({
-      ...s,
-      choices: (s.choices ?? []).map((c: any) => ({
-        id: c.id, choiceIndex: c.choiceIndex, text: c.text,
-        // isCorrect, distractorType, rationale 제외
-      })),
-    }));
+    rest.steps = rest.steps.map((s: any) => {
+      const promptKey = `${p.source}:${s.stepIndex}`;
+      const promptEn = STEP_PROMPT_EN[promptKey];
+      return {
+        id: s.id, stepIndex: s.stepIndex, stepType: s.stepType,
+        prompt: lang === 'en' && promptEn ? promptEn : s.prompt,
+        choices: (s.choices ?? []).map((c: any) => {
+          const choiceKey = `${p.source}:${s.stepIndex}:${c.choiceIndex}`;
+          const choiceEn = CHOICE_EN[choiceKey];
+          return {
+            id: c.id, choiceIndex: c.choiceIndex,
+            text: lang === 'en' && choiceEn ? choiceEn.text : c.text,
+          };
+        }),
+      };
+    });
   }
   return rest;
 };
@@ -28,21 +41,21 @@ const sanitizeForClient = (p: any) => {
 export class ProblemsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(q: any) {
+  async list(q: any, lang: Lang = 'ko') {
     const rows = await this.prisma.problem.findMany({
       where: this.buildWhere(q),
       include: { steps: { orderBy: { stepIndex: 'asc' }, include: { choices: { orderBy: { choiceIndex: 'asc' } } } } },
       orderBy: { createdAt: 'asc' },
     });
-    return rows.map(sanitizeForClient);
+    return rows.map((p) => sanitizeForClient(p, lang));
   }
 
-  async findById(id: string) {
+  async findById(id: string, lang: Lang = 'ko') {
     const row = await this.prisma.problem.findUnique({
       where: { id },
       include: { steps: { orderBy: { stepIndex: 'asc' }, include: { choices: { orderBy: { choiceIndex: 'asc' } } } } },
     });
-    return sanitizeForClient(row);
+    return sanitizeForClient(row, lang);
   }
 
   async findHint(id: string) {
@@ -60,3 +73,4 @@ export class ProblemsRepository {
 }
 
 export const _sanitizeForClient = sanitizeForClient;
+export { sanitizeForClient };

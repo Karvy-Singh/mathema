@@ -2,6 +2,7 @@ import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { AiCoachService } from './ai-coach.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { CurrentLang, Lang } from '../../common/i18n/current-lang.decorator';
 
 /**
  * UI ↔ 라우트:
@@ -16,22 +17,22 @@ export class AiCoachController {
   constructor(private readonly service: AiCoachService) {}
 
   @Get('diagnosis')
-  diagnosis(@CurrentUser('id') userId: string) {
-    return this.service.diagnosis(userId);
+  diagnosis(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang) {
+    return this.service.diagnosis(userId, lang);
   }
 
   @Get('error-dna')
-  errorDna(@CurrentUser('id') userId: string) {
-    return this.service.errorDna(userId);
+  errorDna(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang) {
+    return this.service.errorDna(userId, lang);
   }
 
   @Get('patterns')
-  patterns(@CurrentUser('id') userId: string) {
-    return this.service.patterns(userId);
+  patterns(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang) {
+    return this.service.patterns(userId, lang);
   }
 
   @Get('mentor-message')
-  mentorMessage(@CurrentUser('id') userId: string, @Query('week') week = 'current') {
-    return this.service.mentorMessage(userId, week);
+  mentorMessage(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang, @Query('week') week = 'current') {
+    return this.service.mentorMessage(userId, week, lang);
   }
 }

@@ -7,20 +7,34 @@ import { pointsToNextGrade } from '../../common/utils/grade-calculator.util';
 import { AttemptsService } from '../attempts/attempts.service';
 import { SessionContext } from '../../common/enums/session-context.enum';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { Lang } from '../../common/i18n/current-lang.decorator';
+import { PROBLEM_EN, STEP_PROMPT_EN, CHOICE_EN } from '../../common/i18n/content-en';
 
 /**
- * 응시용 sanitize — answer/isCorrect/distractorType/rationale 제거 (정답 노출 차단)
+ * 응시용 sanitize — answer/isCorrect/distractorType/rationale 제거 + lang 번역.
  */
-function sanitizeForExam(p: any): any {
+function sanitizeForExam(p: any, lang: Lang = 'ko'): any {
   if (!p) return p;
   const { answer, ...rest } = p;
+  if (lang === 'en') {
+    const en = PROBLEM_EN[p.source];
+    if (en) rest.body = en.body;
+  }
   if (Array.isArray(rest.steps)) {
-    rest.steps = rest.steps.map((s: any) => ({
-      id: s.id, stepIndex: s.stepIndex, stepType: s.stepType, prompt: s.prompt,
-      choices: (s.choices ?? []).map((c: any) => ({
-        id: c.id, choiceIndex: c.choiceIndex, text: c.text,
-      })),
-    }));
+    rest.steps = rest.steps.map((s: any) => {
+      const promptEn = STEP_PROMPT_EN[`${p.source}:${s.stepIndex}`];
+      return {
+        id: s.id, stepIndex: s.stepIndex, stepType: s.stepType,
+        prompt: lang === 'en' && promptEn ? promptEn : s.prompt,
+        choices: (s.choices ?? []).map((c: any) => {
+          const choiceEn = CHOICE_EN[`${p.source}:${s.stepIndex}:${c.choiceIndex}`];
+          return {
+            id: c.id, choiceIndex: c.choiceIndex,
+            text: lang === 'en' && choiceEn ? choiceEn.text : c.text,
+          };
+        }),
+      };
+    });
   }
   return rest;
 }
@@ -83,37 +97,39 @@ export class MockExamsService {
     };
   }
 
-  /** 응시 시작 — 문제 구성 + MockExam·MockExamResult 생성 후 응시용 패키지 반환 */
-  async startRecommended(userId: string) {
+  async startRecommended(userId: string, lang: Lang = 'ko') {
     const { problems } = await this.aiRec.compose(userId);
-    return this.beginSession(userId, {
-      name: 'AI 맞춤 진단 모의고사', type: 'RECOMMENDED' as any,
-      totalMinutes: 60, problems,
-    });
+    const name = lang === 'en' ? 'AI-tailored Mock' : 'AI 맞춤 진단 모의고사';
+    return this.beginSession(userId, { name, type: 'RECOMMENDED' as any, totalMinutes: 60, problems }, lang);
   }
 
-  async startTyped(userId: string, kind: 'mini' | 'wrong-redo' | 'real') {
+  async startTyped(userId: string, kind: 'mini' | 'wrong-redo' | 'real', lang: Lang = 'ko') {
     const { problems } = await this.aiRec.composeTyped(userId, kind);
-    const meta: Record<string, { name: string; type: any; totalMinutes: number }> = {
-      mini:        { name: '단원별 미니 테스트',   type: 'MINI',       totalMinutes: 20 },
-      'wrong-redo':{ name: '오답 재출제 시험',     type: 'WRONG_REDO', totalMinutes: 30 },
-      real:        { name: '실전 모의고사',        type: 'REAL',       totalMinutes: 100 },
+    const metaKo: Record<string, { name: string; type: any; totalMinutes: number }> = {
+      mini:        { name: '단원별 미니 테스트',  type: 'MINI',       totalMinutes: 20 },
+      'wrong-redo':{ name: '오답 재출제 시험',    type: 'WRONG_REDO', totalMinutes: 30 },
+      real:        { name: '실전 모의고사',       type: 'REAL',       totalMinutes: 100 },
     };
-    return this.beginSession(userId, { ...meta[kind], problems });
+    const metaEn: Record<string, { name: string; type: any; totalMinutes: number }> = {
+      mini:        { name: 'Unit Mini Test',     type: 'MINI',       totalMinutes: 20 },
+      'wrong-redo':{ name: 'Wrong-Redo Exam',    type: 'WRONG_REDO', totalMinutes: 30 },
+      real:        { name: 'Full Mock Exam',     type: 'REAL',       totalMinutes: 100 },
+    };
+    const m = (lang === 'en' ? metaEn : metaKo)[kind];
+    return this.beginSession(userId, { ...m, problems }, lang);
   }
 
   private async beginSession(userId: string, p: {
     name: string; type: any; totalMinutes: number;
     problems: Array<{ id: string; source: string; difficulty: string }>;
-  }) {
+  }, lang: Lang = 'ko') {
     if (!p.problems || p.problems.length === 0) {
       return { resultId: null, name: p.name, totalMinutes: p.totalMinutes, problems: [] };
     }
     const { result } = await this.repo.createSession(userId, {
       name: p.name, type: p.type, totalProblems: p.problems.length, totalMinutes: p.totalMinutes,
     });
-    // 응시용 패키지 — 문제 본문까지 포함 (한 번에 다 가져가서 클라가 풀이)
-    const fullProblems = await this.fetchFullProblems(p.problems.map((x) => x.id));
+    const fullProblems = await this.fetchFullProblems(p.problems.map((x) => x.id), lang);
     return {
       resultId: result.id,
       name: p.name,
@@ -122,7 +138,7 @@ export class MockExamsService {
     };
   }
 
-  private async fetchFullProblems(ids: string[]) {
+  private async fetchFullProblems(ids: string[], lang: Lang = 'ko') {
     if (ids.length === 0) return [];
     const ps = await this.prisma.problem.findMany({
       where: { id: { in: ids } },
@@ -137,7 +153,7 @@ export class MockExamsService {
     return ids
       .map((id) => byId.get(id))
       .filter(Boolean)
-      .map((p: any) => sanitizeForExam(p));
+      .map((p: any) => sanitizeForExam(p, lang));
   }
 
   /**

@@ -9,6 +9,8 @@ import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { CreateWrongNoteDto } from './dto/create-wrong-note.dto';
 import { QueryWrongNotesDto } from './dto/query-wrong-notes.dto';
 import { ReviewWrongNoteDto } from './dto/review-wrong-note.dto';
+import { Lang } from '../../common/i18n/current-lang.decorator';
+import { STATIC_FALLBACK_EN } from '../../common/i18n/content-en';
 
 @Injectable()
 export class WrongNotesService {
@@ -23,22 +25,26 @@ export class WrongNotesService {
   ) {}
 
   getStats(userId: string) { return this.repo.aggregateStats(userId); }
-  getRecent(userId: string, limit: number) { return this.repo.findRecent(userId, limit); }
-  list(userId: string, query: QueryWrongNotesDto) { return this.repo.list(userId, query); }
-  getDue(userId: string, limit?: number) { return this.repo.findDue(userId, limit); }
-  async getOne(userId: string, id: string) {
-    const note = await this.repo.findOne(userId, id);
+  getRecent(userId: string, limit: number, lang: Lang = 'ko') { return this.repo.findRecent(userId, limit, lang); }
+  list(userId: string, query: QueryWrongNotesDto, lang: Lang = 'ko') { return this.repo.list(userId, query, lang); }
+  getDue(userId: string, limit?: number, lang: Lang = 'ko') { return this.repo.findDue(userId, limit, lang); }
+  async getOne(userId: string, id: string, lang: Lang = 'ko') {
+    const note = await this.repo.findOne(userId, id, lang);
     const similar = await this.similar.findSimilar(note.problemId, 5);
     return { ...note, similar };
   }
   create(userId: string, dto: CreateWrongNoteDto) { return this.repo.create(userId, dto); }
-  async uploadPhoto(userId: string, file: Express.Multer.File) {
+  async uploadPhoto(_userId: string, file: Express.Multer.File, lang: Lang = 'ko') {
     if (!file) return { ok: false, message: 'file required' };
-    return { ok: true, message: '사진 등록 — Vision API 연동(api입력칸) 후 자동 인식됩니다.' };
+    return { ok: true,
+      message: lang === 'en' ? STATIC_FALLBACK_EN.uploadPhotoOk
+        : '사진 등록 — Vision API 연동(api입력칸) 후 자동 인식됩니다.' };
   }
-  async uploadPdf(userId: string, file: Express.Multer.File) {
+  async uploadPdf(_userId: string, file: Express.Multer.File, lang: Lang = 'ko') {
     if (!file) return { ok: false, message: 'file required' };
-    return { ok: true, message: 'PDF 일괄 추출 — LLM 연동(api입력칸) 후 자동 분리됩니다.' };
+    return { ok: true,
+      message: lang === 'en' ? STATIC_FALLBACK_EN.uploadPdfOk
+        : 'PDF 일괄 추출 — LLM 연동(api입력칸) 후 자동 분리됩니다.' };
   }
 
   async updateStatus(userId: string, id: string, status: string) {

@@ -6,6 +6,8 @@ import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { StartSessionDto } from './dto/start-session.dto';
 import { SubmitAnswerDto } from './dto/submit-answer.dto';
 import { SessionContext } from '../../common/enums/session-context.enum';
+import { Lang } from '../../common/i18n/current-lang.decorator';
+import { CHOICE_EN } from '../../common/i18n/content-en';
 
 @Injectable()
 export class StudySessionsService {
@@ -29,7 +31,7 @@ export class StudySessionsService {
    *   - 오답: { isCorrect: false, choice: { text, distractorType, rationale } } → 학습용 즉시 피드백
    *   - isRetry: 같은 step의 N번째 시도면 true (BKT 무효화됨)
    */
-  async submitAnswer(userId: string, id: string, dto: SubmitAnswerDto) {
+  async submitAnswer(userId: string, id: string, dto: SubmitAnswerDto, lang: Lang = 'ko') {
     const attempt = await this.attempts.create(userId, {
       problemId: dto.problemId,
       answer: dto.answer,
@@ -44,8 +46,18 @@ export class StudySessionsService {
     if (dto.choiceId) {
       const choice = await this.prisma.problemChoice.findUnique({
         where: { id: dto.choiceId },
-        select: { id: true, text: true, isCorrect: true, distractorType: true, rationale: true },
+        select: {
+          id: true, text: true, isCorrect: true, distractorType: true, rationale: true,
+          step: { select: { stepIndex: true, problem: { select: { source: true } } } },
+        },
       });
+      if (choice && lang === 'en' && choice.step) {
+        const key = `${choice.step.problem.source}:${choice.step.stepIndex}:${(await this.prisma.problemChoice.findUnique({ where: { id: choice.id }, select: { choiceIndex: true } }))?.choiceIndex}`;
+        const en = CHOICE_EN[key];
+        if (en) {
+          return { ...attempt, choice: { ...choice, text: en.text, rationale: en.rationale ?? null } };
+        }
+      }
       return { ...attempt, choice };
     }
     return attempt;

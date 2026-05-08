@@ -26,6 +26,13 @@ export const tokens = {
 api.interceptors.request.use((cfg) => {
   const t = tokens.get();
   if (t) cfg.headers.Authorization = `Bearer ${t}`;
+  // 현재 i18n 언어를 매 요청마다 자동 첨부
+  try {
+    const lang = localStorage.getItem('mathema.lang');
+    if (lang === 'ko' || lang === 'en') {
+      cfg.headers['Accept-Language'] = lang;
+    }
+  } catch { /* ignore */ }
   return cfg;
 });
 

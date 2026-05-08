@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
+import { Lang } from '../../../common/i18n/current-lang.decorator';
+import { UNIT_NAME_EN, RECOMMENDATION_EN } from '../../../common/i18n/content-en';
 
 /**
  * "강점 유지" — MasterySnapshot 최상위 단원을 추천.
- * 80% 이상 단원이 있을 때만 의미 있음 (없으면 null).
  */
 @Injectable()
 export class MaintainStrengthStrategy {
   constructor(private readonly prisma: PrismaService) {}
 
-  async recommend(userId: string, excludeUnitIds: string[] = []) {
+  async recommend(userId: string, excludeUnitIds: string[] = [], lang: Lang = 'ko') {
     const masteries = await this.prisma.masterySnapshot.findMany({
       where: { userId, ...(excludeUnitIds.length ? { unitId: { notIn: excludeUnitIds } } : {}) },
       include: { unit: true },
@@ -22,6 +23,20 @@ export class MaintainStrengthStrategy {
 
     const score = Math.round(top.score);
 
+    if (lang === 'en') {
+      const unitEn = UNIT_NAME_EN[top.unit.name] ?? top.unit.name;
+      return {
+        tag: RECOMMENDATION_EN.tagStrong,
+        tagColor: '#4A5D3A',
+        unitId: top.unitId,
+        unit: RECOMMENDATION_EN.strongUnit(unitEn),
+        title: RECOMMENDATION_EN.strongTitle(unitEn),
+        reason: RECOMMENDATION_EN.strongReason(score),
+        time: '45 min',
+        type: 'Practice',
+        icon: 'Zap',
+      };
+    }
     return {
       tag: '강점 유지',
       tagColor: '#4A5D3A',

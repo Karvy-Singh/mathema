@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
+import { Lang } from '../../../common/i18n/current-lang.decorator';
+import { UNIT_NAME_EN, SUB_UNIT_NAME_EN, RECOMMENDATION_EN } from '../../../common/i18n/content-en';
 
 /**
  * "오답 집중" — 마스터되지 않은 오답이 가장 많이 누적된 단원을 추천.
- * 동일 단원에서 occurrences 합이 큰 순으로 정렬.
  */
 @Injectable()
 export class FocusOnMistakesStrategy {
   constructor(private readonly prisma: PrismaService) {}
 
-  async recommend(userId: string) {
+  async recommend(userId: string, lang: Lang = 'ko') {
     const notes = await this.prisma.wrongNote.findMany({
       where: { userId, status: { not: 'MASTERED' } },
       include: { problem: { include: { unit: true, subUnit: true } } },
@@ -42,6 +43,21 @@ export class FocusOnMistakesStrategy {
     const top = [...buckets.values()].sort((a, b) => b.occurrences - a.occurrences)[0];
     const totalNotes = notes.filter((n) => n.problem.unitId === top.unitId).length;
 
+    if (lang === 'en') {
+      const unitEn = UNIT_NAME_EN[top.unitName] ?? top.unitName;
+      const subEn = SUB_UNIT_NAME_EN[top.subUnitName] ?? top.subUnitName;
+      return {
+        tag: RECOMMENDATION_EN.tagFocus,
+        tagColor: '#8B3A1F',
+        unitId: top.unitId,
+        unit: RECOMMENDATION_EN.focusUnit(unitEn, subEn),
+        title: top.subUnitName ? RECOMMENDATION_EN.focusTitleSub(subEn) : RECOMMENDATION_EN.focusTitleUnit(unitEn),
+        reason: RECOMMENDATION_EN.focusReason(top.occurrences, totalNotes),
+        time: this.estimateTime(top.occurrences),
+        type: 'Interactive practice',
+        icon: 'Layers',
+      };
+    }
     return {
       tag: '오답 집중',
       tagColor: '#8B3A1F',

@@ -61,10 +61,12 @@ export class LlmProvider {
   async generate(req: LlmRequest): Promise<LlmResponse> {
     if (!this.apiKey || this.apiKey === 'api입력칸') {
       this.logger.warn('AI_LLM_API_KEY 가 설정되지 않았습니다 (api입력칸) — fallback 텍스트 반환.');
+      // Locale 정보가 prompt 에 포함될 수도 있으므로 매우 간단한 휴리스틱 — 한국어 prompt면 한국어, 아니면 영어
+      const isKo = /[ㄱ-힝]/.test(req.prompt + (req.system ?? ''));
       return {
-        text:
-          'AI 키가 설정되지 않아 샘플 응답을 표시합니다. ' +
-          '`backend/.env` 의 AI_LLM_API_KEY 를 채우면 실제 LLM 응답으로 전환됩니다.',
+        text: isKo
+          ? 'AI 키가 설정되지 않아 샘플 응답을 표시합니다. `backend/.env` 의 AI_LLM_API_KEY 를 채우면 실제 LLM 응답으로 전환됩니다.'
+          : 'AI key not configured — showing a sample response. Fill `AI_LLM_API_KEY` in `backend/.env` to switch to real LLM output.',
         inputTokens: 0,
         outputTokens: 0,
       };

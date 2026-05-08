@@ -3,46 +3,67 @@ import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { NoteStatus } from '../../common/enums/note-status.enum';
 import { ERROR_TYPE_LABEL_KO } from '../../common/enums/error-type.enum';
 import { DIFFICULTY_LABEL_KO } from '../../common/enums/difficulty.enum';
+import { Lang } from '../../common/i18n/current-lang.decorator';
+import { UNIT_NAME_EN, SUB_UNIT_NAME_EN, DIFFICULTY_EN, ERROR_TYPE_EN } from '../../common/i18n/content-en';
 
-const formatDate = (d: Date) => {
+const formatDate = (d: Date, lang: Lang) => {
   const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+  if (lang === 'en') {
+    if (days <= 1) return 'today';
+    if (days < 7) return `${days}d ago`;
+    if (days < 30) return `${Math.floor(days / 7)}w ago`;
+    return `${Math.floor(days / 30)}mo ago`;
+  }
   if (days <= 1) return '오늘';
   if (days < 7) return `${days}일 전`;
   if (days < 30) return `${Math.floor(days / 7)}주 전`;
   return `${Math.floor(days / 30)}개월 전`;
 };
 
-const formatDueIn = (next: Date | null): string | null => {
+const formatDueIn = (next: Date | null, lang: Lang): string | null => {
   if (!next) return null;
   const ms = next.getTime() - Date.now();
   const days = Math.ceil(ms / 86400000);
+  if (lang === 'en') {
+    if (ms <= 0) return 'Review now';
+    if (days <= 1) return 'Tomorrow';
+    return `In ${days}d`;
+  }
   if (ms <= 0) return '복습 필요';
   if (days <= 1) return '내일';
   return `${days}일 후`;
 };
 
-const toCardShape = (n: any) => ({
-  id: n.id,
-  problemId: n.problemId,
-  problem: n.problem.source,
-  unit: n.problem.unit.name,
-  subUnit: n.problem.subUnit?.name ?? '',
-  errorType: ERROR_TYPE_LABEL_KO[n.errorType as keyof typeof ERROR_TYPE_LABEL_KO],
-  errorTypeRaw: n.errorType,
-  insight: n.insight,
-  diff: DIFFICULTY_LABEL_KO[n.problem.difficulty as keyof typeof DIFFICULTY_LABEL_KO],
-  date: formatDate(n.createdAt),
-  similarCount: n.similarCount,
-  status: n.status.toLowerCase(),
-  // SM-2 노출 필드
-  easinessFactor: Math.round((n.easinessFactor ?? 2.5) * 100) / 100,
-  repetitionCount: n.repetitionCount ?? 0,
-  intervalDays: n.intervalDays ?? 0,
-  nextReviewAt: n.nextReviewAt ? n.nextReviewAt.toISOString() : null,
-  dueIn: formatDueIn(n.nextReviewAt),
-  isDue: n.nextReviewAt ? n.nextReviewAt.getTime() <= Date.now() : true, // 미복습 = 즉시 due
-  lapseCount: n.lapseCount ?? 0,
-});
+const toCardShape = (n: any, lang: Lang = 'ko') => {
+  const unitKo = n.problem.unit.name;
+  const subUnitKo = n.problem.subUnit?.name ?? '';
+  return {
+    id: n.id,
+    problemId: n.problemId,
+    problem: n.problem.source,
+    unit: lang === 'en' ? (UNIT_NAME_EN[unitKo] ?? unitKo) : unitKo,
+    subUnit: lang === 'en' ? (SUB_UNIT_NAME_EN[subUnitKo] ?? subUnitKo) : subUnitKo,
+    errorType: lang === 'en'
+      ? ERROR_TYPE_EN[n.errorType as keyof typeof ERROR_TYPE_EN]
+      : ERROR_TYPE_LABEL_KO[n.errorType as keyof typeof ERROR_TYPE_LABEL_KO],
+    errorTypeRaw: n.errorType,
+    insight: n.insight,
+    diff: lang === 'en'
+      ? DIFFICULTY_EN[n.problem.difficulty as keyof typeof DIFFICULTY_EN]
+      : DIFFICULTY_LABEL_KO[n.problem.difficulty as keyof typeof DIFFICULTY_LABEL_KO],
+    date: formatDate(n.createdAt, lang),
+    similarCount: n.similarCount,
+    status: n.status.toLowerCase(),
+    // SM-2 노출 필드
+    easinessFactor: Math.round((n.easinessFactor ?? 2.5) * 100) / 100,
+    repetitionCount: n.repetitionCount ?? 0,
+    intervalDays: n.intervalDays ?? 0,
+    nextReviewAt: n.nextReviewAt ? n.nextReviewAt.toISOString() : null,
+    dueIn: formatDueIn(n.nextReviewAt, lang),
+    isDue: n.nextReviewAt ? n.nextReviewAt.getTime() <= Date.now() : true,
+    lapseCount: n.lapseCount ?? 0,
+  };
+};
 
 @Injectable()
 export class WrongNotesRepository {
@@ -86,7 +107,7 @@ export class WrongNotesRepository {
     };
   }
 
-  async findDue(userId: string, limit?: number) {
+  async findDue(userId: string, limit?: number, lang: Lang = 'ko') {
     const now = new Date();
     const rows = await this.prisma.wrongNote.findMany({
       where: {
@@ -104,7 +125,7 @@ export class WrongNotesRepository {
       ...(limit ? { take: limit } : {}),
       include: { problem: { include: { unit: true, subUnit: true } } },
     });
-    return rows.map(toCardShape);
+    return rows.map((r) => toCardShape(r, lang));
   }
 
   async applyReview(userId: string, id: string, sm2: { easinessFactor: number; repetitionCount: number; intervalDays: number; nextReviewAt: Date; lapsed: boolean }) {
@@ -121,31 +142,31 @@ export class WrongNotesRepository {
     });
   }
 
-  async findRecent(userId: string, limit: number) {
+  async findRecent(userId: string, limit: number, lang: Lang = 'ko') {
     const rows = await this.prisma.wrongNote.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
       take: limit,
       include: { problem: { include: { unit: true, subUnit: true } } },
     });
-    return rows.map(toCardShape);
+    return rows.map((r) => toCardShape(r, lang));
   }
 
-  async list(userId: string, query: any) {
+  async list(userId: string, query: any, lang: Lang = 'ko') {
     const rows = await this.prisma.wrongNote.findMany({
       where: { userId, ...this.buildWhere(query) },
       orderBy: this.buildOrderBy(query),
       include: { problem: { include: { unit: true, subUnit: true } } },
     });
-    return rows.map(toCardShape);
+    return rows.map((r) => toCardShape(r, lang));
   }
 
-  async findOne(userId: string, id: string) {
+  async findOne(userId: string, id: string, lang: Lang = 'ko') {
     const n = await this.prisma.wrongNote.findFirstOrThrow({
       where: { id, userId },
       include: { problem: { include: { unit: true, subUnit: true } } },
     });
-    return toCardShape(n);
+    return toCardShape(n, lang);
   }
 
   create(userId: string, dto: any) {

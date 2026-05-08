@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { ProblemsRepository } from './problems.repository';
+import { ProblemsRepository, sanitizeForClient } from './problems.repository';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { recommendedDifficulties } from '../../common/utils/difficulty-matcher.util';
+import { Lang } from '../../common/i18n/current-lang.decorator';
 
 @Injectable()
 export class ProblemsService {
@@ -9,16 +10,11 @@ export class ProblemsService {
     private readonly repo: ProblemsRepository,
     private readonly prisma: PrismaService,
   ) {}
-  list(q: any) { return this.repo.list(q); }
-  one(id: string) { return this.repo.findById(id); }
+  list(q: any, lang: Lang = 'ko') { return this.repo.list(q, lang); }
+  one(id: string, lang: Lang = 'ko') { return this.repo.findById(id, lang); }
   hint(id: string) { return this.repo.findHint(id); }
 
-  /**
-   * 사용자의 단원 숙련도에 맞는 권장 난이도 문제 목록.
-   * mastery 미존재 시 score=50 기본값 (UPPER_MIDDLE 우선).
-   * 모든 문제는 steps + choices 포함 (정답·오답메타는 제거된 상태로).
-   */
-  async recommendedFor(userId: string, unitId: string) {
+  async recommendedFor(userId: string, unitId: string, lang: Lang = 'ko') {
     const mastery = await this.prisma.masterySnapshot.findUnique({
       where: { userId_unitId: { userId, unitId } },
     });
@@ -34,21 +30,6 @@ export class ProblemsService {
     const fallback = problems.length === 0
       ? await this.prisma.problem.findMany({ where: { unitId }, include, orderBy: { createdAt: 'asc' } })
       : problems;
-    return fallback.map((p: any) => sanitize(p));
+    return fallback.map((p: any) => sanitizeForClient(p, lang));
   }
-}
-
-// 클라이언트 노출 시 정답/오답메타 제거 (problems.repository 와 동일 정책)
-function sanitize(p: any): any {
-  if (!p) return p;
-  const { answer, ...rest } = p;
-  if (Array.isArray(rest.steps)) {
-    rest.steps = rest.steps.map((s: any) => ({
-      id: s.id, stepIndex: s.stepIndex, stepType: s.stepType, prompt: s.prompt,
-      choices: (s.choices ?? []).map((c: any) => ({
-        id: c.id, choiceIndex: c.choiceIndex, text: c.text,
-      })),
-    }));
-  }
-  return rest;
 }

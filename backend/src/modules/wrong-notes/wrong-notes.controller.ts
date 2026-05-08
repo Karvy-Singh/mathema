@@ -6,6 +6,7 @@ import { QueryWrongNotesDto } from './dto/query-wrong-notes.dto';
 import { ReviewWrongNoteDto } from './dto/review-wrong-note.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { CurrentLang, Lang } from '../../common/i18n/current-lang.decorator';
 
 /**
  * 오답노트 라우트.
@@ -30,23 +31,23 @@ export class WrongNotesController {
   }
 
   @Get('recent')
-  getRecent(@CurrentUser('id') userId: string, @Query('limit') limit = 3) {
-    return this.service.getRecent(userId, +limit);
+  getRecent(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang, @Query('limit') limit = 3) {
+    return this.service.getRecent(userId, +limit, lang);
   }
 
   @Get('due')
-  getDue(@CurrentUser('id') userId: string, @Query('limit') limit?: string) {
-    return this.service.getDue(userId, limit ? +limit : undefined);
+  getDue(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang, @Query('limit') limit?: string) {
+    return this.service.getDue(userId, limit ? +limit : undefined, lang);
   }
 
   @Get()
-  list(@CurrentUser('id') userId: string, @Query() query: QueryWrongNotesDto) {
-    return this.service.list(userId, query);
+  list(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang, @Query() query: QueryWrongNotesDto) {
+    return this.service.list(userId, query, lang);
   }
 
   @Get(':id')
-  getOne(@CurrentUser('id') userId: string, @Param('id') id: string) {
-    return this.service.getOne(userId, id);
+  getOne(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang, @Param('id') id: string) {
+    return this.service.getOne(userId, id, lang);
   }
 
   @Post()
@@ -56,14 +57,14 @@ export class WrongNotesController {
 
   @Post('upload-photo')
   @UseInterceptors(FileInterceptor('image'))
-  uploadPhoto(@CurrentUser('id') userId: string, @UploadedFile() file: Express.Multer.File) {
-    return this.service.uploadPhoto(userId, file);
+  uploadPhoto(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang, @UploadedFile() file: Express.Multer.File) {
+    return this.service.uploadPhoto(userId, file, lang);
   }
 
   @Post('upload-pdf')
   @UseInterceptors(FileInterceptor('pdf'))
-  uploadPdf(@CurrentUser('id') userId: string, @UploadedFile() file: Express.Multer.File) {
-    return this.service.uploadPdf(userId, file);
+  uploadPdf(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang, @UploadedFile() file: Express.Multer.File) {
+    return this.service.uploadPdf(userId, file, lang);
   }
 
   @Patch(':id/status')

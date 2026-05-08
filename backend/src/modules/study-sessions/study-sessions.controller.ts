@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/co
 import { StudySessionsService } from './study-sessions.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { CurrentLang, Lang } from '../../common/i18n/current-lang.decorator';
 import { StartSessionDto } from './dto/start-session.dto';
 import { SubmitAnswerDto } from './dto/submit-answer.dto';
 
@@ -31,8 +32,8 @@ export class StudySessionsController {
   }
 
   @Post(':id/answer')
-  submit(@CurrentUser('id') userId: string, @Param('id') id: string, @Body() dto: SubmitAnswerDto) {
-    return this.service.submitAnswer(userId, id, dto);
+  submit(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang, @Param('id') id: string, @Body() dto: SubmitAnswerDto) {
+    return this.service.submitAnswer(userId, id, dto, lang);
   }
 
   @Post(':id/next')

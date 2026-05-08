@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { FocusOnMistakesStrategy } from './strategies/focus-on-mistakes.strategy';
 import { ReinforceWeaknessStrategy } from './strategies/reinforce-weakness.strategy';
 import { MaintainStrengthStrategy } from './strategies/maintain-strength.strategy';
+import { Lang } from '../../common/i18n/current-lang.decorator';
+import { RECOMMENDATION_EN } from '../../common/i18n/content-en';
 
 /**
  * 대시보드 "오늘의 맞춤 학습" 카드 3장 동적 구성.
@@ -21,31 +23,37 @@ export class RecommendationsService {
     private readonly maintain: MaintainStrengthStrategy,
   ) {}
 
-  async today(userId: string) {
+  async today(userId: string, lang: Lang = 'ko') {
     const exclude: string[] = [];
     const cards: any[] = [];
 
-    const c1 = await this.focus.recommend(userId);
+    const c1 = await this.focus.recommend(userId, lang);
     if (c1) { cards.push(c1); if (c1.unitId) exclude.push(c1.unitId); }
 
-    const c2 = await this.reinforce.recommend(userId, exclude);
+    const c2 = await this.reinforce.recommend(userId, exclude, lang);
     if (c2) { cards.push(c2); if (c2.unitId) exclude.push(c2.unitId); }
 
-    const c3 = await this.maintain.recommend(userId, exclude);
+    const c3 = await this.maintain.recommend(userId, exclude, lang);
     if (c3) cards.push(c3);
 
-    // 데이터 부족 시 친절한 fallback (사용자가 빈 화면을 보지 않도록)
-    while (cards.length < 3) cards.push(this.fallbackCard(cards.length));
-
+    while (cards.length < 3) cards.push(this.fallbackCard(cards.length, lang));
     return cards;
   }
 
-  private fallbackCard(idx: number) {
-    const presets = [
+  private fallbackCard(idx: number, lang: Lang = 'ko') {
+    if (lang === 'en') {
+      const en = [
+        { tag: RECOMMENDATION_EN.tagFocus, tagColor: '#8B3A1F', unitId: null, unit: RECOMMENDATION_EN.fbFocusUnit, title: RECOMMENDATION_EN.fbFocusTitle, reason: RECOMMENDATION_EN.fbFocusReason, time: '—', type: 'Interactive practice', icon: 'Layers' },
+        { tag: RECOMMENDATION_EN.tagWeak, tagColor: '#B45309', unitId: null, unit: RECOMMENDATION_EN.fbWeakUnit, title: RECOMMENDATION_EN.fbWeakTitle, reason: RECOMMENDATION_EN.fbWeakReason, time: '20 min', type: 'Visualization', icon: 'Eye' },
+        { tag: RECOMMENDATION_EN.tagStrong, tagColor: '#4A5D3A', unitId: null, unit: RECOMMENDATION_EN.fbStrongUnit, title: RECOMMENDATION_EN.fbStrongTitle, reason: RECOMMENDATION_EN.fbStrongReason, time: '—', type: 'Practice', icon: 'Zap' },
+      ];
+      return en[idx];
+    }
+    const ko = [
       { tag: '오답 집중', tagColor: '#8B3A1F', unitId: null, unit: '데이터 누적 중 · —', title: '문제를 풀어 오답을 모아주세요', reason: 'AI가 약점을 찾으려면 5문제 이상 필요', time: '—', type: '인터랙티브 학습', icon: 'Layers' },
       { tag: '약점 보강', tagColor: '#B45309', unitId: null, unit: '데이터 누적 중 · —', title: '단원별 진단 모의고사 응시', reason: '숙련도 측정을 위해 진단 시험 권장', time: '20분', type: '시각화 영상', icon: 'Eye' },
       { tag: '강점 유지', tagColor: '#4A5D3A', unitId: null, unit: '데이터 누적 중 · —', title: '강점 단원을 발견해보세요', reason: '70% 이상 숙련도 단원이 생기면 노출', time: '—', type: '실전 문제', icon: 'Zap' },
     ];
-    return presets[idx];
+    return ko[idx];
   }
 }
