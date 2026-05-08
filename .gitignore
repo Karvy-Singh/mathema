@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+**/dist/
+**/build/
+
+# Environment files (only .env.example committed)
+.env
+.env.local
+.env.*.local
+**/.env
+!**/.env.example
+
+# Prisma generated client (regenerated on install)
+**/.prisma/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Coverage / test artifacts
+coverage/
+.nyc_output/
+
+# Local uploads / runtime data
+uploads/
+tmp/
+
+# Misc
+*.tsbuildinfo

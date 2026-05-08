@@ -1,0 +1,55 @@
+type Props = {
+  value: number;
+  onChange: (v: number) => void;
+  label?: string;
+};
+
+/**
+ * 메타인지 자기평가 슬라이더 — 답 제출 직전 확신도 표시.
+ *
+ * 색상: 0~33% 빨강 / 34~66% 주황 / 67~100% 녹색
+ * 5% 단위 스냅. 키보드(←/→), 드래그, 클릭 모두 지원.
+ *
+ * 캘리브레이션 분석에 사용 — Brier score 와 confidence-accuracy 산점도.
+ */
+export default function ConfidenceSlider({ value, onChange, label = '확신도 (메타인지)' }: Props) {
+  const color = value < 34 ? '#8B3A1F' : value < 67 ? '#B45309' : '#4A5D3A';
+  const labelText = value < 34 ? '낮음' : value < 67 ? '보통' : '높음';
+
+  return (
+    <div style={{ marginTop: 12, marginBottom: 12 }}>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        fontSize: 11, color: '#6B6354', marginBottom: 6,
+        letterSpacing: '0.1em', textTransform: 'uppercase',
+      }}>
+        <span>{label}</span>
+        <span style={{
+          color, fontWeight: 600,
+          fontFamily: 'JetBrains Mono, monospace',
+          textTransform: 'none', letterSpacing: 0,
+        }}>
+          {value}% · {labelText}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        step={5}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        style={{
+          width: '100%', accentColor: color, cursor: 'pointer',
+        }}
+      />
+      <div style={{
+        display: 'flex', justifyContent: 'space-between',
+        fontSize: 10, color: '#A89684', marginTop: 4,
+        fontFamily: 'JetBrains Mono, monospace',
+      }}>
+        <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+      </div>
+    </div>
+  );
+}
