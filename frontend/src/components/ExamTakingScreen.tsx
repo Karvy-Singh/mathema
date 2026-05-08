@@ -4,6 +4,7 @@ import { Clock, ArrowLeft, ArrowRight, CheckCircle2, X, Send } from 'lucide-reac
 import { toast } from './Toast';
 import * as M from '../lib/mutations';
 import ConfidenceSlider from './ConfidenceSlider';
+import { useT } from '../lib/i18n';
 
 type Props = {
   exam: M.ExamPackage;
@@ -23,6 +24,7 @@ type Props = {
  */
 export default function ExamTakingScreen({ exam, onClose }: Props) {
   const qc = useQueryClient();
+  const { t } = useT();
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [confidences, setConfidences] = useState<Record<string, number>>({});
@@ -67,7 +69,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
   // 시간 만료 자동 제출
   useEffect(() => {
     if (remaining === 0 && exam.resultId && !submitMut.isPending && !submitMut.isSuccess) {
-      toast('시간이 만료되어 자동 제출됩니다', 'info');
+      toast(t('exam.timer.expired'), 'info');
       submitMut.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,7 +104,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
       return M.submitExamResult(exam.resultId!, { answers: payload });
     },
     onSuccess: (r) => {
-      toast(`제출 완료 · ${r.score}점 · ${r.grade}등급`, 'success');
+      toast(t('toast.exam.submitDone', { score: r.score, grade: r.grade }), 'success');
       qc.invalidateQueries({ queryKey: ['mock-summary'] });
       qc.invalidateQueries({ queryKey: ['mock-trajectory'] });
       qc.invalidateQueries({ queryKey: ['mock-results'] });
@@ -112,7 +114,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
       qc.invalidateQueries({ queryKey: ['heatmap'] });
       onClose(r);
     },
-    onError: () => toast('제출 실패', 'error'),
+    onError: () => toast(t('toast.exam.submitFailed'), 'error'),
   });
 
   // 응시 가능한 문제가 없는 경우
@@ -125,10 +127,10 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
               {exam.name}
             </h2>
             <p style={{ fontSize: 13, color: '#6B6354', lineHeight: 1.65, marginBottom: 24 }}>
-              현재 응시 가능한 문제가 없어요.<br />
-              학습 데이터가 누적되거나 AI 키 설정 후 자동 구성됩니다.
+              <strong>{t('exam.empty.title')}</strong><br />
+              {t('exam.empty.desc')}
             </p>
-            <button onClick={() => onClose(null)} style={btnPrimary}>닫기</button>
+            <button onClick={() => onClose(null)} style={btnPrimary}>{t('common.close')}</button>
           </div>
         </div>
       </Overlay>
@@ -145,7 +147,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
       }}>
         <div>
           <div style={{ fontSize: 11, letterSpacing: '0.2em', color: '#A89684', textTransform: 'uppercase' }}>
-            응시 중 · {progress.filled}/{progress.total} 답안 입력
+            {t('exam.label.takingNumOf', { filled: progress.filled, total: progress.total })}
           </div>
           <h1 className="serif" style={{ fontSize: 22, fontWeight: 500, margin: 0, marginTop: 2, letterSpacing: '-0.02em' }}>
             {exam.name}
@@ -165,7 +167,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
             onClick={() => setConfirmExit(true)}
             style={{ background: 'none', border: '1px solid #F2EDE230', color: '#F2EDE2', padding: '6px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}
           >
-            <X size={12} /> 나가기
+            <X size={12} /> {t('exam.exit.btn')}
           </button>
         </div>
       </div>
@@ -188,7 +190,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24 }}>
             <div>
               <div style={{ fontSize: 11, letterSpacing: '0.18em', color: '#8B7E6A', textTransform: 'uppercase' }}>
-                Problem {String(idx + 1).padStart(2, '0')} / {exam.problems.length}
+                {t('exam.problem.label', { n: String(idx + 1).padStart(2, '0'), total: exam.problems.length })}
               </div>
               <div className="serif" style={{ fontSize: 17, color: '#1F1A14', fontStyle: 'italic', marginTop: 4 }}>
                 {current.source}
@@ -202,9 +204,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
                 current.difficulty === 'UPPER_MIDDLE' ? '#B45309' : '#A89684',
               color: '#F2EDE2', borderRadius: 2,
             }}>
-              {current.difficulty === 'KILLER' ? '킬러' :
-               current.difficulty === 'SEMI_KILLER' ? '준킬러' :
-               current.difficulty === 'UPPER_MIDDLE' ? '중상' : '중'}
+              {current.difficulty}
             </span>
           </div>
 
@@ -231,7 +231,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
           {current.steps && current.steps.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18, marginBottom: 8 }}>
               {current.steps.sort((a, b) => a.stepIndex - b.stepIndex).map((s) => {
-                const stepLabel = s.stepType === 'CONCEPT' ? '개념' : s.stepType === 'PROCESS' ? '풀이 과정' : '정답';
+                const stepLabel = s.stepType === 'CONCEPT' ? t('study.step.concept') : s.stepType === 'PROCESS' ? t('study.step.process') : t('study.step.answer');
                 const selected = choiceIds[current.id]?.[s.stepIndex];
                 return (
                   <div key={s.id} style={{
@@ -243,7 +243,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
                       backgroundColor: selected ? '#4A5D3A' : '#B45309',
                       color: '#F2EDE2', borderRadius: 2, fontSize: 11, fontWeight: 600,
                     }}>
-                      {s.stepIndex}단계 · {stepLabel}{selected ? ' ✓' : ''}
+                      {`${s.stepIndex}/3`} · {stepLabel}{selected ? ' ✓' : ''}
                     </div>
                     <div style={{ fontSize: 14, color: '#1F1A14', fontWeight: 600, marginBottom: 12, lineHeight: 1.5 }}>
                       {s.prompt}
@@ -292,13 +292,13 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
           ) : (
             <div style={{ marginBottom: 8 }}>
               <div style={{ fontSize: 11, letterSpacing: '0.15em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: 8 }}>
-                답안 (단일 입력)
+                {t('exam.answer.label')}
               </div>
               <input
                 type="text"
                 value={answers[current.id] ?? ''}
                 onChange={(e) => setAnswer(current.id, e.target.value)}
-                placeholder="답을 입력하세요"
+                placeholder={t('exam.answer.placeholder')}
                 style={{
                   width: '100%', padding: '14px 16px', fontSize: 16,
                   border: '1px solid #1F1A1430', borderRadius: 4,
@@ -358,19 +358,19 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
             opacity: idx === 0 ? 0.4 : 1,
           }}
         >
-          <ArrowLeft size={14} /> 이전
+          <ArrowLeft size={14} /> {t('exam.prev.label')}
         </button>
         <div style={{ fontSize: 12, color: '#6B6354' }}>
           {progress.filled === progress.total
-            ? '모든 문제 답안 작성됨'
-            : `미작성 ${progress.total - progress.filled}문제`}
+            ? t('exam.progress.allDone')
+            : t('exam.progress.remaining', { n: progress.total - progress.filled })}
         </div>
         {idx < exam.problems.length - 1 ? (
           <button
             onClick={() => setIdx((i) => Math.min(exam.problems.length - 1, i + 1))}
             style={btnPrimary}
           >
-            다음 <ArrowRight size={14} />
+            {t('exam.next.label')} <ArrowRight size={14} />
           </button>
         ) : (
           <button
@@ -378,7 +378,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
             disabled={submitMut.isPending}
             style={{ ...btnPrimary, backgroundColor: '#D97706', color: '#1F1A14' }}
           >
-            <Send size={14} /> {submitMut.isPending ? '제출 중…' : '제출하기'}
+            <Send size={14} /> {submitMut.isPending ? t('exam.submit.busy') : t('exam.submit.label')}
           </button>
         )}
       </div>
@@ -386,9 +386,10 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
       {/* 제출 확인 모달 */}
       {confirmSubmit && (
         <ConfirmDialog
-          title="모의고사를 제출할까요?"
-          desc={`${progress.filled}/${progress.total}개 답안 작성됨. 제출 후에는 수정할 수 없어요.`}
-          confirmLabel={submitMut.isPending ? '제출 중…' : '제출'}
+          title={t('exam.submit.title')}
+          desc={t('exam.submit.desc', { filled: progress.filled, total: progress.total })}
+          confirmLabel={submitMut.isPending ? t('exam.submit.busy') : t('exam.submit.confirm')}
+          cancelLabel={t('common.cancel')}
           confirmDisabled={submitMut.isPending}
           onConfirm={() => { setConfirmSubmit(false); submitMut.mutate(); }}
           onCancel={() => setConfirmSubmit(false)}
@@ -396,9 +397,10 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
       )}
       {confirmExit && (
         <ConfirmDialog
-          title="응시를 중단할까요?"
-          desc="작성한 답안은 저장되지 않습니다."
-          confirmLabel="나가기"
+          title={t('exam.exit.title')}
+          desc={t('exam.exit.desc')}
+          confirmLabel={t('exam.exit.confirm')}
+          cancelLabel={t('common.cancel')}
           confirmDisabled={false}
           onConfirm={() => onClose(null)}
           onCancel={() => setConfirmExit(false)}
@@ -422,8 +424,8 @@ function Overlay({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ConfirmDialog({ title, desc, confirmLabel, confirmDisabled, onConfirm, onCancel, danger }: {
-  title: string; desc: string; confirmLabel: string; confirmDisabled: boolean;
+function ConfirmDialog({ title, desc, confirmLabel, cancelLabel, confirmDisabled, onConfirm, onCancel, danger }: {
+  title: string; desc: string; confirmLabel: string; cancelLabel: string; confirmDisabled: boolean;
   onConfirm: () => void; onCancel: () => void; danger?: boolean;
 }) {
   return (
@@ -439,7 +441,7 @@ function ConfirmDialog({ title, desc, confirmLabel, confirmDisabled, onConfirm, 
         <h3 className="serif" style={{ fontSize: 20, fontWeight: 500, margin: 0, marginBottom: 8 }}>{title}</h3>
         <p style={{ fontSize: 13, color: '#6B6354', lineHeight: 1.65, margin: 0, marginBottom: 20 }}>{desc}</p>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button onClick={onCancel} style={btnGhost}>취소</button>
+          <button onClick={onCancel} style={btnGhost}>{cancelLabel}</button>
           <button
             onClick={onConfirm}
             disabled={confirmDisabled}

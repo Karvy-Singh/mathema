@@ -6,6 +6,7 @@ import { toast } from './Toast';
 import { get } from '../lib/api';
 import type { Problem } from '../lib/queries';
 import { createWrongNote, uploadWrongNotePhoto, uploadWrongNotePdf } from '../lib/mutations';
+import { useT } from '../lib/i18n';
 
 type Mode = 'text' | 'photo' | 'pdf';
 type Props = {
@@ -14,20 +15,21 @@ type Props = {
   onClose: () => void;
 };
 
-const ERROR_TYPES = [
-  { key: 'CONCEPT_MISUNDERSTANDING', label: '개념 오해' },
-  { key: 'CALCULATION_MISTAKE', label: '계산 실수' },
-  { key: 'TIME_SHORTAGE', label: '시간 부족' },
-  { key: 'OTHER', label: '기타' },
-];
-
 export default function RegisterWrongNoteModal({ open, initialMode = 'text', onClose }: Props) {
+  const { t } = useT();
   const [mode, setMode] = useState<Mode>(initialMode);
   const [problemId, setProblemId] = useState('');
-  const [errorType, setErrorType] = useState(ERROR_TYPES[0].key);
   const [insight, setInsight] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const qc = useQueryClient();
+
+  const ERROR_TYPES = [
+    { key: 'CONCEPT_MISUNDERSTANDING', label: t('wn.regModal.errorType.concept') },
+    { key: 'CALCULATION_MISTAKE',      label: t('wn.regModal.errorType.calc') },
+    { key: 'TIME_SHORTAGE',            label: t('wn.regModal.errorType.time') },
+    { key: 'OTHER',                    label: t('wn.regModal.errorType.other') },
+  ];
+  const [errorType, setErrorType] = useState(ERROR_TYPES[0].key);
 
   const problemsQ = useQuery({
     queryKey: ['problems-pick'],
@@ -41,41 +43,43 @@ export default function RegisterWrongNoteModal({ open, initialMode = 'text', onC
   const createMut = useMutation({
     mutationFn: () => createWrongNote({ problemId, errorType, insight: insight || undefined }),
     onSuccess: () => {
-      toast('오답이 등록됐어요', 'success');
+      toast(t('toast.wn.added'), 'success');
       qc.invalidateQueries({ queryKey: ['wn-list'] });
       qc.invalidateQueries({ queryKey: ['wn-stats'] });
       qc.invalidateQueries({ queryKey: ['wn-recent'] });
       close();
     },
-    onError: (e: any) => toast(e?.response?.data?.error?.message ?? '등록 실패', 'error'),
+    onError: (e: any) => toast(e?.response?.data?.error?.message ?? t('toast.wn.addFailed'), 'error'),
   });
 
   const photoMut = useMutation({
     mutationFn: (f: File) => uploadWrongNotePhoto(f),
     onSuccess: (r) => {
-      toast(r.message ?? '사진 업로드 완료', r.ok ? 'success' : 'info');
+      toast(r.message ?? t('toast.wn.uploadDone'), r.ok ? 'success' : 'info');
       close();
     },
-    onError: () => toast('사진 업로드 실패', 'error'),
+    onError: () => toast(t('toast.wn.uploadFailed'), 'error'),
   });
 
   const pdfMut = useMutation({
     mutationFn: (f: File) => uploadWrongNotePdf(f),
     onSuccess: (r) => {
-      toast(r.message ?? 'PDF 업로드 완료', r.ok ? 'success' : 'info');
+      toast(r.message ?? t('toast.wn.pdfDone'), r.ok ? 'success' : 'info');
       close();
     },
-    onError: () => toast('PDF 업로드 실패', 'error'),
+    onError: () => toast(t('toast.wn.pdfFailed'), 'error'),
   });
 
+  const MODES: Array<{ key: Mode; label: string; sub: string; Icon: any; color: string }> = [
+    { key: 'photo', label: t('wn.register.photo'), sub: t('wn.register.photoSub'), Icon: Camera, color: '#8B3A1F' },
+    { key: 'text',  label: t('wn.register.text'),  sub: t('wn.register.textSub'),  Icon: FileText, color: '#B45309' },
+    { key: 'pdf',   label: t('wn.register.pdf'),   sub: t('wn.register.pdfSub'),   Icon: ImageIcon, color: '#4A5D3A' },
+  ];
+
   return (
-    <Modal open={open} onClose={close} subtitle="Wrong Note · Add" title="오답 등록" width={620}>
+    <Modal open={open} onClose={close} subtitle={t('wn.regModal.label')} title={t('wn.regModal.title')} width={620}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 24 }}>
-        {([
-          { key: 'photo', label: '사진으로 등록', sub: 'AI 자동 인식', Icon: Camera, color: '#8B3A1F' },
-          { key: 'text', label: '직접 입력', sub: '문제 선택 + 메모', Icon: FileText, color: '#B45309' },
-          { key: 'pdf', label: 'PDF 업로드', sub: '문제집 일괄', Icon: ImageIcon, color: '#4A5D3A' },
-        ] as Array<{ key: Mode; label: string; sub: string; Icon: any; color: string }>).map((opt) => {
+        {MODES.map((opt) => {
           const I = opt.Icon;
           const active = mode === opt.key;
           return (
@@ -98,40 +102,39 @@ export default function RegisterWrongNoteModal({ open, initialMode = 'text', onC
 
       {mode === 'text' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <Field label="문제 선택">
+          <Field label={t('wn.regModal.field.problem')}>
             <select
               value={problemId}
               onChange={(e) => setProblemId(e.target.value)}
               style={inputStyle}
             >
-              <option value="">— 문제를 선택하세요 —</option>
+              <option value="">{t('wn.regModal.field.problem.placeholder')}</option>
               {(problemsQ.data ?? []).map((p) => (
                 <option key={p.id} value={p.id}>{p.source} ({p.difficulty})</option>
               ))}
             </select>
           </Field>
-          <Field label="오류 유형">
+          <Field label={t('wn.regModal.field.errorType')}>
             <select value={errorType} onChange={(e) => setErrorType(e.target.value)} style={inputStyle}>
-              {ERROR_TYPES.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
+              {ERROR_TYPES.map((et) => <option key={et.key} value={et.key}>{et.label}</option>)}
             </select>
           </Field>
-          <Field label="메모 (선택)">
+          <Field label={t('wn.regModal.field.note')}>
             <textarea
               value={insight}
               onChange={(e) => setInsight(e.target.value)}
-              placeholder="치환적분에서 dx 처리를 누락했음 …"
               rows={4}
               style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
             />
           </Field>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <button onClick={close} style={btnGhost}>취소</button>
+            <button onClick={close} style={btnGhost}>{t('common.cancel')}</button>
             <button
               disabled={!problemId || createMut.isPending}
               onClick={() => createMut.mutate()}
               style={btnPrimary}
             >
-              {createMut.isPending ? '등록 중…' : '등록'}
+              {createMut.isPending ? t('wn.regModal.submit.busy') : t('wn.regModal.submit.label')}
             </button>
           </div>
         </div>
@@ -145,7 +148,7 @@ export default function RegisterWrongNoteModal({ open, initialMode = 'text', onC
           }}>
             <Upload size={20} color="#6B6354" />
             <div style={{ fontSize: 13, color: '#6B6354', margin: '10px 0 14px' }}>
-              {mode === 'photo' ? '문제 사진을 업로드하세요 (JPG, PNG)' : '문제집 PDF를 업로드하세요'}
+              {mode === 'photo' ? t('wn.regModal.upload.imgHint') : t('wn.regModal.upload.pdfHint')}
             </div>
             <input
               type="file"
@@ -160,17 +163,16 @@ export default function RegisterWrongNoteModal({ open, initialMode = 'text', onC
             )}
           </div>
           <div style={{ fontSize: 11, color: '#8B7E6A', lineHeight: 1.6 }}>
-            ※ AI Vision/LLM 키가 설정되지 않은 상태에서는 업로드 후 안내 메시지만 표시됩니다.
-            실제 자동 인식은 <code>backend/.env</code> 의 AI 키 설정 시 활성화됩니다.
+            {t('wn.regModal.upload.aiNote')}
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <button onClick={close} style={btnGhost}>취소</button>
+            <button onClick={close} style={btnGhost}>{t('common.cancel')}</button>
             <button
               disabled={!file || (mode === 'photo' ? photoMut.isPending : pdfMut.isPending)}
               onClick={() => file && (mode === 'photo' ? photoMut.mutate(file) : pdfMut.mutate(file))}
               style={btnPrimary}
             >
-              {(mode === 'photo' ? photoMut.isPending : pdfMut.isPending) ? '업로드 중…' : '업로드'}
+              {(mode === 'photo' ? photoMut.isPending : pdfMut.isPending) ? t('wn.regModal.upload.busy') : t('wn.regModal.upload.submit')}
             </button>
           </div>
         </div>

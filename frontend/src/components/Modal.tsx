@@ -1,5 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useT } from '../lib/i18n';
 
 type Props = {
   open: boolean;
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export default function Modal({ open, onClose, title, subtitle, width = 640, children }: Props) {
+  const { t } = useT();
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -47,7 +49,7 @@ export default function Modal({ open, onClose, title, subtitle, width = 640, chi
       >
         <button
           onClick={onClose}
-          aria-label="닫기"
+          aria-label={t('common.close')}
           style={{
             position: 'absolute', top: 16, right: 16,
             background: 'none', border: 'none', cursor: 'pointer',

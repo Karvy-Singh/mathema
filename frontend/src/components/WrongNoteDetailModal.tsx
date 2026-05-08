@@ -4,23 +4,24 @@ import Modal from './Modal';
 import { toast } from './Toast';
 import { fetchWrongNote, fetchProblemHint } from '../lib/queries';
 import { updateWrongNoteStatus, reviewWrongNote, ReviewQuality } from '../lib/mutations';
+import { useT } from '../lib/i18n';
 
 type Props = {
   noteId: string | null;
   onClose: () => void;
 };
 
-// SM-2 4단계 quality. label, color, 예상 다음 간격(라벨용 — 정확한 값은 EF에 따라 다름)
-const QUALITY_BUTTONS: Array<{ key: ReviewQuality; label: string; sub: string; color: string }> = [
-  { key: 'AGAIN', label: '다시',   sub: '내일',     color: '#8B3A1F' },
-  { key: 'HARD',  label: '어려움', sub: '~1d',     color: '#B45309' },
-  { key: 'GOOD',  label: '보통',   sub: '~6d',     color: '#1F1A14' },
-  { key: 'EASY',  label: '완벽',   sub: '~6d×EF',  color: '#4A5D3A' },
-];
-
 export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
   const qc = useQueryClient();
+  const { t } = useT();
   const open = !!noteId;
+  // SM-2 4단계 quality
+  const QUALITY_BUTTONS: Array<{ key: ReviewQuality; label: string; sub: string; color: string }> = [
+    { key: 'AGAIN', label: t('wn.detail.review.again'), sub: '~1d', color: '#8B3A1F' },
+    { key: 'HARD',  label: t('wn.detail.review.hard'),  sub: '~1d',    color: '#B45309' },
+    { key: 'GOOD',  label: t('wn.detail.review.good'),  sub: '~6d',    color: '#1F1A14' },
+    { key: 'EASY',  label: t('wn.detail.review.easy'),  sub: '~6d×EF', color: '#4A5D3A' },
+  ];
 
   const detail = useQuery({
     queryKey: ['wn-detail', noteId],
@@ -45,33 +46,34 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
   const masterMut = useMutation({
     mutationFn: (id: string) => updateWrongNoteStatus(id, 'MASTERED'),
     onSuccess: () => {
-      toast('영구 마스터 처리되었어요', 'success');
+      toast(t('toast.master.permanent'), 'success');
       invalidate();
     },
-    onError: () => toast('마스터 처리 실패', 'error'),
+    onError: () => toast(t('toast.master.failed'), 'error'),
   });
 
   const reviewMut = useMutation({
     mutationFn: (q: ReviewQuality) => reviewWrongNote(noteId!, q),
     onSuccess: (r) => {
-      const next = r.nextReviewAt
-        ? `${Math.max(1, Math.ceil((new Date(r.nextReviewAt).getTime() - Date.now()) / 86400000))}일 후`
-        : '—';
+      const days = r.nextReviewAt
+        ? Math.max(1, Math.ceil((new Date(r.nextReviewAt).getTime() - Date.now()) / 86400000))
+        : 0;
+      const next = days > 0 ? t('wn.due.inDays', { days }) : '—';
       if (r.autoMastered) {
-        toast('연속 완벽 3회 — 자동 마스터되었어요', 'success');
+        toast(t('toast.review.autoMastered'), 'success');
       } else if (r.lapsed) {
-        toast(`다시 학습이 필요해요. 다음 복습: ${next}`, 'info');
+        toast(t('toast.review.tryAgain', { date: next }), 'info');
       } else {
-        toast(`복습 완료 · 다음 복습: ${next}`, 'success');
+        toast(t('toast.review.done', { date: next }), 'success');
       }
       invalidate();
     },
-    onError: () => toast('복습 기록 실패', 'error'),
+    onError: () => toast(t('toast.review.failed'), 'error'),
   });
 
   return (
-    <Modal open={open} onClose={onClose} subtitle="AI 맞춤 해설" title={detail.data?.problem ?? '오답 분석'} width={720}>
-      {detail.isLoading && <div style={{ color: '#6B6354', fontSize: 13 }}>불러오는 중…</div>}
+    <Modal open={open} onClose={onClose} subtitle={t('wn.detail.label')} title={detail.data?.problem ?? t('wn.detail.fallbackTitle')} width={720}>
+      {detail.isLoading && <div style={{ color: '#6B6354', fontSize: 13 }}>{t('common.loading')}</div>}
       {detail.data && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ display: 'flex', gap: 8, fontSize: 12, color: '#6B6354', flexWrap: 'wrap' }}>
@@ -95,7 +97,7 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
           {hint.data?.hint && (
             <div>
               <div style={{ fontSize: 11, letterSpacing: '0.15em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: 10 }}>
-                힌트
+                {t('wn.detail.hint')}
               </div>
               <div style={{ padding: 12, backgroundColor: '#FAF6EB', border: '1px solid #1F1A1418', borderRadius: 4, fontSize: 13, lineHeight: 1.65 }}>
                 {hint.data.hint}
@@ -106,7 +108,7 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
           {detail.data.similar && detail.data.similar.length > 0 && (
             <div>
               <div style={{ fontSize: 11, letterSpacing: '0.15em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: 10 }}>
-                유사 문제 {detail.data.similar.length}개
+                {t('wn.detail.similar', { n: detail.data.similar.length })}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {detail.data.similar.map((s) => (
@@ -125,10 +127,10 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <RotateCcw size={12} color="#8B7E6A" />
                 <div style={{ fontSize: 11, letterSpacing: '0.15em', color: '#8B7E6A', textTransform: 'uppercase' }}>
-                  복습 평가 (SM-2)
+                  {t('wn.detail.review.label')}
                 </div>
                 <div style={{ marginLeft: 'auto', fontSize: 11, color: '#6B6354', display: 'flex', gap: 10 }}>
-                  <span><Clock size={10} style={{ verticalAlign: -1, marginRight: 4 }}/>{detail.data.dueIn ?? '미복습'}</span>
+                  <span><Clock size={10} style={{ verticalAlign: -1, marginRight: 4 }}/>{detail.data.dueIn ?? t('wn.detail.review.unreviewed')}</span>
                   <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>rep {detail.data.repetitionCount} · EF {detail.data.easinessFactor}</span>
                 </div>
               </div>
@@ -155,7 +157,7 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
                 ))}
               </div>
               <div style={{ marginTop: 8, fontSize: 11, color: '#A89684', lineHeight: 1.5 }}>
-                ※ 다시: 1일 뒤 재복습 · 어려움/보통: 짧은 간격 · 완벽: EF 배수로 늘어남. 연속 완벽 3회 이상 + 30일 이상 도달 시 자동 마스터.
+                {t('wn.detail.review.note')}
               </div>
             </div>
           )}
@@ -171,11 +173,11 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
                   cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit',
                 }}
               >
-                <CheckCircle2 size={12} /> {masterMut.isPending ? '처리 중…' : '영구 마스터로 즉시 처리'}
+                <CheckCircle2 size={12} /> {masterMut.isPending ? t('common.loading') : t('wn.detail.permanentMaster')}
               </button>
             ) : (
               <span style={{ fontSize: 12, color: '#4A5D3A', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <CheckCircle2 size={14} /> 마스터 완료
+                <CheckCircle2 size={14} /> {t('wn.master.completed')}
               </span>
             )}
           </div>

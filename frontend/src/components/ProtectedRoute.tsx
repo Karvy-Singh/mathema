@@ -1,9 +1,11 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useT } from '../lib/i18n';
 
 export default function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { user, ready } = useAuth();
-  if (!ready) return <FullPageMessage text="불러오는 중..." />;
+  const { t } = useT();
+  if (!ready) return <FullPageMessage text={t('common.loading')} />;
   if (!user) return <Navigate to="/login" replace />;
   return children;
 }

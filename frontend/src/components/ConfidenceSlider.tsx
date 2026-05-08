@@ -1,3 +1,5 @@
+import { useT } from '../lib/i18n';
+
 type Props = {
   value: number;
   onChange: (v: number) => void;
@@ -12,9 +14,11 @@ type Props = {
  *
  * 캘리브레이션 분석에 사용 — Brier score 와 confidence-accuracy 산점도.
  */
-export default function ConfidenceSlider({ value, onChange, label = '확신도 (메타인지)' }: Props) {
+export default function ConfidenceSlider({ value, onChange, label }: Props) {
+  const { t } = useT();
   const color = value < 34 ? '#8B3A1F' : value < 67 ? '#B45309' : '#4A5D3A';
-  const labelText = value < 34 ? '낮음' : value < 67 ? '보통' : '높음';
+  const labelText = value < 34 ? t('study.confidence.low') : value < 67 ? t('study.confidence.medium') : t('study.confidence.high');
+  const displayLabel = label ?? t('study.confidence.label');
 
   return (
     <div style={{ marginTop: 12, marginBottom: 12 }}>
@@ -23,7 +27,7 @@ export default function ConfidenceSlider({ value, onChange, label = '확신도 (
         fontSize: 11, color: '#6B6354', marginBottom: 6,
         letterSpacing: '0.1em', textTransform: 'uppercase',
       }}>
-        <span>{label}</span>
+        <span>{displayLabel}</span>
         <span style={{
           color, fontWeight: 600,
           fontFamily: 'JetBrains Mono, monospace',
