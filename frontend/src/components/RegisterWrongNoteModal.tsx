@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, FileText, Image as ImageIcon, Upload } from 'lucide-react';
 import Modal from './Modal';
@@ -22,6 +22,11 @@ export default function RegisterWrongNoteModal({ open, initialMode = 'text', onC
   const [insight, setInsight] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const qc = useQueryClient();
+
+  // 모달이 새로 열릴 때마다 호출자가 지정한 initialMode 로 탭을 동기화 (이전 호출 잔여 상태 방지)
+  useEffect(() => {
+    if (open) setMode(initialMode);
+  }, [open, initialMode]);
 
   const ERROR_TYPES = [
     { key: 'CONCEPT_MISUNDERSTANDING', label: t('wn.regModal.errorType.concept') },

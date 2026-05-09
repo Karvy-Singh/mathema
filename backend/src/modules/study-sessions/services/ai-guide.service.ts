@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AiService } from '../../../infrastructure/ai/ai.service';
 import { stepwiseGuidePrompt } from '../../../infrastructure/ai/prompts/stepwise-guide.prompt';
+import { Lang } from '../../../common/i18n/current-lang.decorator';
 
 export type Perspective = '공식 중심' | '단계별' | '시각화' | '실생활 예시';
 
@@ -14,8 +15,8 @@ export type Perspective = '공식 중심' | '단계별' | '시각화' | '실생�
 export class AiGuideService {
   constructor(private readonly ai: AiService) {}
 
-  async generate(userId: string, sessionId: string, perspective: string) {
-    const prompt = stepwiseGuidePrompt({ sessionId, userId, perspective: perspective as Perspective });
+  async generate(userId: string, sessionId: string, perspective: string, lang: Lang = 'ko') {
+    const prompt = stepwiseGuidePrompt({ sessionId, userId, perspective: perspective as Perspective, lang });
     return this.ai.generateText(prompt);
   }
 }

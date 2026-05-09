@@ -53,7 +53,7 @@ export class FocusOnMistakesStrategy {
         unit: RECOMMENDATION_EN.focusUnit(unitEn, subEn),
         title: top.subUnitName ? RECOMMENDATION_EN.focusTitleSub(subEn) : RECOMMENDATION_EN.focusTitleUnit(unitEn),
         reason: RECOMMENDATION_EN.focusReason(top.occurrences, totalNotes),
-        time: this.estimateTime(top.occurrences),
+        time: this.estimateTime(top.occurrences, lang),
         type: 'Interactive practice',
         icon: 'Layers',
       };
@@ -65,15 +65,15 @@ export class FocusOnMistakesStrategy {
       unit: `${top.unitName} · ${top.subUnitName || '핵심 영역'}`,
       title: top.subUnitName ? `${top.subUnitName} 한 번에 끝내기` : `${top.unitName} 약점 보강`,
       reason: `누적 오답 ${top.occurrences}회 (${totalNotes}문제) — 즉시 보강 필요`,
-      time: this.estimateTime(top.occurrences),
+      time: this.estimateTime(top.occurrences, lang),
       type: '인터랙티브 학습',
       icon: 'Layers',
     };
   }
 
-  private estimateTime(occurrences: number): string {
+  private estimateTime(occurrences: number, lang: Lang = 'ko'): string {
     // 한 문제 마스터 ≈ 4분 + 누적당 +2분, 최대 45분
     const min = Math.min(45, 8 + occurrences * 2);
-    return `${min}분`;
+    return lang === 'en' ? `${min} min` : `${min}분`;
   }
 }

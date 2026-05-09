@@ -13,7 +13,12 @@ export type RecommendCard = {
 };
 export type WrongNoteCard = {
   id: string; problemId: string;
-  problem: string; unit: string; subUnit: string;
+  problem: string;
+  /** 실제 문제 본문 — 어떤 문제였는지 카드/모달에서 즉시 확인 */
+  problemBody?: string;
+  /** 정답 — 상세 모달에서 노출 */
+  problemAnswer?: string;
+  unit: string; subUnit: string;
   errorType: string; errorTypeRaw: string; insight: string;
   diff: string; date: string; similarCount: number; status: string;
   // SM-2
@@ -46,7 +51,8 @@ export type ReportCurrent = {
 export type TimeVsAccuracy = Array<{ week: string; time: number; accuracy: number }>;
 export type FocusItem = { unit: string; area: string; priority: string; color: string; impact: string };
 export type Achievement = { icon: string; title: string; sub: string; color: string };
-export type Me = { id: string; name: string; email: string; examDate: string; targetGrade: number; dDay: number };
+export type GradeLevel = 'G_MIDDLE_1' | 'G_MIDDLE_2' | 'G_MIDDLE_3' | 'G_HIGH_1' | 'G_HIGH_2' | 'G_HIGH_3';
+export type Me = { id: string; name: string; email: string; examDate: string; targetGrade: number; dDay: number; gradeLevel?: GradeLevel | null };
 
 // fetchers
 export const fetchMe = () => get<Me>('/users/me');
@@ -110,7 +116,11 @@ export type StudySession = {
   currentStep: number; startedAt: string; endedAt: string | null;
 };
 export type SessionGuide = { text: string; inputTokens: number; outputTokens: number };
-export type Unit = { id: string; name: string; order: number; subUnits: Array<{ id: string; name: string; order: number }> };
+export type Unit = {
+  id: string; name: string; displayName?: string; order: number;
+  gradeLevels?: GradeLevel[];
+  subUnits: Array<{ id: string; name: string; displayName?: string; order: number }>;
+};
 
 export const fetchWrongNote = (id: string) => get<WrongNoteDetail>(`/wrong-notes/${id}`);
 export const fetchDueWrongNotes = (limit?: number) =>
@@ -120,4 +130,7 @@ export const fetchProblemHint = (id: string) => get<Hint>(`/problems/${id}/hint`
 export const fetchStudySession = (id: string) => get<StudySession>(`/study-sessions/${id}`);
 export const fetchSessionGuide = (id: string, perspective: string) =>
   get<SessionGuide>(`/study-sessions/${id}/guide`, { perspective });
-export const fetchCurriculum = () => get<Unit[]>('/curriculum');
+export const fetchCurriculum = (grade?: string) =>
+  get<Unit[]>('/curriculum', grade ? { grade } : undefined);
+export const fetchUnitsForUser = (grade?: string) =>
+  get<Unit[]>('/curriculum/units', grade ? { grade } : undefined);

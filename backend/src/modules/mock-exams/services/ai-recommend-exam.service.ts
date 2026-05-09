@@ -28,7 +28,7 @@ export class AiRecommendExamService {
     });
     if (masteries.length === 0) return { problems: [] };
 
-    const target = 30;
+    const target = 20;
     const weights = masteries.map((m) => ({ unitId: m.unitId, score: m.score, w: Math.max(5, 100 - m.score) }));
     const totalW = weights.reduce((s, x) => s + x.w, 0);
 
@@ -58,7 +58,7 @@ export class AiRecommendExamService {
    */
   async composeTyped(userId: string, kind: 'mini' | 'wrong-redo' | 'real') {
     if (kind === 'wrong-redo') {
-      const due = await this.wrongNotesRepo.findDue(userId, 30);
+      const due = await this.wrongNotesRepo.findDue(userId, 20);
       const problemIds = due.map((d: any) => d.problemId);
       if (problemIds.length === 0) return { kind, problems: [] };
       const ps = await this.prisma.problem.findMany({ where: { id: { in: problemIds } } });
@@ -84,7 +84,6 @@ export class AiRecommendExamService {
         });
         problems.push(...ps.map((p) => ({ id: p.id, source: p.source, difficulty: p.difficulty })));
       }
-      // fallback: 권장 난이도에 문제가 없으면 단원 전체에서
       if (problems.length === 0) {
         const ps = await this.prisma.problem.findMany({ where: { unitId: weakest.unitId }, take: 10 });
         return { kind, problems: ps.map((p) => ({ id: p.id, source: p.source, difficulty: p.difficulty })) };
@@ -92,14 +91,16 @@ export class AiRecommendExamService {
       return { kind, problems };
     }
 
-    // real — 단원별 균등 분포
-    const units = await this.prisma.unit.findMany();
-    const perUnit = Math.max(1, Math.floor(30 / Math.max(units.length, 1)));
+    // real — 사용자 mastery 단원에 한정해 균등 분포 (학년 외 단원 제외) — 총 20문제
+    const masteries = await this.prisma.masterySnapshot.findMany({ where: { userId }, include: { unit: true } });
+    const targetReal = 20;
+    if (masteries.length === 0) return { kind, problems: [] };
+    const perUnit = Math.max(1, Math.floor(targetReal / masteries.length));
     const all: Array<{ id: string; source: string; difficulty: string }> = [];
-    for (const u of units) {
-      const ps = await this.prisma.problem.findMany({ where: { unitId: u.id }, take: perUnit });
+    for (const m of masteries) {
+      const ps = await this.prisma.problem.findMany({ where: { unitId: m.unitId }, take: perUnit });
       all.push(...ps.map((p) => ({ id: p.id, source: p.source, difficulty: p.difficulty })));
     }
-    return { kind, problems: all.slice(0, 30) };
+    return { kind, problems: all.slice(0, targetReal) };
   }
 }

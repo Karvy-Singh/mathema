@@ -14,13 +14,13 @@ export class MockExamsController {
   summary(@CurrentUser('id') userId: string) { return this.service.summary(userId); }
 
   @Get('trajectory')
-  trajectory(@CurrentUser('id') userId: string, @Query('count') count = 6) {
-    return this.service.trajectory(userId, +count);
+  trajectory(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang, @Query('count') count = 6) {
+    return this.service.trajectory(userId, +count, lang);
   }
 
   @Get('results')
-  results(@CurrentUser('id') userId: string, @Query('recent') recent = 4) {
-    return this.service.recentResults(userId, +recent);
+  results(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang, @Query('recent') recent = 4) {
+    return this.service.recentResults(userId, +recent, lang);
   }
 
   @Post('recommended/start')

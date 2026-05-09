@@ -1,8 +1,10 @@
 import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, GradeLevel } from '../context/AuthContext';
 import { AuthShell, Field } from './LoginPage';
 import { useT } from '../lib/i18n';
+
+const GRADES: GradeLevel[] = ['G_MIDDLE_1', 'G_MIDDLE_2', 'G_MIDDLE_3', 'G_HIGH_1', 'G_HIGH_2', 'G_HIGH_3'];
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -12,6 +14,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [examDate, setExamDate] = useState('2025-11-13');
   const [targetGrade, setTargetGrade] = useState('1');
+  const [gradeLevel, setGradeLevel] = useState<GradeLevel>('G_HIGH_3');
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -23,6 +26,7 @@ export default function RegisterPage() {
         email, password, name,
         examDate: new Date(examDate).toISOString(),
         targetGrade: Number(targetGrade),
+        gradeLevel,
       });
     } catch (e: any) {
       setErr(e?.response?.data?.error?.message ?? t('auth.register.failed'));
@@ -34,6 +38,13 @@ export default function RegisterPage() {
       <Field label={t('auth.email')} type="email" value={email} onChange={setEmail} />
       <Field label={t('auth.passwordHint')} type="password" value={password} onChange={setPassword} />
       <Field label={t('auth.name')} value={name} onChange={setName} />
+      <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <span style={{ fontSize: 11, color: '#8B7E6A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('auth.gradeLevel')}</span>
+        <select value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value as GradeLevel)}
+          style={{ padding: '12px 14px', fontSize: 14, border: '1px solid #1F1A1430', borderRadius: 4, backgroundColor: '#F2EDE2', outline: 'none', fontFamily: 'inherit' }}>
+          {GRADES.map((g) => (<option key={g} value={g}>{t(`grade.${g}`)}</option>))}
+        </select>
+      </label>
       <Field label={t('auth.examDate')} type="date" value={examDate} onChange={setExamDate} />
       <Field label={t('auth.targetGrade')} type="number" value={targetGrade} onChange={setTargetGrade} />
       {err && <div style={{ color: '#8B3A1F', fontSize: 13 }}>{err}</div>}

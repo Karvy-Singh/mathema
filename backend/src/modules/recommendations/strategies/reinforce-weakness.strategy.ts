@@ -33,7 +33,7 @@ export class ReinforceWeaknessStrategy {
         unit: RECOMMENDATION_EN.weakUnit(unitEn),
         title: RECOMMENDATION_EN.weakTitle(unitEn),
         reason: gap > 0 ? RECOMMENDATION_EN.weakReasonGap(score, gap) : RECOMMENDATION_EN.weakReasonStable(score),
-        time: this.estimateTime(score),
+        time: this.estimateTime(score, lang),
         type: 'Visualization',
         icon: 'Eye',
       };
@@ -47,14 +47,18 @@ export class ReinforceWeaknessStrategy {
       reason: gap > 0
         ? `숙련도 ${score}% — 또래 평균 대비 ${gap}%p 낮음`
         : `숙련도 ${score}% — 안정 단계로 끌어올리기`,
-      time: this.estimateTime(score),
+      time: this.estimateTime(score, lang),
       type: '시각화 영상',
       icon: 'Eye',
     };
   }
 
-  private estimateTime(score: number): string {
-    // 점수 낮을수록 더 긴 학습 권장
+  private estimateTime(score: number, lang: Lang = 'ko'): string {
+    if (lang === 'en') {
+      if (score < 40) return '30 min';
+      if (score < 60) return '20 min';
+      return '15 min';
+    }
     if (score < 40) return '30분';
     if (score < 60) return '20분';
     return '15분';

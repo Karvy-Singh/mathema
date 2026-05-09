@@ -87,6 +87,26 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
             <span style={{ marginLeft: 'auto' }}>{detail.data.date}</span>
           </div>
 
+          {/* 문제 본문 — 어떤 문제였는지 즉시 확인 */}
+          {detail.data.problemBody && (
+            <div>
+              <div style={{ fontSize: 11, letterSpacing: '0.15em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: 8 }}>
+                {t('wn.detail.problemBody')}
+              </div>
+              <div className="serif" style={{
+                padding: 16, backgroundColor: '#FAF6EB', border: '1px solid #1F1A1418',
+                borderRadius: 4, fontSize: 15, lineHeight: 1.7, color: '#1F1A14',
+                whiteSpace: 'pre-wrap',
+              }}>{detail.data.problemBody}</div>
+              {detail.data.problemAnswer && (
+                <div style={{ marginTop: 8, padding: '10px 14px', backgroundColor: '#4A5D3A12', border: '1px solid #4A5D3A40', borderRadius: 4, fontSize: 13, color: '#1F1A14' }}>
+                  <span style={{ fontWeight: 600, color: '#4A5D3A', marginRight: 6 }}>{t('wn.detail.answer')}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{detail.data.problemAnswer}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           <div style={{ padding: 16, backgroundColor: '#1F1A1408', borderLeft: '2px solid #8B3A1F', borderRadius: '0 4px 4px 0' }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
               <Sparkles size={14} color="#8B3A1F" style={{ marginTop: 3, flexShrink: 0 }} />

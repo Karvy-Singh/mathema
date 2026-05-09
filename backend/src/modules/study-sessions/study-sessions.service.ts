@@ -18,11 +18,11 @@ export class StudySessionsService {
     private readonly prisma: PrismaService,
   ) {}
 
-  start(userId: string, dto: StartSessionDto) { return this.repo.create(userId, dto); }
-  get(userId: string, id: string) { return this.repo.findOne(userId, id); }
+  start(userId: string, dto: StartSessionDto, _lang: Lang = 'ko') { return this.repo.create(userId, dto); }
+  get(userId: string, id: string, _lang: Lang = 'ko') { return this.repo.findOne(userId, id); }
 
-  getAiGuide(userId: string, id: string, perspective: string) {
-    return this.aiGuide.generate(userId, id, perspective);
+  getAiGuide(userId: string, id: string, perspective: string, lang: Lang = 'ko') {
+    return this.aiGuide.generate(userId, id, perspective, lang);
   }
 
   /**

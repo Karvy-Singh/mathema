@@ -8,31 +8,62 @@ import { AttemptsService } from '../attempts/attempts.service';
 import { SessionContext } from '../../common/enums/session-context.enum';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { Lang } from '../../common/i18n/current-lang.decorator';
-import { PROBLEM_EN, STEP_PROMPT_EN, CHOICE_EN } from '../../common/i18n/content-en';
+import { PROBLEM_EN, STEP_PROMPT_EN, CHOICE_EN, SOURCE_EN, HINT_EN } from '../../common/i18n/content-en';
 
 /**
- * 응시용 sanitize — answer/isCorrect/distractorType/rationale 제거 + lang 번역.
+ * MockExam name → English short label.
+ * 예: "2024 9월 모의평가" → "2024 Sep Mock", "6월 모의평가" → "Jun Mock"
  */
+function translateExamName(name: string): string {
+  if (!name) return name;
+  let s = name;
+  const monthMap: Record<string, string> = {
+    '1월': 'Jan', '2월': 'Feb', '3월': 'Mar', '4월': 'Apr', '5월': 'May', '6월': 'Jun',
+    '7월': 'Jul', '8월': 'Aug', '9월': 'Sep', '10월': 'Oct', '11월': 'Nov', '12월': 'Dec',
+  };
+  for (const [k, v] of Object.entries(monthMap)) s = s.replace(k, v);
+  s = s.replace('모의평가', 'Mock').replace('학력평가', 'Practice')
+       .replace('수능', 'SAT').replace('교육청', 'Edu')
+       .replace(/\s+/g, ' ').trim();
+  return s;
+}
+
+/**
+ * 응시용 sanitize — answer/isCorrect/distractorType/rationale 제거 + lang 번역 + 보기 셔플.
+ * 매 요청마다 보기 순서를 무작위로 섞어 "정답은 항상 1번" 패턴 차단.
+ */
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function sanitizeForExam(p: any, lang: Lang = 'ko'): any {
   if (!p) return p;
   const { answer, ...rest } = p;
   if (lang === 'en') {
     const en = PROBLEM_EN[p.source];
     if (en) rest.body = en.body;
+    if (SOURCE_EN[p.source]) rest.source = SOURCE_EN[p.source];
+    if (rest.hint && HINT_EN[rest.hint]) rest.hint = HINT_EN[rest.hint];
   }
   if (Array.isArray(rest.steps)) {
     rest.steps = rest.steps.map((s: any) => {
       const promptEn = STEP_PROMPT_EN[`${p.source}:${s.stepIndex}`];
+      const choices = (s.choices ?? []).map((c: any) => {
+        const choiceEn = CHOICE_EN[`${p.source}:${s.stepIndex}:${c.choiceIndex}`];
+        return {
+          id: c.id, choiceIndex: c.choiceIndex,
+          text: lang === 'en' && choiceEn ? choiceEn.text : c.text,
+        };
+      });
       return {
         id: s.id, stepIndex: s.stepIndex, stepType: s.stepType,
         prompt: lang === 'en' && promptEn ? promptEn : s.prompt,
-        choices: (s.choices ?? []).map((c: any) => {
-          const choiceEn = CHOICE_EN[`${p.source}:${s.stepIndex}:${c.choiceIndex}`];
-          return {
-            id: c.id, choiceIndex: c.choiceIndex,
-            text: lang === 'en' && choiceEn ? choiceEn.text : c.text,
-          };
-        }),
+        choices: shuffle(choices),
       };
     });
   }
@@ -49,23 +80,31 @@ export class MockExamsService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async trajectory(userId: string, count: number) {
+  async trajectory(userId: string, count: number, lang: Lang = 'ko') {
     const rows = await this.repo.findTrajectory(userId, count);
     return rows.map((r: any) => ({
-      name: r.mockExam.name.replace(/^2024\s+/, '').replace('학력평가', '학평').replace('모의평가', '모평'),
+      name: lang === 'en'
+        ? translateExamName(r.mockExam.name)
+        : r.mockExam.name.replace(/^2024\s+/, '').replace('학력평가', '학평').replace('모의평가', '모평'),
       score: r.score, grade: r.grade, target: 80,
     }));
   }
 
-  async recentResults(userId: string, count: number) {
+  async recentResults(userId: string, count: number, lang: Lang = 'ko') {
     const rows = await this.repo.findRecent(userId, count);
-    return rows.map((r: any) => ({
-      id: r.id,
-      name: r.mockExam.name,
-      date: r.takenAt.toISOString().slice(0, 10).replace(/-/g, '년 ').replace(/년 (\d+)$/, '년 $1월') + '일',
-      score: r.score, grade: r.grade, percentile: r.percentile,
-      time: `${r.durationMin}분/${r.mockExam.totalMinutes}분`,
-    }));
+    return rows.map((r: any) => {
+      const iso = r.takenAt.toISOString().slice(0, 10);
+      const dateKo = iso.replace(/-/g, '년 ').replace(/년 (\d+)$/, '년 $1월') + '일';
+      return {
+        id: r.id,
+        name: lang === 'en' ? translateExamName(r.mockExam.name) : r.mockExam.name,
+        date: lang === 'en' ? iso : dateKo,
+        score: r.score, grade: r.grade, percentile: r.percentile,
+        time: lang === 'en'
+          ? `${r.durationMin}min / ${r.mockExam.totalMinutes}min`
+          : `${r.durationMin}분/${r.mockExam.totalMinutes}분`,
+      };
+    });
   }
 
   async summary(userId: string) {
@@ -100,20 +139,20 @@ export class MockExamsService {
   async startRecommended(userId: string, lang: Lang = 'ko') {
     const { problems } = await this.aiRec.compose(userId);
     const name = lang === 'en' ? 'AI-tailored Mock' : 'AI 맞춤 진단 모의고사';
-    return this.beginSession(userId, { name, type: 'RECOMMENDED' as any, totalMinutes: 60, problems }, lang);
+    return this.beginSession(userId, { name, type: 'RECOMMENDED' as any, totalMinutes: 50, problems }, lang);
   }
 
   async startTyped(userId: string, kind: 'mini' | 'wrong-redo' | 'real', lang: Lang = 'ko') {
     const { problems } = await this.aiRec.composeTyped(userId, kind);
     const metaKo: Record<string, { name: string; type: any; totalMinutes: number }> = {
-      mini:        { name: '단원별 미니 테스트',  type: 'MINI',       totalMinutes: 20 },
+      mini:        { name: '단원별 미니 테스트',  type: 'MINI',       totalMinutes: 15 },
       'wrong-redo':{ name: '오답 재출제 시험',    type: 'WRONG_REDO', totalMinutes: 30 },
-      real:        { name: '실전 모의고사',       type: 'REAL',       totalMinutes: 100 },
+      real:        { name: '실전 모의고사',       type: 'REAL',       totalMinutes: 60 },
     };
     const metaEn: Record<string, { name: string; type: any; totalMinutes: number }> = {
-      mini:        { name: 'Unit Mini Test',     type: 'MINI',       totalMinutes: 20 },
+      mini:        { name: 'Unit Mini Test',     type: 'MINI',       totalMinutes: 15 },
       'wrong-redo':{ name: 'Wrong-Redo Exam',    type: 'WRONG_REDO', totalMinutes: 30 },
-      real:        { name: 'Full Mock Exam',     type: 'REAL',       totalMinutes: 100 },
+      real:        { name: 'Full Mock Exam',     type: 'REAL',       totalMinutes: 60 },
     };
     const m = (lang === 'en' ? metaEn : metaKo)[kind];
     return this.beginSession(userId, { ...m, problems }, lang);

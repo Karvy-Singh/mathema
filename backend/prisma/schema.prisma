@@ -66,19 +66,31 @@ enum DistractorType {
   TIME_PRESSURE_GUESS     // 시간 압박 시 흔한 오선택 (다른 문제 답 혼입)
 }
 
+/// 가입 시 학년. 1단원 매핑은 Unit.gradeLevels 참조.
+enum GradeLevel {
+  G_MIDDLE_1   // 중1
+  G_MIDDLE_2   // 중2
+  G_MIDDLE_3   // 중3
+  G_HIGH_1     // 고1
+  G_HIGH_2     // 고2
+  G_HIGH_3     // 고3
+}
+
 // ---------- USER ----------
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
+  id           String      @id @default(uuid())
+  email        String      @unique
   passwordHash String
-  name         String    // 예: 민준
-  examDate     DateTime  // 수능 날짜 → D-day 계산
-  targetGrade  Int       // 목표 등급 (1~9)
+  name         String      // 예: 민준
+  examDate     DateTime    // 수능 날짜 → D-day 계산
+  targetGrade  Int         // 목표 등급 (1~9)
+  /// 가입 시 선택한 학년 — 단원 추천·필터에 사용. 기존 사용자 호환을 위해 nullable.
+  gradeLevel   GradeLevel? @default(G_HIGH_3)
   /// 소프트 삭제 — null이면 활성 사용자. 값이 있으면 인증 차단되며 분석 자산은 보존.
   deletedAt    DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   attempts        Attempt[]
   wrongNotes      WrongNote[]
@@ -96,9 +108,11 @@ model User {
 // ---------- CURRICULUM ----------
 
 model Unit {
-  id        String    @id @default(uuid())
-  name      String    @unique // 미적분 II
+  id        String       @id @default(uuid())
+  name      String       @unique // 미적분 II
   order     Int
+  /// 이 단원을 학습 가능한 학년 목록 (예: [G_HIGH_1, G_HIGH_2])
+  gradeLevels GradeLevel[] @default([])
   subUnits  SubUnit[]
   problems  Problem[]
   studySessions StudySession[]

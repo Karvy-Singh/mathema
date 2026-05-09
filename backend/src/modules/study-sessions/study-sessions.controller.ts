@@ -12,23 +12,24 @@ export class StudySessionsController {
   constructor(private readonly service: StudySessionsService) {}
 
   @Post('start')
-  start(@CurrentUser('id') userId: string, @Body() dto: StartSessionDto) {
-    return this.service.start(userId, dto);
+  start(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang, @Body() dto: StartSessionDto) {
+    return this.service.start(userId, dto, lang);
   }
 
   @Get(':id')
-  get(@CurrentUser('id') userId: string, @Param('id') id: string) {
-    return this.service.get(userId, id);
+  get(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang, @Param('id') id: string) {
+    return this.service.get(userId, id, lang);
   }
 
   // 4가지 관점 변환: '공식 중심' | '단계별' | '시각화' | '실생활 예시'
   @Get(':id/guide')
   guide(
     @CurrentUser('id') userId: string,
+    @CurrentLang() lang: Lang,
     @Param('id') id: string,
     @Query('perspective') perspective: string,
   ) {
-    return this.service.getAiGuide(userId, id, perspective);
+    return this.service.getAiGuide(userId, id, perspective, lang);
   }
 
   @Post(':id/answer')

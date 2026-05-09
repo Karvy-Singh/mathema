@@ -277,13 +277,14 @@ export class AiCoachService {
       where: { userId }, orderBy: { weekStart: 'desc' },
     });
 
-    if (r?.mentorMessage) {
+    // EN 모드에선 DB의 KO 멘토 메시지를 사용하지 않고 항상 동적 EN 생성으로 우회
+    if (r?.mentorMessage && lang !== 'en') {
       return {
         week: r.isoWeek,
         generatedAt: r.generatedAt,
         message: r.mentorMessage,
-        strength: lang === 'en' ? AI_COACH_EN.mentor.fallbackStrength : '꾸준한 학습 패턴과 오답 복기',
-        nextGoal: lang === 'en' ? AI_COACH_EN.mentor.fallbackNextGoal : '준킬러 문제의 시간 단축 훈련',
+        strength: '꾸준한 학습 패턴과 오답 복기',
+        nextGoal: '준킬러 문제의 시간 단축 훈련',
       };
     }
 

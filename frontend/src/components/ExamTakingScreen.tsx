@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Clock, ArrowLeft, ArrowRight, CheckCircle2, X, Send } from 'lucide-react';
+import { Clock, ArrowLeft, ArrowRight, CheckCircle2, X, Send, Home } from 'lucide-react';
 import { toast } from './Toast';
 import * as M from '../lib/mutations';
 import ConfidenceSlider from './ConfidenceSlider';
@@ -66,9 +66,11 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
     }
   }, [current]);
 
-  // 시간 만료 자동 제출
+  const submittedRef = useRef(false);
+  // 시간 만료 자동 제출 — submittedRef 로 멱등 보장 (에러 시에도 재시도 안 함)
   useEffect(() => {
-    if (remaining === 0 && exam.resultId && !submitMut.isPending && !submitMut.isSuccess) {
+    if (remaining === 0 && exam.resultId && !submittedRef.current) {
+      submittedRef.current = true;
       toast(t('exam.timer.expired'), 'info');
       submitMut.mutate();
     }
@@ -165,9 +167,10 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
           </div>
           <button
             onClick={() => setConfirmExit(true)}
-            style={{ background: 'none', border: '1px solid #F2EDE230', color: '#F2EDE2', padding: '6px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}
+            title={t('exam.exit.btn')}
+            style={{ background: 'transparent', border: '1px solid #F2EDE250', color: '#F2EDE2', padding: '8px 14px', borderRadius: 4, cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}
           >
-            <X size={12} /> {t('exam.exit.btn')}
+            <Home size={14} /> {t('exam.exit.home')}
           </button>
         </div>
       </div>
@@ -227,63 +230,75 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
             </div>
           )}
 
-          {/* 3단계 객관식 (CONCEPT → PROCESS → ANSWER) */}
+          {/* 3단계 객관식 (CONCEPT → PROCESS → ANSWER) — 순차 공개:
+              이전 단계 답을 선택하기 전까지 다음 단계 보기는 가려둔다 (전단계 답 유출 방지).
+              한 번 선택한 단계는 잠긴 채 이후 단계가 열린다. */}
           {current.steps && current.steps.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18, marginBottom: 8 }}>
-              {current.steps.sort((a, b) => a.stepIndex - b.stepIndex).map((s) => {
-                const stepLabel = s.stepType === 'CONCEPT' ? t('study.step.concept') : s.stepType === 'PROCESS' ? t('study.step.process') : t('study.step.answer');
-                const selected = choiceIds[current.id]?.[s.stepIndex];
-                return (
-                  <div key={s.id} style={{
-                    padding: 16, backgroundColor: '#FAF6EB',
-                    border: '1px solid #1F1A1418', borderRadius: 4,
-                  }}>
-                    <div style={{
-                      display: 'inline-block', padding: '3px 10px', marginBottom: 10,
-                      backgroundColor: selected ? '#4A5D3A' : '#B45309',
-                      color: '#F2EDE2', borderRadius: 2, fontSize: 11, fontWeight: 600,
+              {(() => {
+                const sorted = [...current.steps].sort((a, b) => a.stepIndex - b.stepIndex);
+                const selectedFor = (idx: number) => choiceIds[current.id]?.[idx];
+                return sorted.map((s, i) => {
+                  const stepLabel = s.stepType === 'CONCEPT' ? t('study.step.concept') : s.stepType === 'PROCESS' ? t('study.step.process') : t('study.step.answer');
+                  const selected = selectedFor(s.stepIndex);
+                  // 이전 모든 단계가 선택됐을 때만 잠금 해제
+                  const prevAllAnswered = sorted.slice(0, i).every((p) => !!selectedFor(p.stepIndex));
+                  const isLockedNext = !prevAllAnswered && !selected; // 아직 열리지 않은 후속 단계
+                  return (
+                    <div key={s.id} style={{
+                      padding: 16, backgroundColor: '#FAF6EB',
+                      border: '1px solid #1F1A1418', borderRadius: 4,
+                      opacity: isLockedNext ? 0.55 : 1,
                     }}>
-                      {`${s.stepIndex}/3`} · {stepLabel}{selected ? ' ✓' : ''}
+                      <div style={{
+                        display: 'inline-block', padding: '3px 10px', marginBottom: 10,
+                        backgroundColor: selected ? '#4A5D3A' : isLockedNext ? '#A89684' : '#B45309',
+                        color: '#F2EDE2', borderRadius: 2, fontSize: 11, fontWeight: 600,
+                      }}>
+                        {`${s.stepIndex}/${sorted.length}`} · {stepLabel}{selected ? ' ✓' : isLockedNext ? ' · ' + t('exam.step.locked') : ''}
+                      </div>
+                      <div style={{ fontSize: 14, color: '#1F1A14', fontWeight: 600, marginBottom: 12, lineHeight: 1.5 }}>
+                        {isLockedNext ? t('exam.step.lockedHint') : s.prompt}
+                      </div>
+                      {!isLockedNext && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {s.choices.map((c, ci) => {
+                            const isSelected = selected === c.id;
+                            return (
+                              <button
+                                key={c.id}
+                                onClick={() => setChoiceIds((prev) => ({
+                                  ...prev,
+                                  [current.id]: { ...(prev[current.id] ?? {}), [s.stepIndex]: c.id },
+                                }))}
+                                style={{
+                                  padding: '8px 12px', textAlign: 'left',
+                                  border: '1px solid ' + (isSelected ? '#1F1A14' : '#1F1A1430'),
+                                  backgroundColor: isSelected ? '#1F1A1408' : '#F2EDE2',
+                                  color: '#1F1A14',
+                                  borderRadius: 3, fontSize: 13, fontFamily: 'inherit',
+                                  cursor: 'pointer',
+                                  display: 'flex', alignItems: 'flex-start', gap: 8,
+                                  transition: 'all 0.15s',
+                                }}
+                              >
+                                <span style={{
+                                  flexShrink: 0, width: 20, height: 20, borderRadius: '50%',
+                                  backgroundColor: isSelected ? '#1F1A14' : '#1F1A1410',
+                                  color: isSelected ? '#F2EDE2' : '#6B6354',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  fontSize: 10, fontWeight: 600,
+                                }}>{ci + 1}</span>
+                                <span style={{ flex: 1, fontFamily: 'JetBrains Mono, monospace', fontSize: 12, lineHeight: 1.5 }}>{c.text}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                    <div style={{ fontSize: 14, color: '#1F1A14', fontWeight: 600, marginBottom: 12, lineHeight: 1.5 }}>
-                      {s.prompt}
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {s.choices.map((c) => {
-                        const isSelected = selected === c.id;
-                        return (
-                          <button
-                            key={c.id}
-                            onClick={() => setChoiceIds((prev) => ({
-                              ...prev,
-                              [current.id]: { ...(prev[current.id] ?? {}), [s.stepIndex]: c.id },
-                            }))}
-                            style={{
-                              padding: '8px 12px', textAlign: 'left',
-                              border: '1px solid ' + (isSelected ? '#1F1A14' : '#1F1A1430'),
-                              backgroundColor: isSelected ? '#1F1A1408' : '#F2EDE2',
-                              color: '#1F1A14',
-                              borderRadius: 3, fontSize: 13, fontFamily: 'inherit',
-                              cursor: 'pointer',
-                              display: 'flex', alignItems: 'flex-start', gap: 8,
-                              transition: 'all 0.15s',
-                            }}
-                          >
-                            <span style={{
-                              flexShrink: 0, width: 20, height: 20, borderRadius: '50%',
-                              backgroundColor: isSelected ? '#1F1A14' : '#1F1A1410',
-                              color: isSelected ? '#F2EDE2' : '#6B6354',
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              fontSize: 10, fontWeight: 600,
-                            }}>{c.choiceIndex}</span>
-                            <span style={{ flex: 1, fontFamily: 'JetBrains Mono, monospace', fontSize: 12, lineHeight: 1.5 }}>{c.text}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
               <ConfidenceSlider
                 value={confidences[current.id] ?? 50}
                 onChange={(v) => setConfidences((prev) => ({ ...prev, [current.id]: v }))}

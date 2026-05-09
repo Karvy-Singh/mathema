@@ -24,6 +24,7 @@ export class AuthService {
       name: dto.name,
       examDate: new Date(dto.examDate),
       targetGrade: dto.targetGrade,
+      ...(dto.gradeLevel ? { gradeLevel: dto.gradeLevel } : {}),
     });
     return this.issueTokens(user.id);
   }

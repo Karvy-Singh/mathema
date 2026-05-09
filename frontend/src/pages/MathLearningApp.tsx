@@ -23,6 +23,7 @@ import RegisterWrongNoteModal from '../components/RegisterWrongNoteModal';
 import MockExamResultModal from '../components/MockExamResultModal';
 import ExamTakingScreen from '../components/ExamTakingScreen';
 import ConfidenceSlider from '../components/ConfidenceSlider';
+import { UnitPicker } from '../components/UnitPicker';
 
 const SESSION_KEY = 'mathema.activeSession';
 
@@ -46,13 +47,62 @@ const sectionLabelStyle: React.CSSProperties = {
 };
 const baseText: React.CSSProperties = { wordBreak: 'keep-all', overflowWrap: 'break-word' };
 
+// ============ NAV ↔ URL 동기화 ============
+// 브라우저 히스토리에 각 탭/시험 진입 상태를 push 해서, 뒤로가기 시 사이트 안에서 이동하도록 함.
+const NAV_TO_HASH: Record<NavKey, string> = {
+  '대시보드': 'dashboard',
+  '오답노트': 'wrong-notes',
+  '학습': 'study',
+  '모의고사': 'mock-exam',
+  '리포트': 'report',
+};
+const HASH_TO_NAV: Record<string, NavKey> = Object.fromEntries(
+  Object.entries(NAV_TO_HASH).map(([k, v]) => [v, k as NavKey]),
+) as Record<string, NavKey>;
+
+const readHash = (): { nav: NavKey; exam: boolean } => {
+  const raw = window.location.hash.replace(/^#\/?/, '');
+  const exam = raw.endsWith('/exam');
+  const navHash = exam ? raw.replace(/\/exam$/, '') : raw;
+  const nav = HASH_TO_NAV[navHash] ?? '대시보드';
+  return { nav, exam };
+};
+
+const writeHash = (nav: NavKey, exam: boolean, replace = false) => {
+  const next = '#/' + NAV_TO_HASH[nav] + (exam ? '/exam' : '');
+  if (window.location.hash === next) return;
+  if (replace) window.history.replaceState(null, '', next);
+  else window.history.pushState(null, '', next);
+};
+
 // ============ MAIN APP ============
 export default function MathLearningApp() {
-  const [activeNav, setActiveNav] = useState<NavKey>('대시보드');
+  const initial = readHash();
+  const [activeNav, setActiveNavState] = useState<NavKey>(initial.nav);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(
     () => sessionStorage.getItem(SESSION_KEY),
   );
   const [activeExam, setActiveExam] = useState<M.ExamPackage | null>(null);
+
+  // popstate (뒤로/앞으로) → 해시에 맞춰 nav/exam 복원
+  useEffect(() => {
+    const onPop = () => {
+      const { nav, exam } = readHash();
+      setActiveNavState(nav);
+      if (!exam) setActiveExam(null); // 뒤로 누르면 exam 닫힘
+    };
+    window.addEventListener('popstate', onPop);
+    // 첫 진입 시 해시 보정 (해시 없는 상태로 들어오면 #/dashboard 로)
+    if (!window.location.hash) writeHash(initial.nav, false, true);
+    return () => window.removeEventListener('popstate', onPop);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // setActiveNav 호출 시 history 에 push
+  const setActiveNav = (n: NavKey) => {
+    setActiveNavState(n);
+    writeHash(n, false);
+  };
 
   const enterStudy = (sessionId: string) => {
     sessionStorage.setItem(SESSION_KEY, sessionId);
@@ -63,8 +113,15 @@ export default function MathLearningApp() {
     sessionStorage.removeItem(SESSION_KEY);
     setActiveSessionId(null);
   };
-  const enterExam = (exam: M.ExamPackage) => setActiveExam(exam);
-  const exitExam = () => setActiveExam(null);
+  const enterExam = (exam: M.ExamPackage) => {
+    setActiveExam(exam);
+    writeHash(activeNav, true);
+  };
+  const exitExam = () => {
+    setActiveExam(null);
+    // 시험 진입 때 push 한 한 단계를 되돌림 — 시험 직전 페이지로 복귀
+    if (window.location.hash.endsWith('/exam')) window.history.back();
+  };
 
   return (
     <div style={{
@@ -98,9 +155,9 @@ export default function MathLearningApp() {
       <TopNav activeNav={activeNav} setActiveNav={setActiveNav} />
 
       <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '48px 40px 80px' }}>
-        {activeNav === '대시보드' && <DashboardPage onStartStudy={enterStudy} />}
+        {activeNav === '대시보드' && <DashboardPage onStartStudy={enterStudy} onGotoWrongNotes={() => setActiveNav('오답노트')} />}
         {activeNav === '오답노트' && <WrongNotesPage />}
-        {activeNav === '학습' && <StudyPage sessionId={activeSessionId} onClear={clearSession} />}
+        {activeNav === '학습' && <StudyPage sessionId={activeSessionId} onClear={clearSession} onStartStudy={enterStudy} />}
         {activeNav === '모의고사' && <MockExamPage onStartExam={enterExam} />}
         {activeNav === '리포트' && <ReportPage />}
       </main>
@@ -132,10 +189,18 @@ function TopNav({ activeNav, setActiveNav }: { activeNav: NavKey; setActiveNav: 
     }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '20px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+          <button
+            onClick={() => { trackUi('nav.change', { to: '대시보드', via: 'brand' }); setActiveNav('대시보드'); }}
+            title={t('nav.dashboard')}
+            style={{
+              display: 'flex', alignItems: 'baseline', gap: '8px',
+              background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+              color: 'inherit', fontFamily: 'inherit',
+            }}
+          >
             <span className="serif" style={{ fontSize: '26px', fontWeight: 600, letterSpacing: '-0.03em', fontStyle: 'italic' }}>{t('app.brand')}</span>
             <span style={{ fontSize: '11px', letterSpacing: '0.2em', color: '#8B7E6A', textTransform: 'uppercase' }}>{t('app.tagline')}</span>
-          </div>
+          </button>
           <div style={{ display: 'flex', gap: '4px' }}>
             {items.map(item => (
               <button key={item} onClick={() => { trackUi('nav.change', { to: item }); setActiveNav(item); }} style={{
@@ -191,7 +256,7 @@ function TopNav({ activeNav, setActiveNav }: { activeNav: NavKey; setActiveNav: 
 }
 
 // ============ DASHBOARD ============
-function DashboardPage({ onStartStudy }: { onStartStudy: (sessionId: string) => void }) {
+function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sessionId: string) => void; onGotoWrongNotes: () => void }) {
   const { t } = useT();
   const summary = useQuery({ queryKey: ['dashboard'], queryFn: Q.fetchDashboardSummary });
   const mastery = useQuery({ queryKey: ['mastery'], queryFn: Q.fetchMastery });
@@ -331,6 +396,14 @@ function DashboardPage({ onStartStudy }: { onStartStudy: (sessionId: string) => 
               </button>
             ))}
           </div>
+
+          <UnitPicker
+            disabled={startSessionMut.isPending}
+            onPick={(unitId) => {
+              trackClick('start_study_from_unitpicker', { unitId });
+              startSessionMut.mutate(unitId);
+            }}
+          />
         </div>
       </div>
 
@@ -343,16 +416,40 @@ function DashboardPage({ onStartStudy }: { onStartStudy: (sessionId: string) => 
               <span style={{ fontSize: '14px', color: '#6B6354', marginLeft: '12px', fontFamily: '"Pretendard", sans-serif', fontWeight: 400 }}>{t('dashboard.section.wrongNotes.sub')}</span>
             </h2>
           </div>
+          <button
+            onClick={() => { trackClick('view_all_wrongnotes', { from: 'dashboard' }); onGotoWrongNotes(); }}
+            style={{
+              padding: '8px 14px', fontSize: 12, fontWeight: 600,
+              backgroundColor: 'transparent', border: '1px solid #1F1A1430',
+              borderRadius: 4, cursor: 'pointer', color: '#1F1A14', fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}
+          >
+            {t('dashboard.viewAllWrongNotes')} <ChevronRight size={12} />
+          </button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
           {(recent.data ?? []).map((m, i) => (
-            <div key={i} style={{ backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px', padding: '20px' }}>
+            <div
+              key={i}
+              className="hover-lift"
+              onClick={() => { trackClick('open_wrongnote_detail', { from: 'dashboard_card', noteId: m.id }); setDetailNoteId(m.id); }}
+              style={{ backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px', padding: '20px', cursor: 'pointer' }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                 <span style={{ fontSize: '10px', color: '#8B7E6A', letterSpacing: '0.05em' }}>{m.problem}</span>
                 <span style={{ fontSize: '10px', padding: '2px 6px', backgroundColor: m.diff === '준킬러' ? '#8B3A1F' : '#B45309', color: '#F2EDE2', borderRadius: '2px' }}>{m.diff}</span>
               </div>
               <div className="serif" style={{ fontSize: '13px', color: '#8B7E6A', marginBottom: '8px', fontStyle: 'italic' }}>{m.unit} · {m.errorType}</div>
-              <div style={{ fontSize: '14px', lineHeight: 1.55, color: '#1F1A14', marginBottom: '16px' }}>{m.insight}</div>
+              {m.problemBody && (
+                <div className="serif" style={{
+                  fontSize: '14px', lineHeight: 1.55, color: '#1F1A14', marginBottom: '12px',
+                  padding: '10px 12px', backgroundColor: '#1F1A1406', border: '1px solid #1F1A1418',
+                  borderRadius: 4,
+                  display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                }}>{m.problemBody}</div>
+              )}
+              <div style={{ fontSize: '13px', lineHeight: 1.55, color: '#6B6354', marginBottom: '16px' }}>{m.insight}</div>
               <button
                 onClick={() => { trackClick('open_wrongnote_detail', { from: 'dashboard', noteId: m.id }); setDetailNoteId(m.id); }}
                 style={{ width: '100%', padding: '8px', backgroundColor: 'transparent', border: '1px solid #1F1A1430', borderRadius: '2px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontFamily: 'inherit', color: '#1F1A14' }}
@@ -454,7 +551,7 @@ function DashboardPage({ onStartStudy }: { onStartStudy: (sessionId: string) => 
 
 // ============ WRONG NOTES PAGE ============
 function WrongNotesPage() {
-  const { t } = useT();
+  const { t, lang } = useT();
   const [filter, setFilter] = useState<string>('전체');
   const [sort, setSort] = useState<'newest' | 'oldest'>('newest');
   const [sortOpen, setSortOpen] = useState(false);
@@ -553,16 +650,27 @@ function WrongNotesPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #1F1A1415' }}>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <Filter size={14} color="#8B7E6A" />
-          {['전체', '미적분 II', '확률·통계', '함수', '기하·벡터'].map(f => (
-            <button key={f} onClick={() => setFilter(f)} style={{
-              padding: '6px 12px', fontSize: '13px',
-              fontWeight: filter === f ? 600 : 400,
-              color: filter === f ? '#F2EDE2' : '#6B6354',
-              backgroundColor: filter === f ? '#1F1A14' : 'transparent',
-              border: '1px solid ' + (filter === f ? '#1F1A14' : '#1F1A1430'),
-              borderRadius: '999px', cursor: 'pointer', fontFamily: 'inherit',
-            }}>{f}</button>
-          ))}
+          {(() => {
+            const ko = ['전체', '미적분 II', '확률·통계', '함수', '기하·벡터'];
+            const enMap: Record<string, string> = {
+              '전체': 'All',
+              '미적분 II': 'Calculus II',
+              '확률·통계': 'Probability & Statistics',
+              '함수': 'Functions',
+              '기하·벡터': 'Geometry & Vectors',
+            };
+            const display = (f: string) => lang === 'en' ? (enMap[f] ?? f) : f;
+            return ko.map(f => (
+              <button key={f} onClick={() => setFilter(f)} style={{
+                padding: '6px 12px', fontSize: '13px',
+                fontWeight: filter === f ? 600 : 400,
+                color: filter === f ? '#F2EDE2' : '#6B6354',
+                backgroundColor: filter === f ? '#1F1A14' : 'transparent',
+                border: '1px solid ' + (filter === f ? '#1F1A14' : '#1F1A1430'),
+                borderRadius: '999px', cursor: 'pointer', fontFamily: 'inherit',
+              }}>{display(f)}</button>
+            ));
+          })()}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#6B6354', position: 'relative' }}>
           <span>{t('wn.sort.label')}</span>
@@ -648,6 +756,15 @@ function WrongNotesPage() {
               <span style={{ fontSize: '11px', color: '#A89684' }}>· {note.date}</span>
             </div>
 
+            {note.problemBody && (
+              <div className="serif" style={{
+                padding: '12px 14px', backgroundColor: '#FAF6EB',
+                border: '1px solid #1F1A1418', borderRadius: 4, marginBottom: '12px',
+                fontSize: '14px', lineHeight: 1.6, color: '#1F1A14',
+                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+              }}>{note.problemBody}</div>
+            )}
+
             <div style={{ padding: '14px', backgroundColor: '#1F1A1408', borderLeft: '2px solid #1F1A1430', borderRadius: '0 2px 2px 0', marginBottom: '16px' }}>
               <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
                 <Sparkles size={12} color="#8B3A1F" style={{ marginTop: '3px', flexShrink: 0 }} />
@@ -707,13 +824,21 @@ function WrongNotesPage() {
 }
 
 // ============ STUDY PAGE (동적: 활성 세션이 있으면 데이터 연결, 없으면 안내) ============
-function StudyPage({ sessionId, onClear }: { sessionId: string | null; onClear: () => void }) {
-  if (!sessionId) return <StudyPlaceholder />;
+function StudyPage({ sessionId, onClear, onStartStudy }: { sessionId: string | null; onClear: () => void; onStartStudy?: (id: string) => void }) {
+  if (!sessionId) return <StudyPlaceholder onStartStudy={onStartStudy} />;
   return <StudySession sessionId={sessionId} onClear={onClear} />;
 }
 
-function StudyPlaceholder() {
+function StudyPlaceholder({ onStartStudy }: { onStartStudy?: (id: string) => void }) {
   const { t } = useT();
+  const startSessionMut = useMutation({
+    mutationFn: (unitId: string) => M.startStudySession({ unitId }),
+    onSuccess: (s) => {
+      toast(t('toast.session.started'), 'success');
+      onStartStudy?.(s.id);
+    },
+    onError: () => toast(t('toast.session.startFailed'), 'error'),
+  });
   return (
     <div className="fade-up" style={{
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -725,8 +850,17 @@ function StudyPlaceholder() {
       <h2 className="serif" style={{ fontSize: '32px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0, marginBottom: '12px' }}>
         {t('study.placeholder.title')}
       </h2>
-      <div style={{ fontSize: '14px', color: '#6B6354', maxWidth: '420px', lineHeight: 1.65 }}>
+      <div style={{ fontSize: '14px', color: '#6B6354', maxWidth: '420px', lineHeight: 1.65, marginBottom: 24 }}>
         {t('study.placeholder.desc')}
+      </div>
+      <div style={{ width: '100%', maxWidth: 480 }}>
+        <UnitPicker
+          disabled={startSessionMut.isPending}
+          onPick={(unitId) => {
+            trackClick('start_study_from_studyplaceholder', { unitId });
+            startSessionMut.mutate(unitId);
+          }}
+        />
       </div>
     </div>
   );
@@ -973,9 +1107,9 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                 </div>
               </div>
 
-              {/* 5지선다 — mastery learning 모드 (정답까지 재시도) */}
+              {/* 5지선다 — mastery learning 모드 (정답까지 재시도). 표시 번호는 배열 순서 기준 (백엔드가 매 요청마다 셔플). */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
-                {currentStep.choices.map((c) => {
+                {currentStep.choices.map((c, idx) => {
                   const stepLocked = !!stepResults[problemStep];   // 정답 맞춰서 잠김
                   const isAlreadyWrong = wrongChoiceIds.has(c.id); // 이미 틀린 선택지
                   const isCurrentSelection = !stepLocked && selectedChoiceId === c.id;
@@ -1025,7 +1159,7 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 11, fontWeight: 600,
                       }}>
-                        {icon ?? c.choiceIndex}
+                        {icon ?? (idx + 1)}
                       </span>
                       <span style={{ flex: 1, fontFamily: 'JetBrains Mono, monospace', fontSize: 13, lineHeight: 1.5 }}>{c.text}</span>
                     </button>
@@ -1186,7 +1320,9 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '24px', borderTop: '1px solid #1F1A1415' }}>
         <button
           onClick={() => toast(t('toast.prev.disabled'), 'info')}
-          style={{ padding: '12px 20px', backgroundColor: 'transparent', border: '1px solid #1F1A1430', borderRadius: '4px', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit', color: '#6B6354' }}
+          disabled
+          title={t('toast.prev.disabled')}
+          style={{ padding: '12px 20px', backgroundColor: 'transparent', border: '1px solid #1F1A1418', borderRadius: '4px', fontSize: '13px', cursor: 'not-allowed', opacity: 0.4, display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit', color: '#6B6354' }}
         >
           <ArrowLeft size={14} /> {t('common.previous')}
         </button>

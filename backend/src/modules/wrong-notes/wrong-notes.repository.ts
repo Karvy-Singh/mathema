@@ -4,7 +4,7 @@ import { NoteStatus } from '../../common/enums/note-status.enum';
 import { ERROR_TYPE_LABEL_KO } from '../../common/enums/error-type.enum';
 import { DIFFICULTY_LABEL_KO } from '../../common/enums/difficulty.enum';
 import { Lang } from '../../common/i18n/current-lang.decorator';
-import { UNIT_NAME_EN, SUB_UNIT_NAME_EN, DIFFICULTY_EN, ERROR_TYPE_EN } from '../../common/i18n/content-en';
+import { UNIT_NAME_EN, SUB_UNIT_NAME_EN, DIFFICULTY_EN, ERROR_TYPE_EN, SOURCE_EN, INSIGHT_EN, PROBLEM_EN } from '../../common/i18n/content-en';
 
 const formatDate = (d: Date, lang: Lang) => {
   const days = Math.floor((Date.now() - d.getTime()) / 86400000);
@@ -37,24 +37,35 @@ const formatDueIn = (next: Date | null, lang: Lang): string | null => {
 const toCardShape = (n: any, lang: Lang = 'ko') => {
   const unitKo = n.problem.unit.name;
   const subUnitKo = n.problem.subUnit?.name ?? '';
+  const sourceKo = n.problem.source;
+  const insightKo = n.insight;
+  // 문제 본문 — EN 모드면 PROBLEM_EN 사전에서 영문 치환, 없으면 KO 본문 그대로.
+  const bodyKo = n.problem.body as string;
+  const answerKo = n.problem.answer as string;
+  const en = PROBLEM_EN[sourceKo];
+  const problemBody = lang === 'en' && en?.body ? en.body : bodyKo;
+  const problemAnswer = lang === 'en' && en?.answer ? en.answer : answerKo;
   return {
     id: n.id,
     problemId: n.problemId,
-    problem: n.problem.source,
+    problem: lang === 'en' ? (SOURCE_EN[sourceKo] ?? sourceKo) : sourceKo,
+    /** 실제 문제 본문 (오답노트에서 어떤 문제였는지 즉시 확인 가능) */
+    problemBody,
+    /** 정답 — 오답노트 상세에서 노출 */
+    problemAnswer,
     unit: lang === 'en' ? (UNIT_NAME_EN[unitKo] ?? unitKo) : unitKo,
     subUnit: lang === 'en' ? (SUB_UNIT_NAME_EN[subUnitKo] ?? subUnitKo) : subUnitKo,
     errorType: lang === 'en'
       ? ERROR_TYPE_EN[n.errorType as keyof typeof ERROR_TYPE_EN]
       : ERROR_TYPE_LABEL_KO[n.errorType as keyof typeof ERROR_TYPE_LABEL_KO],
     errorTypeRaw: n.errorType,
-    insight: n.insight,
+    insight: lang === 'en' ? (INSIGHT_EN[insightKo] ?? insightKo) : insightKo,
     diff: lang === 'en'
       ? DIFFICULTY_EN[n.problem.difficulty as keyof typeof DIFFICULTY_EN]
       : DIFFICULTY_LABEL_KO[n.problem.difficulty as keyof typeof DIFFICULTY_LABEL_KO],
     date: formatDate(n.createdAt, lang),
     similarCount: n.similarCount,
     status: n.status.toLowerCase(),
-    // SM-2 노출 필드
     easinessFactor: Math.round((n.easinessFactor ?? 2.5) * 100) / 100,
     repetitionCount: n.repetitionCount ?? 0,
     intervalDays: n.intervalDays ?? 0,
