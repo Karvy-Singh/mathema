@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+﻿import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth, GradeLevel } from '../context/AuthContext';
 import { AuthShell, Field } from './LoginPage';
@@ -39,21 +39,21 @@ export default function RegisterPage() {
       <Field label={t('auth.passwordHint')} type="password" value={password} onChange={setPassword} />
       <Field label={t('auth.name')} value={name} onChange={setName} />
       <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <span style={{ fontSize: 11, color: '#8B7E6A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('auth.gradeLevel')}</span>
+        <span style={{ fontSize: 11, color: '#8B95AB', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('auth.gradeLevel')}</span>
         <select value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value as GradeLevel)}
-          style={{ padding: '12px 14px', fontSize: 14, border: '1px solid #1F1A1430', borderRadius: 4, backgroundColor: '#F2EDE2', outline: 'none', fontFamily: 'inherit' }}>
+          style={{ padding: '12px 14px', fontSize: 14, border: '1px solid #14285030', borderRadius: 4, backgroundColor: '#EFEBDF', outline: 'none', fontFamily: 'inherit' }}>
           {GRADES.map((g) => (<option key={g} value={g}>{t(`grade.${g}`)}</option>))}
         </select>
       </label>
       <Field label={t('auth.examDate')} type="date" value={examDate} onChange={setExamDate} />
       <Field label={t('auth.targetGrade')} type="number" value={targetGrade} onChange={setTargetGrade} />
-      {err && <div style={{ color: '#8B3A1F', fontSize: 13 }}>{err}</div>}
+      {err && <div style={{ color: '#C25E2E', fontSize: 13 }}>{err}</div>}
       <button disabled={busy} type="submit"
-        style={{ padding: 14, backgroundColor: '#1F1A14', color: '#F2EDE2', border: 'none', borderRadius: 4, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+        style={{ padding: 14, backgroundColor: '#142850', color: '#EFEBDF', border: 'none', borderRadius: 4, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
         {busy ? t('auth.login.busy') : t('auth.register.submit')}
       </button>
-      <div style={{ textAlign: 'center', fontSize: 13, color: '#6B6354' }}>
-        {t('auth.register.haveAccount')} <Link to="/login" style={{ color: '#1F1A14', fontWeight: 600 }}>{t('auth.register.goLogin')}</Link>
+      <div style={{ textAlign: 'center', fontSize: 13, color: '#5C6B85' }}>
+        {t('auth.register.haveAccount')} <Link to="/login" style={{ color: '#142850', fontWeight: 600 }}>{t('auth.register.goLogin')}</Link>
       </div>
     </form>
   </AuthShell>;

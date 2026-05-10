@@ -21,6 +21,120 @@ export class StudySessionsService {
   start(userId: string, dto: StartSessionDto, _lang: Lang = 'ko') { return this.repo.create(userId, dto); }
   get(userId: string, id: string, _lang: Lang = 'ko') { return this.repo.findOne(userId, id); }
 
+  /**
+   * 가중치 기반 추천 단원 — 학습 시작 화면에 노출.
+   * weight = α·(100-mastery) + β·wrongNoteCount + γ·(timeBudget - timeSpent)
+   * 학년 필터(grade) 가 주어지면 해당 학년 단원만, 아니면 사용자 자신의 학년.
+   */
+  async recommendedUnits(userId: string, count = 3, gradeOverride?: string, lang: Lang = 'ko') {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } }) as any;
+    const grade = (gradeOverride && gradeOverride !== '__all__' && gradeOverride !== '__mine__')
+      ? gradeOverride
+      : (gradeOverride === '__all__' ? null : user?.gradeLevel ?? null);
+
+    // 사용자 mastery 가 있는 단원 + (필요시 학년 필터). mastery 가 없으면 0 으로 간주.
+    const masteries = await this.prisma.masterySnapshot.findMany({
+      where: { userId },
+      include: { unit: true },
+    });
+
+    // 학년 필터: 학년이 지정됐으면 해당 학년에 속한 단원만
+    let units = masteries.map((m: any) => ({
+      unitId: m.unitId,
+      unitName: m.unit.name,
+      mastery: Math.round(m.score),
+      gradeLevels: m.unit.gradeLevels ?? [],
+    }));
+    if (grade) units = units.filter((u: any) => (u.gradeLevels as string[]).includes(grade));
+
+    if (units.length === 0) return [];
+
+    // 단원별 부가 통계: 오답 카운트, 학습 시간(초)
+    const wrongByUnit = await this.prisma.wrongNote.groupBy({
+      by: ['problemId'],
+      where: { userId, status: { not: 'MASTERED' } },
+      _count: true,
+    });
+    const wrongProblemIds = wrongByUnit.map((w) => w.problemId);
+    const wrongProblems = wrongProblemIds.length
+      ? await this.prisma.problem.findMany({ where: { id: { in: wrongProblemIds } }, select: { id: true, unitId: true } })
+      : [];
+    const unitIdByProblem = new Map(wrongProblems.map((p) => [p.id, p.unitId]));
+    const wrongCountByUnit: Record<string, number> = {};
+    for (const w of wrongByUnit) {
+      const unitId = unitIdByProblem.get(w.problemId);
+      if (unitId) wrongCountByUnit[unitId] = (wrongCountByUnit[unitId] ?? 0) + (w._count as any);
+    }
+
+    const attempts = await this.prisma.attempt.findMany({
+      where: { userId },
+      select: { durationSec: true, problem: { select: { unitId: true } } },
+    });
+    const timeByUnit: Record<string, number> = {};
+    const countByUnit: Record<string, number> = {};
+    for (const a of attempts) {
+      const uid = a.problem.unitId;
+      timeByUnit[uid] = (timeByUnit[uid] ?? 0) + a.durationSec;
+      countByUnit[uid] = (countByUnit[uid] ?? 0) + 1;
+    }
+    const maxTime = Math.max(60, ...Object.values(timeByUnit), 1);
+
+    // 가중치: 약점(α) + 오답(β) + 학습부족(γ). 정규화로 0~100 score.
+    const enriched = units.map((u: any) => {
+      const wrongs = wrongCountByUnit[u.unitId] ?? 0;
+      const timeSec = timeByUnit[u.unitId] ?? 0;
+      const masteryGap = 100 - u.mastery; // 0~100
+      const wrongScore = Math.min(60, wrongs * 12); // 오답 1건당 12pt, 최대 60
+      const undertimeScore = Math.round((1 - timeSec / maxTime) * 40); // 시간 적을수록 ↑, 최대 40
+      const score = Math.round(masteryGap * 0.45 + wrongScore * 0.35 + undertimeScore * 0.20);
+      return {
+        unitId: u.unitId,
+        unitName: u.unitName,
+        mastery: u.mastery,
+        wrongCount: wrongs,
+        attemptCount: countByUnit[u.unitId] ?? 0,
+        studyMinutes: Math.round(timeSec / 60),
+        weight: score,
+      };
+    });
+
+    enriched.sort((a, b) => b.weight - a.weight);
+    const top = enriched.slice(0, count);
+
+    // 표시용 reason 라벨 (KO/EN)
+    const labelize = (e: typeof enriched[number]) => {
+      const parts: string[] = [];
+      if (lang === 'en') {
+        parts.push(`Mastery ${e.mastery}%`);
+        if (e.wrongCount > 0) parts.push(`${e.wrongCount} wrong note${e.wrongCount > 1 ? 's' : ''}`);
+        parts.push(`${e.studyMinutes} min studied`);
+      } else {
+        parts.push(`숙련도 ${e.mastery}%`);
+        if (e.wrongCount > 0) parts.push(`오답 ${e.wrongCount}건`);
+        parts.push(`학습 ${e.studyMinutes}분`);
+      }
+      return parts.join(' · ');
+    };
+
+    // 단원명 EN 변환
+    const unitDisplay = (name: string) => {
+      if (lang !== 'en') return name;
+      const { UNIT_NAME_EN } = require('../../common/i18n/content-en');
+      return UNIT_NAME_EN[name] ?? name;
+    };
+
+    return top.map((e) => ({
+      unitId: e.unitId,
+      unit: unitDisplay(e.unitName),
+      mastery: e.mastery,
+      wrongCount: e.wrongCount,
+      attemptCount: e.attemptCount,
+      studyMinutes: e.studyMinutes,
+      weight: e.weight,
+      reason: labelize(e),
+    }));
+  }
+
   getAiGuide(userId: string, id: string, perspective: string, lang: Lang = 'ko') {
     return this.aiGuide.generate(userId, id, perspective, lang);
   }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 
 type ToastKind = 'success' | 'error' | 'info';
@@ -36,14 +36,14 @@ export function ToastHost() {
     }}>
       {items.map((it) => {
         const color =
-          it.kind === 'success' ? '#4A5D3A' :
-          it.kind === 'error' ? '#8B3A1F' : '#1F1A14';
+          it.kind === 'success' ? '#5A8A45' :
+          it.kind === 'error' ? '#C25E2E' : '#142850';
         const Icon =
           it.kind === 'success' ? CheckCircle2 :
           it.kind === 'error' ? AlertCircle : Info;
         return (
           <div key={it.id} style={{
-            backgroundColor: '#1F1A14', color: '#F2EDE2',
+            backgroundColor: '#142850', color: '#EFEBDF',
             padding: '12px 16px', borderRadius: 4, minWidth: 280, maxWidth: 420,
             display: 'flex', alignItems: 'flex-start', gap: 10,
             borderLeft: `3px solid ${color}`,

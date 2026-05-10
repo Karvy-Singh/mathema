@@ -4,7 +4,7 @@ import { NoteStatus } from '../../common/enums/note-status.enum';
 import { ERROR_TYPE_LABEL_KO } from '../../common/enums/error-type.enum';
 import { DIFFICULTY_LABEL_KO } from '../../common/enums/difficulty.enum';
 import { Lang } from '../../common/i18n/current-lang.decorator';
-import { UNIT_NAME_EN, SUB_UNIT_NAME_EN, DIFFICULTY_EN, ERROR_TYPE_EN, SOURCE_EN, INSIGHT_EN, PROBLEM_EN } from '../../common/i18n/content-en';
+import { UNIT_NAME_EN, SUB_UNIT_NAME_EN, DIFFICULTY_EN, ERROR_TYPE_EN, SOURCE_EN, INSIGHT_EN, PROBLEM_EN, CONCEPT_EN, FORMULA_EN } from '../../common/i18n/content-en';
 
 const formatDate = (d: Date, lang: Lang) => {
   const days = Math.floor((Date.now() - d.getTime()) / 86400000);
@@ -42,9 +42,13 @@ const toCardShape = (n: any, lang: Lang = 'ko') => {
   // 문제 본문 — EN 모드면 PROBLEM_EN 사전에서 영문 치환, 없으면 KO 본문 그대로.
   const bodyKo = n.problem.body as string;
   const answerKo = n.problem.answer as string;
+  const conceptKo = (n.problem.concept ?? null) as string | null;
+  const formulaKo = (n.problem.formula ?? null) as string | null;
   const en = PROBLEM_EN[sourceKo];
   const problemBody = lang === 'en' && en?.body ? en.body : bodyKo;
   const problemAnswer = lang === 'en' && en?.answer ? en.answer : answerKo;
+  const problemConcept = lang === 'en' && CONCEPT_EN[sourceKo] ? CONCEPT_EN[sourceKo] : conceptKo;
+  const problemFormula = lang === 'en' && FORMULA_EN[sourceKo] ? FORMULA_EN[sourceKo] : formulaKo;
   return {
     id: n.id,
     problemId: n.problemId,
@@ -53,6 +57,10 @@ const toCardShape = (n: any, lang: Lang = 'ko') => {
     problemBody,
     /** 정답 — 오답노트 상세에서 노출 */
     problemAnswer,
+    /** 핵심 개념 — 학습 피드백 / 오답노트 상세에 노출 */
+    problemConcept,
+    /** 관련 공식 — 개념 패널 안의 공식 라인 */
+    problemFormula,
     unit: lang === 'en' ? (UNIT_NAME_EN[unitKo] ?? unitKo) : unitKo,
     subUnit: lang === 'en' ? (SUB_UNIT_NAME_EN[subUnitKo] ?? subUnitKo) : subUnitKo,
     errorType: lang === 'en'

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Clock, ArrowLeft, ArrowRight, CheckCircle2, X, Send, Home } from 'lucide-react';
 import { toast } from './Toast';
@@ -128,7 +128,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
             <h2 className="serif" style={{ fontSize: 24, fontWeight: 500, margin: 0, marginBottom: 12 }}>
               {exam.name}
             </h2>
-            <p style={{ fontSize: 13, color: '#6B6354', lineHeight: 1.65, marginBottom: 24 }}>
+            <p style={{ fontSize: 13, color: '#5C6B85', lineHeight: 1.65, marginBottom: 24 }}>
               <strong>{t('exam.empty.title')}</strong><br />
               {t('exam.empty.desc')}
             </p>
@@ -143,12 +143,12 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
     <Overlay>
       {/* 헤더 */}
       <div style={{
-        backgroundColor: '#1F1A14', color: '#F2EDE2',
+        backgroundColor: '#142850', color: '#EFEBDF',
         padding: '16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        borderBottom: '1px solid #F2EDE218',
+        borderBottom: '1px solid #EFEBDF18',
       }}>
         <div>
-          <div style={{ fontSize: 11, letterSpacing: '0.2em', color: '#A89684', textTransform: 'uppercase' }}>
+          <div style={{ fontSize: 11, letterSpacing: '0.2em', color: '#AAB4C5', textTransform: 'uppercase' }}>
             {t('exam.label.takingNumOf', { filled: progress.filled, total: progress.total })}
           </div>
           <h1 className="serif" style={{ fontSize: 22, fontWeight: 500, margin: 0, marginTop: 2, letterSpacing: '-0.02em' }}>
@@ -158,7 +158,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
           <div style={{
             display: 'flex', alignItems: 'center', gap: 8,
-            padding: '8px 14px', backgroundColor: remaining < 60 ? '#8B3A1F' : '#F2EDE218',
+            padding: '8px 14px', backgroundColor: remaining < 60 ? '#C25E2E' : '#EFEBDF18',
             borderRadius: 4, fontFamily: 'JetBrains Mono, monospace',
             transition: 'background-color 0.3s',
           }}>
@@ -168,7 +168,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
           <button
             onClick={() => setConfirmExit(true)}
             title={t('exam.exit.btn')}
-            style={{ background: 'transparent', border: '1px solid #F2EDE250', color: '#F2EDE2', padding: '8px 14px', borderRadius: 4, cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}
+            style={{ background: 'transparent', border: '1px solid #EFEBDF50', color: '#EFEBDF', padding: '8px 14px', borderRadius: 4, cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}
           >
             <Home size={14} /> {t('exam.exit.home')}
           </button>
@@ -176,11 +176,11 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
       </div>
 
       {/* 진척률 바 */}
-      <div style={{ height: 4, backgroundColor: '#F2EDE220' }}>
+      <div style={{ height: 4, backgroundColor: '#EFEBDF20' }}>
         <div style={{
           height: '100%',
           width: `${(progress.filled / progress.total) * 100}%`,
-          backgroundColor: '#D97706', transition: 'width 0.3s',
+          backgroundColor: '#D9A055', transition: 'width 0.3s',
         }} />
       </div>
 
@@ -192,39 +192,39 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
         <div style={{ width: '100%', maxWidth: 720 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24 }}>
             <div>
-              <div style={{ fontSize: 11, letterSpacing: '0.18em', color: '#8B7E6A', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: 11, letterSpacing: '0.18em', color: '#8B95AB', textTransform: 'uppercase' }}>
                 {t('exam.problem.label', { n: String(idx + 1).padStart(2, '0'), total: exam.problems.length })}
               </div>
-              <div className="serif" style={{ fontSize: 17, color: '#1F1A14', fontStyle: 'italic', marginTop: 4 }}>
+              <div className="serif" style={{ fontSize: 17, color: '#142850', fontStyle: 'italic', marginTop: 4 }}>
                 {current.source}
               </div>
             </div>
             <span style={{
               fontSize: 11, padding: '4px 10px',
               backgroundColor:
-                current.difficulty === 'KILLER' ? '#1F1A14' :
-                current.difficulty === 'SEMI_KILLER' ? '#8B3A1F' :
-                current.difficulty === 'UPPER_MIDDLE' ? '#B45309' : '#A89684',
-              color: '#F2EDE2', borderRadius: 2,
+                current.difficulty === 'KILLER' ? '#142850' :
+                current.difficulty === 'SEMI_KILLER' ? '#C25E2E' :
+                current.difficulty === 'UPPER_MIDDLE' ? '#C7791F' : '#AAB4C5',
+              color: '#EFEBDF', borderRadius: 2,
             }}>
               {current.difficulty}
             </span>
           </div>
 
           <div className="serif" style={{
-            fontSize: 18, lineHeight: 1.75, color: '#1F1A14', marginBottom: 24,
+            fontSize: 18, lineHeight: 1.75, color: '#142850', marginBottom: 24,
             whiteSpace: 'pre-wrap',
-            padding: 24, backgroundColor: '#FAF6EB', border: '1px solid #1F1A1418', borderRadius: 4,
+            padding: 24, backgroundColor: '#F8F4E9', border: '1px solid #14285018', borderRadius: 4,
           }}>
             {current.body}
           </div>
 
           {current.formula && (
             <div style={{
-              padding: 18, backgroundColor: '#1F1A1408', borderRadius: 4,
+              padding: 18, backgroundColor: '#14285008', borderRadius: 4,
               textAlign: 'center', marginBottom: 24,
             }}>
-              <div className="serif mono" style={{ fontSize: 18, color: '#1F1A14' }}>
+              <div className="serif mono" style={{ fontSize: 18, color: '#142850' }}>
                 {current.formula}
               </div>
             </div>
@@ -246,18 +246,18 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
                   const isLockedNext = !prevAllAnswered && !selected; // 아직 열리지 않은 후속 단계
                   return (
                     <div key={s.id} style={{
-                      padding: 16, backgroundColor: '#FAF6EB',
-                      border: '1px solid #1F1A1418', borderRadius: 4,
+                      padding: 16, backgroundColor: '#F8F4E9',
+                      border: '1px solid #14285018', borderRadius: 4,
                       opacity: isLockedNext ? 0.55 : 1,
                     }}>
                       <div style={{
                         display: 'inline-block', padding: '3px 10px', marginBottom: 10,
-                        backgroundColor: selected ? '#4A5D3A' : isLockedNext ? '#A89684' : '#B45309',
-                        color: '#F2EDE2', borderRadius: 2, fontSize: 11, fontWeight: 600,
+                        backgroundColor: selected ? '#5A8A45' : isLockedNext ? '#AAB4C5' : '#C7791F',
+                        color: '#EFEBDF', borderRadius: 2, fontSize: 11, fontWeight: 600,
                       }}>
                         {`${s.stepIndex}/${sorted.length}`} · {stepLabel}{selected ? ' ✓' : isLockedNext ? ' · ' + t('exam.step.locked') : ''}
                       </div>
-                      <div style={{ fontSize: 14, color: '#1F1A14', fontWeight: 600, marginBottom: 12, lineHeight: 1.5 }}>
+                      <div style={{ fontSize: 14, color: '#142850', fontWeight: 600, marginBottom: 12, lineHeight: 1.5 }}>
                         {isLockedNext ? t('exam.step.lockedHint') : s.prompt}
                       </div>
                       {!isLockedNext && (
@@ -273,9 +273,9 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
                                 }))}
                                 style={{
                                   padding: '8px 12px', textAlign: 'left',
-                                  border: '1px solid ' + (isSelected ? '#1F1A14' : '#1F1A1430'),
-                                  backgroundColor: isSelected ? '#1F1A1408' : '#F2EDE2',
-                                  color: '#1F1A14',
+                                  border: '1px solid ' + (isSelected ? '#142850' : '#14285030'),
+                                  backgroundColor: isSelected ? '#14285008' : '#EFEBDF',
+                                  color: '#142850',
                                   borderRadius: 3, fontSize: 13, fontFamily: 'inherit',
                                   cursor: 'pointer',
                                   display: 'flex', alignItems: 'flex-start', gap: 8,
@@ -284,8 +284,8 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
                               >
                                 <span style={{
                                   flexShrink: 0, width: 20, height: 20, borderRadius: '50%',
-                                  backgroundColor: isSelected ? '#1F1A14' : '#1F1A1410',
-                                  color: isSelected ? '#F2EDE2' : '#6B6354',
+                                  backgroundColor: isSelected ? '#142850' : '#14285010',
+                                  color: isSelected ? '#EFEBDF' : '#5C6B85',
                                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                                   fontSize: 10, fontWeight: 600,
                                 }}>{ci + 1}</span>
@@ -306,7 +306,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
             </div>
           ) : (
             <div style={{ marginBottom: 8 }}>
-              <div style={{ fontSize: 11, letterSpacing: '0.15em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: 8 }}>
+              <div style={{ fontSize: 11, letterSpacing: '0.15em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: 8 }}>
                 {t('exam.answer.label')}
               </div>
               <input
@@ -316,8 +316,8 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
                 placeholder={t('exam.answer.placeholder')}
                 style={{
                   width: '100%', padding: '14px 16px', fontSize: 16,
-                  border: '1px solid #1F1A1430', borderRadius: 4,
-                  backgroundColor: '#F2EDE2', fontFamily: 'JetBrains Mono, monospace',
+                  border: '1px solid #14285030', borderRadius: 4,
+                  backgroundColor: '#EFEBDF', fontFamily: 'JetBrains Mono, monospace',
                   outline: 'none', boxSizing: 'border-box',
                 }}
               />
@@ -331,7 +331,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
           {/* 문제 번호 그리드 (5×N 격자) */}
           <div style={{
             display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: 4,
-            marginTop: 32, paddingTop: 20, borderTop: '1px solid #1F1A1418',
+            marginTop: 32, paddingTop: 20, borderTop: '1px solid #14285018',
           }}>
             {exam.problems.map((p, i) => {
               const cs = choiceIds[p.id] ?? {};
@@ -346,9 +346,9 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
                   onClick={() => setIdx(i)}
                   style={{
                     aspectRatio: '1', fontSize: 11, fontWeight: isCurrent ? 700 : 500,
-                    backgroundColor: isCurrent ? '#1F1A14' : filled ? '#4A5D3A20' : '#FAF6EB',
-                    color: isCurrent ? '#F2EDE2' : filled ? '#4A5D3A' : '#6B6354',
-                    border: '1px solid ' + (isCurrent ? '#1F1A14' : filled ? '#4A5D3A40' : '#1F1A1420'),
+                    backgroundColor: isCurrent ? '#142850' : filled ? '#5A8A4520' : '#F8F4E9',
+                    color: isCurrent ? '#EFEBDF' : filled ? '#5A8A45' : '#5C6B85',
+                    border: '1px solid ' + (isCurrent ? '#142850' : filled ? '#5A8A4540' : '#14285020'),
                     borderRadius: 2, cursor: 'pointer', fontFamily: 'inherit',
                   }}
                 >
@@ -362,7 +362,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
 
       {/* 푸터 (이전/다음/제출) */}
       <div style={{
-        backgroundColor: '#FAF6EB', borderTop: '1px solid #1F1A1418',
+        backgroundColor: '#F8F4E9', borderTop: '1px solid #14285018',
         padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
         <button
@@ -375,7 +375,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
         >
           <ArrowLeft size={14} /> {t('exam.prev.label')}
         </button>
-        <div style={{ fontSize: 12, color: '#6B6354' }}>
+        <div style={{ fontSize: 12, color: '#5C6B85' }}>
           {progress.filled === progress.total
             ? t('exam.progress.allDone')
             : t('exam.progress.remaining', { n: progress.total - progress.filled })}
@@ -391,7 +391,7 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
           <button
             onClick={() => setConfirmSubmit(true)}
             disabled={submitMut.isPending}
-            style={{ ...btnPrimary, backgroundColor: '#D97706', color: '#1F1A14' }}
+            style={{ ...btnPrimary, backgroundColor: '#D9A055', color: '#142850' }}
           >
             <Send size={14} /> {submitMut.isPending ? t('exam.submit.busy') : t('exam.submit.label')}
           </button>
@@ -430,7 +430,7 @@ function Overlay({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 90,
-      backgroundColor: '#F2EDE2', color: '#1F1A14',
+      backgroundColor: '#EFEBDF', color: '#142850',
       display: 'flex', flexDirection: 'column',
       fontFamily: '"Pretendard", sans-serif',
     }}>
@@ -450,17 +450,17 @@ function ConfirmDialog({ title, desc, confirmLabel, cancelLabel, confirmDisabled
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
       <div style={{
-        width: 420, padding: 28, backgroundColor: '#FAF6EB', borderRadius: 6,
-        border: '1px solid #1F1A1420',
+        width: 420, padding: 28, backgroundColor: '#F8F4E9', borderRadius: 6,
+        border: '1px solid #14285020',
       }}>
         <h3 className="serif" style={{ fontSize: 20, fontWeight: 500, margin: 0, marginBottom: 8 }}>{title}</h3>
-        <p style={{ fontSize: 13, color: '#6B6354', lineHeight: 1.65, margin: 0, marginBottom: 20 }}>{desc}</p>
+        <p style={{ fontSize: 13, color: '#5C6B85', lineHeight: 1.65, margin: 0, marginBottom: 20 }}>{desc}</p>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button onClick={onCancel} style={btnGhost}>{cancelLabel}</button>
           <button
             onClick={onConfirm}
             disabled={confirmDisabled}
-            style={danger ? { ...btnPrimary, backgroundColor: '#8B3A1F' } : btnPrimary}
+            style={danger ? { ...btnPrimary, backgroundColor: '#C25E2E' } : btnPrimary}
           >
             {danger && <CheckCircle2 size={14} />} {confirmLabel}
           </button>
@@ -471,18 +471,18 @@ function ConfirmDialog({ title, desc, confirmLabel, cancelLabel, confirmDisabled
 }
 
 const card: React.CSSProperties = {
-  margin: 'auto', width: 480, padding: 32, backgroundColor: '#FAF6EB',
-  border: '1px solid #1F1A1420', borderRadius: 6,
+  margin: 'auto', width: 480, padding: 32, backgroundColor: '#F8F4E9',
+  border: '1px solid #14285020', borderRadius: 6,
 };
 const btnPrimary: React.CSSProperties = {
-  padding: '10px 18px', backgroundColor: '#1F1A14', color: '#F2EDE2',
+  padding: '10px 18px', backgroundColor: '#142850', color: '#EFEBDF',
   border: 'none', borderRadius: 4, fontSize: 13, fontWeight: 600,
   cursor: 'pointer', fontFamily: 'inherit',
   display: 'flex', alignItems: 'center', gap: 6,
 };
 const btnGhost: React.CSSProperties = {
-  padding: '10px 18px', backgroundColor: 'transparent', color: '#1F1A14',
-  border: '1px solid #1F1A1430', borderRadius: 4, fontSize: 13,
+  padding: '10px 18px', backgroundColor: 'transparent', color: '#142850',
+  border: '1px solid #14285030', borderRadius: 4, fontSize: 13,
   cursor: 'pointer', fontFamily: 'inherit',
   display: 'flex', alignItems: 'center', gap: 6,
 };

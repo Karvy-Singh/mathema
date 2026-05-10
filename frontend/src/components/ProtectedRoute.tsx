@@ -1,4 +1,4 @@
-import { useAuth } from '../context/AuthContext';
+﻿import { useAuth } from '../context/AuthContext';
 import { useT } from '../lib/i18n';
 
 export default function ProtectedRoute({ children }: { children: JSX.Element }) {
@@ -14,7 +14,7 @@ function FullPageMessage({ text }: { text: string }) {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', color: '#6B6354', backgroundColor: '#F2EDE2',
+      justifyContent: 'center', color: '#5C6B85', backgroundColor: '#EFEBDF',
       fontFamily: '"Pretendard", -apple-system, sans-serif',
     }}>{text}</div>
   );

@@ -1,4 +1,4 @@
-import { useT } from '../lib/i18n';
+﻿import { useT } from '../lib/i18n';
 
 type Props = {
   value: number;
@@ -16,7 +16,7 @@ type Props = {
  */
 export default function ConfidenceSlider({ value, onChange, label }: Props) {
   const { t } = useT();
-  const color = value < 34 ? '#8B3A1F' : value < 67 ? '#B45309' : '#4A5D3A';
+  const color = value < 34 ? '#C25E2E' : value < 67 ? '#C7791F' : '#5A8A45';
   const labelText = value < 34 ? t('study.confidence.low') : value < 67 ? t('study.confidence.medium') : t('study.confidence.high');
   const displayLabel = label ?? t('study.confidence.label');
 
@@ -24,7 +24,7 @@ export default function ConfidenceSlider({ value, onChange, label }: Props) {
     <div style={{ marginTop: 12, marginBottom: 12 }}>
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        fontSize: 11, color: '#6B6354', marginBottom: 6,
+        fontSize: 11, color: '#5C6B85', marginBottom: 6,
         letterSpacing: '0.1em', textTransform: 'uppercase',
       }}>
         <span>{displayLabel}</span>
@@ -49,7 +49,7 @@ export default function ConfidenceSlider({ value, onChange, label }: Props) {
       />
       <div style={{
         display: 'flex', justifyContent: 'space-between',
-        fontSize: 10, color: '#A89684', marginTop: 4,
+        fontSize: 10, color: '#AAB4C5', marginTop: 4,
         fontFamily: 'JetBrains Mono, monospace',
       }}>
         <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>

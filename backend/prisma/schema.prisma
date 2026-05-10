@@ -141,6 +141,8 @@ model Problem {
   difficulty  Difficulty
   body        String     @db.Text   // 문제 본문 (LaTeX)
   formula     String?    @db.Text   // 정답 공식/풀이 핵심
+  /// 핵심 개념 설명 — 학습 정답/오답 피드백, 오답노트 상세에 노출
+  concept     String?    @db.Text
   answer      String                // 최종 정답 (호환성 유지, steps[]가 없을 때 fallback)
   imageUrl    String?
   hint        String?    @db.Text

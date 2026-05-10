@@ -16,6 +16,17 @@ export class StudySessionsController {
     return this.service.start(userId, dto, lang);
   }
 
+  /** 가중치 기반 추천 단원 — 학습 시작 화면용 */
+  @Get('recommended-units')
+  recommendedUnits(
+    @CurrentUser('id') userId: string,
+    @CurrentLang() lang: Lang,
+    @Query('count') count = 3,
+    @Query('grade') grade?: string,
+  ) {
+    return this.service.recommendedUnits(userId, +count, grade, lang);
+  }
+
   @Get(':id')
   get(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang, @Param('id') id: string) {
     return this.service.get(userId, id, lang);

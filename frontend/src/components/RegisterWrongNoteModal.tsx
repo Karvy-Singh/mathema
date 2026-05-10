@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, FileText, Image as ImageIcon, Upload } from 'lucide-react';
 import Modal from './Modal';
@@ -76,9 +76,9 @@ export default function RegisterWrongNoteModal({ open, initialMode = 'text', onC
   });
 
   const MODES: Array<{ key: Mode; label: string; sub: string; Icon: any; color: string }> = [
-    { key: 'photo', label: t('wn.register.photo'), sub: t('wn.register.photoSub'), Icon: Camera, color: '#8B3A1F' },
-    { key: 'text',  label: t('wn.register.text'),  sub: t('wn.register.textSub'),  Icon: FileText, color: '#B45309' },
-    { key: 'pdf',   label: t('wn.register.pdf'),   sub: t('wn.register.pdfSub'),   Icon: ImageIcon, color: '#4A5D3A' },
+    { key: 'photo', label: t('wn.register.photo'), sub: t('wn.register.photoSub'), Icon: Camera, color: '#C25E2E' },
+    { key: 'text',  label: t('wn.register.text'),  sub: t('wn.register.textSub'),  Icon: FileText, color: '#C7791F' },
+    { key: 'pdf',   label: t('wn.register.pdf'),   sub: t('wn.register.pdfSub'),   Icon: ImageIcon, color: '#5A8A45' },
   ];
 
   return (
@@ -89,16 +89,16 @@ export default function RegisterWrongNoteModal({ open, initialMode = 'text', onC
           const active = mode === opt.key;
           return (
             <button key={opt.key} onClick={() => setMode(opt.key)} style={{
-              padding: 14, backgroundColor: active ? '#1F1A14' : '#F2EDE2',
-              color: active ? '#F2EDE2' : '#1F1A14',
-              border: '1px solid ' + (active ? '#1F1A14' : '#1F1A1430'),
+              padding: 14, backgroundColor: active ? '#142850' : '#EFEBDF',
+              color: active ? '#EFEBDF' : '#142850',
+              border: '1px solid ' + (active ? '#142850' : '#14285030'),
               borderRadius: 4, cursor: 'pointer', fontFamily: 'inherit',
               display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8, textAlign: 'left',
             }}>
-              <I size={18} color={active ? '#D97706' : opt.color} />
+              <I size={18} color={active ? '#D9A055' : opt.color} />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600 }}>{opt.label}</div>
-                <div style={{ fontSize: 11, color: active ? '#A89684' : '#6B6354', marginTop: 2 }}>{opt.sub}</div>
+                <div style={{ fontSize: 11, color: active ? '#AAB4C5' : '#5C6B85', marginTop: 2 }}>{opt.sub}</div>
               </div>
             </button>
           );
@@ -148,11 +148,11 @@ export default function RegisterWrongNoteModal({ open, initialMode = 'text', onC
       {(mode === 'photo' || mode === 'pdf') && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div style={{
-            border: '1px dashed #1F1A1430', borderRadius: 4, padding: 24,
-            backgroundColor: '#F2EDE2', textAlign: 'center',
+            border: '1px dashed #14285030', borderRadius: 4, padding: 24,
+            backgroundColor: '#EFEBDF', textAlign: 'center',
           }}>
-            <Upload size={20} color="#6B6354" />
-            <div style={{ fontSize: 13, color: '#6B6354', margin: '10px 0 14px' }}>
+            <Upload size={20} color="#5C6B85" />
+            <div style={{ fontSize: 13, color: '#5C6B85', margin: '10px 0 14px' }}>
               {mode === 'photo' ? t('wn.regModal.upload.imgHint') : t('wn.regModal.upload.pdfHint')}
             </div>
             <input
@@ -162,12 +162,12 @@ export default function RegisterWrongNoteModal({ open, initialMode = 'text', onC
               style={{ fontFamily: 'inherit', fontSize: 12 }}
             />
             {file && (
-              <div style={{ fontSize: 11, color: '#1F1A14', marginTop: 10, fontFamily: 'JetBrains Mono, monospace' }}>
+              <div style={{ fontSize: 11, color: '#142850', marginTop: 10, fontFamily: 'JetBrains Mono, monospace' }}>
                 {file.name} · {(file.size / 1024).toFixed(1)}KB
               </div>
             )}
           </div>
-          <div style={{ fontSize: 11, color: '#8B7E6A', lineHeight: 1.6 }}>
+          <div style={{ fontSize: 11, color: '#8B95AB', lineHeight: 1.6 }}>
             {t('wn.regModal.upload.aiNote')}
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
@@ -189,23 +189,23 @@ export default function RegisterWrongNoteModal({ open, initialMode = 'text', onC
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <span style={{ fontSize: 11, color: '#8B7E6A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</span>
+      <span style={{ fontSize: 11, color: '#8B95AB', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</span>
       {children}
     </label>
   );
 }
 
 const inputStyle: React.CSSProperties = {
-  padding: '10px 12px', fontSize: 13, border: '1px solid #1F1A1430',
-  borderRadius: 4, backgroundColor: '#F2EDE2', outline: 'none', fontFamily: 'inherit',
+  padding: '10px 12px', fontSize: 13, border: '1px solid #14285030',
+  borderRadius: 4, backgroundColor: '#EFEBDF', outline: 'none', fontFamily: 'inherit',
 };
 const btnPrimary: React.CSSProperties = {
-  padding: '10px 18px', backgroundColor: '#1F1A14', color: '#F2EDE2',
+  padding: '10px 18px', backgroundColor: '#142850', color: '#EFEBDF',
   border: 'none', borderRadius: 4, fontSize: 13, fontWeight: 600,
   cursor: 'pointer', fontFamily: 'inherit',
 };
 const btnGhost: React.CSSProperties = {
-  padding: '10px 18px', backgroundColor: 'transparent', color: '#1F1A14',
-  border: '1px solid #1F1A1430', borderRadius: 4, fontSize: 13,
+  padding: '10px 18px', backgroundColor: 'transparent', color: '#142850',
+  border: '1px solid #14285030', borderRadius: 4, fontSize: 13,
   cursor: 'pointer', fontFamily: 'inherit',
 };

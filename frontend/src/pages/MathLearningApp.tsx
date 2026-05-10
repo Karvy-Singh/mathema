@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
@@ -42,7 +42,7 @@ const Icon = (name: string, size = 14, color?: string) => {
 
 // ============ SHARED STYLES ============
 const sectionLabelStyle: React.CSSProperties = {
-  fontSize: '11px', letterSpacing: '0.2em', color: '#8B7E6A',
+  fontSize: '11px', letterSpacing: '0.2em', color: '#8B95AB',
   textTransform: 'uppercase', marginBottom: '6px',
 };
 const baseText: React.CSSProperties = { wordBreak: 'keep-all', overflowWrap: 'break-word' };
@@ -125,9 +125,9 @@ export default function MathLearningApp() {
 
   return (
     <div style={{
-      minHeight: '100vh', backgroundColor: '#F2EDE2',
+      minHeight: '100vh', backgroundColor: '#EFEBDF',
       fontFamily: '"Pretendard", -apple-system, BlinkMacSystemFont, sans-serif',
-      color: '#1F1A14', ...baseText,
+      color: '#142850', ...baseText,
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;700&display=swap');
@@ -143,13 +143,13 @@ export default function MathLearningApp() {
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
           opacity: 0.06; pointer-events: none; mix-blend-mode: multiply; border-radius: inherit;
         }
-        .deco-line { background-image: linear-gradient(to right, #1F1A14 50%, transparent 50%); background-size: 8px 1px; background-repeat: repeat-x; }
+        .deco-line { background-image: linear-gradient(to right, #142850 50%, transparent 50%); background-size: 8px 1px; background-repeat: repeat-x; }
         @keyframes pulse-warm { 0%,100% { box-shadow: 0 0 0 0 rgba(180,83,9,0.4); } 50% { box-shadow: 0 0 0 8px rgba(180,83,9,0); } }
         .pulse-warm { animation: pulse-warm 2.5s ease-in-out infinite; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .fade-up { animation: fadeUp 0.6s ease-out backwards; }
         .hover-lift { transition: all 0.2s; }
-        .hover-lift:hover { transform: translateY(-2px); border-color: #1F1A1440 !important; }
+        .hover-lift:hover { transform: translateY(-2px); border-color: #14285040 !important; }
       `}</style>
 
       <TopNav activeNav={activeNav} setActiveNav={setActiveNav} />
@@ -184,30 +184,38 @@ function TopNav({ activeNav, setActiveNav }: { activeNav: NavKey; setActiveNav: 
 
   return (
     <nav style={{
-      borderBottom: '1px solid #1F1A1420', backgroundColor: '#F2EDE2',
+      borderBottom: '1px solid #14285020', backgroundColor: '#EFEBDF',
       position: 'sticky', top: 0, zIndex: 50, backdropFilter: 'blur(8px)',
     }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '20px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
           <button
             onClick={() => { trackUi('nav.change', { to: '대시보드', via: 'brand' }); setActiveNav('대시보드'); }}
-            title={t('nav.dashboard')}
+            title={t('app.brand')}
+            aria-label={t('app.brand')}
             style={{
-              display: 'flex', alignItems: 'baseline', gap: '8px',
+              display: 'flex', alignItems: 'center',
               background: 'none', border: 'none', padding: 0, cursor: 'pointer',
               color: 'inherit', fontFamily: 'inherit',
             }}
           >
-            <span className="serif" style={{ fontSize: '26px', fontWeight: 600, letterSpacing: '-0.03em', fontStyle: 'italic' }}>{t('app.brand')}</span>
-            <span style={{ fontSize: '11px', letterSpacing: '0.2em', color: '#8B7E6A', textTransform: 'uppercase' }}>{t('app.tagline')}</span>
+            {/* 흰바탕은 mix-blend-mode: multiply 로 크림 배경에 자연스럽게 합성 — 별도 텍스트 라벨 없이 마크 자체가 브랜드 */}
+            <img
+              src="/matheo-logo.png"
+              alt={t('app.brand')}
+              style={{
+                height: 56, width: 'auto', objectFit: 'contain',
+                mixBlendMode: 'multiply',
+              }}
+            />
           </button>
           <div style={{ display: 'flex', gap: '4px' }}>
             {items.map(item => (
               <button key={item} onClick={() => { trackUi('nav.change', { to: item }); setActiveNav(item); }} style={{
                 padding: '8px 16px', fontSize: '14px',
                 fontWeight: activeNav === item ? 600 : 400,
-                color: activeNav === item ? '#1F1A14' : '#6B6354',
-                backgroundColor: activeNav === item ? '#1F1A1410' : 'transparent',
+                color: activeNav === item ? '#142850' : '#5C6B85',
+                backgroundColor: activeNav === item ? '#14285010' : 'transparent',
                 border: 'none', borderRadius: '4px', cursor: 'pointer',
                 transition: 'all 0.2s', fontFamily: 'inherit',
               }}>{navLabel(item)}</button>
@@ -218,7 +226,7 @@ function TopNav({ activeNav, setActiveNav }: { activeNav: NavKey; setActiveNav: 
           {/* 🌐 언어 토글 KO / EN */}
           <div style={{
             display: 'flex', gap: 0, padding: 2,
-            backgroundColor: '#1F1A1408', borderRadius: 4, border: '1px solid #1F1A1418',
+            backgroundColor: '#14285008', borderRadius: 4, border: '1px solid #14285018',
           }}>
             {(['ko', 'en'] as const).map((l) => (
               <button
@@ -228,8 +236,8 @@ function TopNav({ activeNav, setActiveNav }: { activeNav: NavKey; setActiveNav: 
                 style={{
                   padding: '4px 10px', fontSize: 11, fontWeight: 600,
                   letterSpacing: '0.1em', textTransform: 'uppercase',
-                  backgroundColor: lang === l ? '#1F1A14' : 'transparent',
-                  color: lang === l ? '#F2EDE2' : '#6B6354',
+                  backgroundColor: lang === l ? '#142850' : 'transparent',
+                  color: lang === l ? '#EFEBDF' : '#5C6B85',
                   border: 'none', borderRadius: 3, cursor: 'pointer',
                   fontFamily: 'JetBrains Mono, monospace',
                   transition: 'all 0.15s',
@@ -240,13 +248,13 @@ function TopNav({ activeNav, setActiveNav }: { activeNav: NavKey; setActiveNav: 
             ))}
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: '2px' }}>{t('nav.dDayPrefix')}</div>
+            <div style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: '2px' }}>{t('nav.dDayPrefix')}</div>
             <div className="serif mono" style={{ fontSize: '20px', fontWeight: 600, letterSpacing: '-0.02em' }}>{t('nav.dDay', { days: user?.dDay ?? '–' })}</div>
           </div>
-          <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#1F1A14', color: '#F2EDE2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 600 }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#142850', color: '#EFEBDF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 600 }}>
             {user?.name?.[0] ?? '?'}
           </div>
-          <button onClick={logout} title={t('nav.logout')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B6354' }}>
+          <button onClick={logout} title={t('nav.logout')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5C6B85' }}>
             <LogOut size={16} />
           </button>
         </div>
@@ -293,8 +301,8 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
     <>
       <section style={{ marginBottom: '64px' }} className="fade-up">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#B45309' }} className="pulse-warm" />
-          <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B7E6A', textTransform: 'uppercase' }}>{t('dashboard.diagnosis.label')}</span>
+          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#C7791F' }} className="pulse-warm" />
+          <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B95AB', textTransform: 'uppercase' }}>{t('dashboard.diagnosis.label')}</span>
         </div>
         <h1 className="serif" style={{ fontSize: '48px', lineHeight: 1.15, letterSpacing: '-0.025em', fontWeight: 400, margin: 0, maxWidth: '880px' }}>
           {diagnosis.data?.headline ?? t('dashboard.headline.fallback')}
@@ -302,59 +310,59 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
 
         <div className="deco-line" style={{ height: '1px', marginTop: '32px', marginBottom: '24px' }} />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #1F1A1415', borderBottom: '1px solid #1F1A1415' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #14285015', borderBottom: '1px solid #14285015' }}>
           {[
             { label: t('dashboard.stat.todayStudy'), value: String(stats?.todayMinutes ?? 0), unit: t('common.minute'),
               sub: t('dashboard.stat.todayGoal', { goal: stats?.todayGoalMinutes ?? 180, pct: Math.round(((stats?.todayMinutes ?? 0) / (stats?.todayGoalMinutes ?? 180)) * 100) }),
-              accent: '#B45309', icon: undefined as undefined | string },
+              accent: '#C7791F', icon: undefined as undefined | string },
             { label: t('dashboard.stat.streak'), value: String(stats?.streakDays ?? 0), unit: t('common.day'),
-              sub: t('dashboard.stat.streakBest'), accent: '#4A5D3A', icon: 'Flame' },
+              sub: t('dashboard.stat.streakBest'), accent: '#5A8A45', icon: 'Flame' },
             { label: t('dashboard.stat.weeklyAccuracy'), value: String(stats?.weeklyAccuracy ?? 0), unit: t('common.percent'),
-              sub: t('dashboard.stat.weeklyDelta', { delta: stats?.weeklyAccuracyDelta ?? 0 }), accent: '#4A5D3A', icon: undefined },
+              sub: t('dashboard.stat.weeklyDelta', { delta: stats?.weeklyAccuracyDelta ?? 0 }), accent: '#5A8A45', icon: undefined },
             { label: t('dashboard.stat.expectedGrade'), value: String(stats?.expectedGrade ?? '–'), unit: t('common.grade'),
-              sub: t('dashboard.stat.gradeFrom', { from: stats?.expectedGradeFrom ?? 3 }), accent: '#1F1A14', icon: undefined },
+              sub: t('dashboard.stat.gradeFrom', { from: stats?.expectedGradeFrom ?? 3 }), accent: '#142850', icon: undefined },
           ].map((stat, i) => (
-            <div key={i} style={{ padding: '24px 28px', borderRight: i < 3 ? '1px solid #1F1A1415' : 'none' }}>
+            <div key={i} style={{ padding: '24px 28px', borderRight: i < 3 ? '1px solid #14285015' : 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
                 {stat.icon && Icon(stat.icon, 12, stat.accent)}
-                <span style={{ fontSize: '11px', letterSpacing: '0.18em', color: '#8B7E6A', textTransform: 'uppercase' }}>{stat.label}</span>
+                <span style={{ fontSize: '11px', letterSpacing: '0.18em', color: '#8B95AB', textTransform: 'uppercase' }}>{stat.label}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '8px' }}>
                 <span className="serif mono" style={{ fontSize: '44px', fontWeight: 500, letterSpacing: '-0.04em', color: stat.accent }}>{stat.value}</span>
-                <span style={{ fontSize: '14px', color: '#6B6354', fontWeight: 500 }}>{stat.unit}</span>
+                <span style={{ fontSize: '14px', color: '#5C6B85', fontWeight: 500 }}>{stat.unit}</span>
               </div>
-              <div style={{ fontSize: '12px', color: '#6B6354' }}>{stat.sub}</div>
+              <div style={{ fontSize: '12px', color: '#5C6B85' }}>{stat.sub}</div>
             </div>
           ))}
         </div>
       </section>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '32px', marginBottom: '48px' }}>
-        <div className="grain" style={{ backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px', padding: '32px', position: 'relative' }}>
+        <div className="grain" style={{ backgroundColor: '#F8F4E9', border: '1px solid #14285015', borderRadius: '4px', padding: '32px', position: 'relative' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
             <div>
               <div style={sectionLabelStyle}>No 01 — Mastery Map</div>
               <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('dashboard.section.masteryMap')}</h2>
             </div>
             {diagnosis.data?.weakUnit && (
-              <div style={{ fontSize: '11px', padding: '6px 10px', backgroundColor: '#8B3A1F', color: '#F2EDE2', borderRadius: '2px', letterSpacing: '0.05em' }}>{t('dashboard.weakDetected')}</div>
+              <div style={{ fontSize: '11px', padding: '6px 10px', backgroundColor: '#C25E2E', color: '#EFEBDF', borderRadius: '2px', letterSpacing: '0.05em' }}>{t('dashboard.weakDetected')}</div>
             )}
           </div>
           <div style={{ height: '320px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={mastery.data ?? []}>
-                <PolarGrid stroke="#1F1A1425" />
-                <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12, fill: '#1F1A14', fontWeight: 500 }} />
-                <Radar name={t('dashboard.section.masteryMap')} dataKey="value" stroke="#8B3A1F" fill="#B5552B" fillOpacity={0.25} strokeWidth={1.5} />
+                <PolarGrid stroke="#14285025" />
+                <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12, fill: '#142850', fontWeight: 500 }} />
+                <Radar name={t('dashboard.section.masteryMap')} dataKey="value" stroke="#C25E2E" fill="#C25E2E" fillOpacity={0.25} strokeWidth={1.5} />
               </RadarChart>
             </ResponsiveContainer>
           </div>
           {diagnosis.data?.weakUnit && (
-            <div style={{ marginTop: '16px', padding: '16px', backgroundColor: '#1F1A1408', borderRadius: '4px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-              <AlertCircle size={16} color="#8B3A1F" style={{ marginTop: '2px', flexShrink: 0 }} />
+            <div style={{ marginTop: '16px', padding: '16px', backgroundColor: '#14285008', borderRadius: '4px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <AlertCircle size={16} color="#C25E2E" style={{ marginTop: '2px', flexShrink: 0 }} />
               <div>
                 <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>{t('dashboard.weakUnit', { unit: diagnosis.data.weakUnit ?? '', score: diagnosis.data.weakScore })}</div>
-                <div style={{ fontSize: '12px', color: '#6B6354', lineHeight: 1.55 }}>{t('dashboard.weakUnit.desc')}</div>
+                <div style={{ fontSize: '12px', color: '#5C6B85', lineHeight: 1.55 }}>{t('dashboard.weakUnit.desc')}</div>
               </div>
             </div>
           )}
@@ -373,7 +381,7 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
                 disabled={startSessionMut.isPending}
                 onClick={() => handleRecommendClick(item.unitId, item.tag)}
                 style={{
-                  backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px',
+                  backgroundColor: '#F8F4E9', border: '1px solid #14285015', borderRadius: '4px',
                   padding: '20px', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit',
                 }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
@@ -383,11 +391,11 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                       <span style={{ fontSize: '10px', fontWeight: 600, color: item.tagColor, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{item.tag}</span>
-                      <span style={{ fontSize: '11px', color: '#A89684' }}>·</span>
-                      <span style={{ fontSize: '11px', color: '#6B6354' }}>{item.unit}</span>
+                      <span style={{ fontSize: '11px', color: '#AAB4C5' }}>·</span>
+                      <span style={{ fontSize: '11px', color: '#5C6B85' }}>{item.unit}</span>
                     </div>
                     <div className="serif" style={{ fontSize: '17px', fontWeight: 500, marginBottom: '8px', letterSpacing: '-0.01em' }}>{item.title}</div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#8B7E6A' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#8B95AB' }}>
                       <span>{item.reason}</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{item.type} <ChevronRight size={12} /></span>
                     </div>
@@ -413,15 +421,15 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
             <div style={sectionLabelStyle}>No 03 — Wrong Notes</div>
             <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>
               {t('dashboard.section.wrongNotes')}
-              <span style={{ fontSize: '14px', color: '#6B6354', marginLeft: '12px', fontFamily: '"Pretendard", sans-serif', fontWeight: 400 }}>{t('dashboard.section.wrongNotes.sub')}</span>
+              <span style={{ fontSize: '14px', color: '#5C6B85', marginLeft: '12px', fontFamily: '"Pretendard", sans-serif', fontWeight: 400 }}>{t('dashboard.section.wrongNotes.sub')}</span>
             </h2>
           </div>
           <button
             onClick={() => { trackClick('view_all_wrongnotes', { from: 'dashboard' }); onGotoWrongNotes(); }}
             style={{
               padding: '8px 14px', fontSize: 12, fontWeight: 600,
-              backgroundColor: 'transparent', border: '1px solid #1F1A1430',
-              borderRadius: 4, cursor: 'pointer', color: '#1F1A14', fontFamily: 'inherit',
+              backgroundColor: 'transparent', border: '1px solid #14285030',
+              borderRadius: 4, cursor: 'pointer', color: '#142850', fontFamily: 'inherit',
               display: 'flex', alignItems: 'center', gap: 6,
             }}
           >
@@ -434,25 +442,25 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
               key={i}
               className="hover-lift"
               onClick={() => { trackClick('open_wrongnote_detail', { from: 'dashboard_card', noteId: m.id }); setDetailNoteId(m.id); }}
-              style={{ backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px', padding: '20px', cursor: 'pointer' }}
+              style={{ backgroundColor: '#F8F4E9', border: '1px solid #14285015', borderRadius: '4px', padding: '20px', cursor: 'pointer' }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                <span style={{ fontSize: '10px', color: '#8B7E6A', letterSpacing: '0.05em' }}>{m.problem}</span>
-                <span style={{ fontSize: '10px', padding: '2px 6px', backgroundColor: m.diff === '준킬러' ? '#8B3A1F' : '#B45309', color: '#F2EDE2', borderRadius: '2px' }}>{m.diff}</span>
+                <span style={{ fontSize: '10px', color: '#8B95AB', letterSpacing: '0.05em' }}>{m.problem}</span>
+                <span style={{ fontSize: '10px', padding: '2px 6px', backgroundColor: m.diff === '준킬러' ? '#C25E2E' : '#C7791F', color: '#EFEBDF', borderRadius: '2px' }}>{m.diff}</span>
               </div>
-              <div className="serif" style={{ fontSize: '13px', color: '#8B7E6A', marginBottom: '8px', fontStyle: 'italic' }}>{m.unit} · {m.errorType}</div>
+              <div className="serif" style={{ fontSize: '13px', color: '#8B95AB', marginBottom: '8px', fontStyle: 'italic' }}>{m.unit} · {m.errorType}</div>
               {m.problemBody && (
                 <div className="serif" style={{
-                  fontSize: '14px', lineHeight: 1.55, color: '#1F1A14', marginBottom: '12px',
-                  padding: '10px 12px', backgroundColor: '#1F1A1406', border: '1px solid #1F1A1418',
+                  fontSize: '14px', lineHeight: 1.55, color: '#142850', marginBottom: '12px',
+                  padding: '10px 12px', backgroundColor: '#14285006', border: '1px solid #14285018',
                   borderRadius: 4,
                   display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
                 }}>{m.problemBody}</div>
               )}
-              <div style={{ fontSize: '13px', lineHeight: 1.55, color: '#6B6354', marginBottom: '16px' }}>{m.insight}</div>
+              <div style={{ fontSize: '13px', lineHeight: 1.55, color: '#5C6B85', marginBottom: '16px' }}>{m.insight}</div>
               <button
                 onClick={() => { trackClick('open_wrongnote_detail', { from: 'dashboard', noteId: m.id }); setDetailNoteId(m.id); }}
-                style={{ width: '100%', padding: '8px', backgroundColor: 'transparent', border: '1px solid #1F1A1430', borderRadius: '2px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontFamily: 'inherit', color: '#1F1A14' }}
+                style={{ width: '100%', padding: '8px', backgroundColor: 'transparent', border: '1px solid #14285030', borderRadius: '2px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontFamily: 'inherit', color: '#142850' }}
               >
                 <Sparkles size={12} /> {t('dashboard.aiInsight')}
               </button>
@@ -462,26 +470,26 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
       </section>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '32px' }}>
-        <div className="grain" style={{ backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px', padding: '32px', position: 'relative' }}>
+        <div className="grain" style={{ backgroundColor: '#F8F4E9', border: '1px solid #14285015', borderRadius: '4px', padding: '32px', position: 'relative' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
             <div>
               <div style={sectionLabelStyle}>No 04 — Consistency</div>
               <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('dashboard.section.consistency')}</h2>
-              <div style={{ fontSize: '12px', color: '#6B6354', marginTop: '4px' }}>{t('dashboard.heatmap.weeksAgo')} · <span style={{ color: '#4A5D3A', fontWeight: 600 }}>{t('dashboard.streakNow', { days: stats?.streakDays ?? 0 })}</span></div>
+              <div style={{ fontSize: '12px', color: '#5C6B85', marginTop: '4px' }}>{t('dashboard.heatmap.weeksAgo')} · <span style={{ color: '#5A8A45', fontWeight: 600 }}>{t('dashboard.streakNow', { days: stats?.streakDays ?? 0 })}</span></div>
             </div>
-            <Flame size={20} color="#B45309" />
+            <Flame size={20} color="#C7791F" />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '4px', marginBottom: '20px' }}>
             {(heatmap.data ?? Array.from({ length: 84 }, (_, i) => ({ day: i, intensity: 0 }))).map((d, i) => {
-              const colors = ['#1F1A1408', '#B5552B40', '#B5552B80', '#8B3A1F'];
+              const colors = ['#14285008', '#C25E2E40', '#C25E2E80', '#C25E2E'];
               return <div key={i} style={{ aspectRatio: '1', backgroundColor: colors[d.intensity] || colors[0], borderRadius: '2px' }} />;
             })}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#8B7E6A' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#8B95AB' }}>
             <span>{t('dashboard.heatmap.weeksAgo')}</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>{t('dashboard.heatmap.legend.less')}</span>
-              {['#1F1A1408', '#B5552B40', '#B5552B80', '#8B3A1F'].map((c, i) => (
+              {['#14285008', '#C25E2E40', '#C25E2E80', '#C25E2E'].map((c, i) => (
                 <div key={i} style={{ width: '10px', height: '10px', backgroundColor: c, borderRadius: '2px' }} />
               ))}
               <span>{t('dashboard.heatmap.legend.more')}</span>
@@ -496,39 +504,39 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
               { label: t('dashboard.stats.avgAccuracy'), value: String(actStats.data?.avgAccuracy ?? 0), sub: t('common.percent') },
             ].map((s, i) => (
               <div key={i}>
-                <div style={{ fontSize: '10px', letterSpacing: '0.15em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: '4px' }}>{s.label}</div>
+                <div style={{ fontSize: '10px', letterSpacing: '0.15em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: '4px' }}>{s.label}</div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                   <span className="serif mono" style={{ fontSize: '24px', fontWeight: 500, letterSpacing: '-0.02em' }}>{s.value}</span>
-                  <span style={{ fontSize: '11px', color: '#6B6354' }}>{s.sub}</span>
+                  <span style={{ fontSize: '11px', color: '#5C6B85' }}>{s.sub}</span>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#1F1A14', color: '#F2EDE2', borderRadius: '4px', padding: '32px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ backgroundColor: '#142850', color: '#EFEBDF', borderRadius: '4px', padding: '32px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(180,83,9,0.2) 0%, transparent 70%)' }} />
           <div style={{ position: 'relative' }}>
-            <div style={{ fontSize: '11px', letterSpacing: '0.2em', color: '#A89684', textTransform: 'uppercase', marginBottom: '6px' }}>No 05 — Error DNA</div>
+            <div style={{ fontSize: '11px', letterSpacing: '0.2em', color: '#AAB4C5', textTransform: 'uppercase', marginBottom: '6px' }}>No 05 — Error DNA</div>
             <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0, marginBottom: '4px' }}>{t('dashboard.section.errorDna')}</h2>
-            <div style={{ fontSize: '12px', color: '#A89684', marginBottom: '28px' }}>{t('dashboard.section.errorDna.sub')}</div>
+            <div style={{ fontSize: '12px', color: '#AAB4C5', marginBottom: '28px' }}>{t('dashboard.section.errorDna.sub')}</div>
             <div style={{ marginBottom: '24px' }}>
               {(errorDna.data?.distribution ?? []).map((e, i) => (
                 <div key={i} style={{ marginBottom: '14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}>
                     <span>{e.name}</span>
-                    <span className="mono" style={{ color: '#A89684' }}>{e.value}%</span>
+                    <span className="mono" style={{ color: '#AAB4C5' }}>{e.value}%</span>
                   </div>
-                  <div style={{ height: '4px', backgroundColor: '#F2EDE220', borderRadius: '2px', overflow: 'hidden' }}>
+                  <div style={{ height: '4px', backgroundColor: '#EFEBDF20', borderRadius: '2px', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${e.value}%`, backgroundColor: e.color, borderRadius: '2px' }} />
                   </div>
                 </div>
               ))}
             </div>
-            <div style={{ padding: '16px', backgroundColor: '#F2EDE210', borderLeft: '2px solid #B45309', borderRadius: '0 2px 2px 0' }}>
+            <div style={{ padding: '16px', backgroundColor: '#EFEBDF10', borderLeft: '2px solid #C7791F', borderRadius: '0 2px 2px 0' }}>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                <Lightbulb size={14} color="#D97706" style={{ marginTop: '2px', flexShrink: 0 }} />
-                <div style={{ fontSize: '12px', lineHeight: 1.65, color: '#E8DFD0' }}>
+                <Lightbulb size={14} color="#D9A055" style={{ marginTop: '2px', flexShrink: 0 }} />
+                <div style={{ fontSize: '12px', lineHeight: 1.65, color: '#E0D8C8' }}>
                   {errorDna.data?.insight ?? t('common.loading')}
                 </div>
               </div>
@@ -537,11 +545,11 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
         </div>
       </div>
 
-      <div style={{ marginTop: '64px', paddingTop: '32px', borderTop: '1px solid #1F1A1415', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ fontSize: '11px', color: '#8B7E6A', letterSpacing: '0.05em' }}>
+      <div style={{ marginTop: '64px', paddingTop: '32px', borderTop: '1px solid #14285015', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: '11px', color: '#8B95AB', letterSpacing: '0.05em' }}>
           {t('dashboard.lastUpdate', { ago: diagnosis.data?.updatedAgo ?? '—', version: diagnosis.data?.version ?? 'v2.4.1' })}
         </div>
-        <div className="serif" style={{ fontSize: '13px', fontStyle: 'italic', color: '#6B6354' }}>"Excellence is a habit not an act" — Aristotle</div>
+        <div className="serif" style={{ fontSize: '13px', fontStyle: 'italic', color: '#5C6B85' }}>"Excellence is a habit not an act" — Aristotle</div>
       </div>
 
       <WrongNoteDetailModal noteId={detailNoteId} onClose={() => setDetailNoteId(null)} />
@@ -581,34 +589,34 @@ function WrongNotesPage() {
     <>
       <section style={{ marginBottom: '48px' }} className="fade-up">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#8B3A1F' }} className="pulse-warm" />
-          <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B7E6A', textTransform: 'uppercase' }}>{t('wn.label')}</span>
+          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#C25E2E' }} className="pulse-warm" />
+          <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B95AB', textTransform: 'uppercase' }}>{t('wn.label')}</span>
         </div>
         <h1 className="serif" style={{ fontSize: '48px', lineHeight: 1.15, letterSpacing: '-0.025em', fontWeight: 400, margin: 0, maxWidth: '880px' }}>
-          <em style={{ color: '#8B3A1F', fontStyle: 'italic', fontWeight: 500 }}>
+          <em style={{ color: '#C25E2E', fontStyle: 'italic', fontWeight: 500 }}>
             {t('wn.headline.count', { n: stats.data?.total ?? 0 })}
           </em><br />
-          <span style={{ color: '#6B6354' }}>{t('wn.headline.suffix')}</span>
+          <span style={{ color: '#5C6B85' }}>{t('wn.headline.suffix')}</span>
         </h1>
 
         <div className="deco-line" style={{ height: '1px', marginTop: '32px', marginBottom: '24px' }} />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #1F1A1415', borderBottom: '1px solid #1F1A1415' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #14285015', borderBottom: '1px solid #14285015' }}>
           {[
-            { label: t('wn.stat.total'), value: String(stats.data?.total ?? 0), unit: t('common.problem'), accent: '#1F1A14' },
-            { label: t('wn.stat.analyzed'), value: String(stats.data?.analyzed ?? 0), unit: t('common.problem'), accent: '#B45309' },
+            { label: t('wn.stat.total'), value: String(stats.data?.total ?? 0), unit: t('common.problem'), accent: '#142850' },
+            { label: t('wn.stat.analyzed'), value: String(stats.data?.analyzed ?? 0), unit: t('common.problem'), accent: '#C7791F' },
             { label: t('wn.stat.mastered'), value: String(stats.data?.mastered ?? 0), unit: t('common.problem'),
-              sub: t('wn.stat.masteredPct', { pct: stats.data?.masteredPct ?? 0 }), accent: '#4A5D3A' },
+              sub: t('wn.stat.masteredPct', { pct: stats.data?.masteredPct ?? 0 }), accent: '#5A8A45' },
             { label: t('wn.stat.retry'), value: String(stats.data?.retryAccuracy ?? 0), unit: t('common.percent'),
-              sub: t('wn.stat.retrySub'), accent: '#4A5D3A' },
+              sub: t('wn.stat.retrySub'), accent: '#5A8A45' },
           ].map((stat, i) => (
-            <div key={i} style={{ padding: '24px 28px', borderRight: i < 3 ? '1px solid #1F1A1415' : 'none' }}>
-              <div style={{ fontSize: '11px', letterSpacing: '0.18em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: '12px' }}>{stat.label}</div>
+            <div key={i} style={{ padding: '24px 28px', borderRight: i < 3 ? '1px solid #14285015' : 'none' }}>
+              <div style={{ fontSize: '11px', letterSpacing: '0.18em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: '12px' }}>{stat.label}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '8px' }}>
                 <span className="serif mono" style={{ fontSize: '44px', fontWeight: 500, letterSpacing: '-0.04em', color: stat.accent }}>{stat.value}</span>
-                <span style={{ fontSize: '14px', color: '#6B6354', fontWeight: 500 }}>{stat.unit}</span>
+                <span style={{ fontSize: '14px', color: '#5C6B85', fontWeight: 500 }}>{stat.unit}</span>
               </div>
-              {(stat as any).sub && <div style={{ fontSize: '12px', color: '#6B6354' }}>{(stat as any).sub}</div>}
+              {(stat as any).sub && <div style={{ fontSize: '12px', color: '#5C6B85' }}>{(stat as any).sub}</div>}
             </div>
           ))}
         </div>
@@ -617,9 +625,9 @@ function WrongNotesPage() {
       <section style={{ marginBottom: '48px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
           {[
-            { icon: Camera, label: t('wn.register.photo'), sub: t('wn.register.photoSub'), color: '#8B3A1F' },
-            { icon: FileText, label: t('wn.register.text'), sub: t('wn.register.textSub'), color: '#B45309' },
-            { icon: ImageIcon, label: t('wn.register.pdf'), sub: t('wn.register.pdfSub'), color: '#4A5D3A' },
+            { icon: Camera, label: t('wn.register.photo'), sub: t('wn.register.photoSub'), color: '#C25E2E' },
+            { icon: FileText, label: t('wn.register.text'), sub: t('wn.register.textSub'), color: '#C7791F' },
+            { icon: ImageIcon, label: t('wn.register.pdf'), sub: t('wn.register.pdfSub'), color: '#5A8A45' },
           ].map((item, i) => {
             const I = item.icon;
             const modes: Array<'photo' | 'text' | 'pdf'> = ['photo', 'text', 'pdf'];
@@ -629,7 +637,7 @@ function WrongNotesPage() {
                 className="hover-lift"
                 onClick={() => setRegisterMode(modes[i])}
                 style={{
-                  backgroundColor: '#FAF6EB', border: '1px dashed #1F1A1430', borderRadius: '4px',
+                  backgroundColor: '#F8F4E9', border: '1px dashed #14285030', borderRadius: '4px',
                   padding: '24px', display: 'flex', alignItems: 'center', gap: '16px',
                   cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
                 }}>
@@ -637,19 +645,19 @@ function WrongNotesPage() {
                   <I size={22} color={item.color} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '15px', fontWeight: 600, color: '#1F1A14', marginBottom: '4px' }}>{item.label}</div>
-                  <div style={{ fontSize: '12px', color: '#6B6354' }}>{item.sub}</div>
+                  <div style={{ fontSize: '15px', fontWeight: 600, color: '#142850', marginBottom: '4px' }}>{item.label}</div>
+                  <div style={{ fontSize: '12px', color: '#5C6B85' }}>{item.sub}</div>
                 </div>
-                <Plus size={18} color="#1F1A14" style={{ marginLeft: 'auto', flexShrink: 0 }} />
+                <Plus size={18} color="#142850" style={{ marginLeft: 'auto', flexShrink: 0 }} />
               </button>
             );
           })}
         </div>
       </section>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #1F1A1415' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #14285015' }}>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <Filter size={14} color="#8B7E6A" />
+          <Filter size={14} color="#8B95AB" />
           {(() => {
             const ko = ['전체', '미적분 II', '확률·통계', '함수', '기하·벡터'];
             const enMap: Record<string, string> = {
@@ -664,26 +672,26 @@ function WrongNotesPage() {
               <button key={f} onClick={() => setFilter(f)} style={{
                 padding: '6px 12px', fontSize: '13px',
                 fontWeight: filter === f ? 600 : 400,
-                color: filter === f ? '#F2EDE2' : '#6B6354',
-                backgroundColor: filter === f ? '#1F1A14' : 'transparent',
-                border: '1px solid ' + (filter === f ? '#1F1A14' : '#1F1A1430'),
+                color: filter === f ? '#EFEBDF' : '#5C6B85',
+                backgroundColor: filter === f ? '#142850' : 'transparent',
+                border: '1px solid ' + (filter === f ? '#142850' : '#14285030'),
                 borderRadius: '999px', cursor: 'pointer', fontFamily: 'inherit',
               }}>{display(f)}</button>
             ));
           })()}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#6B6354', position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#5C6B85', position: 'relative' }}>
           <span>{t('wn.sort.label')}</span>
           <button
             onClick={() => setSortOpen((v) => !v)}
-            style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: '#1F1A14', fontWeight: 600, fontFamily: 'inherit' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: '#142850', fontWeight: 600, fontFamily: 'inherit' }}
           >
             {sort === 'newest' ? t('wn.sort.newest') : t('wn.sort.oldest')} <ChevronDown size={12} />
           </button>
           {sortOpen && (
             <div style={{
               position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 10,
-              backgroundColor: '#FAF6EB', border: '1px solid #1F1A1430', borderRadius: 4,
+              backgroundColor: '#F8F4E9', border: '1px solid #14285030', borderRadius: 4,
               boxShadow: '0 8px 20px rgba(31,26,20,0.12)', minWidth: 120,
               fontFamily: 'inherit',
             }}>
@@ -693,10 +701,10 @@ function WrongNotesPage() {
                   onClick={() => { setSort(s); setSortOpen(false); }}
                   style={{
                     display: 'block', width: '100%', padding: '10px 14px',
-                    background: sort === s ? '#1F1A1408' : 'transparent',
+                    background: sort === s ? '#14285008' : 'transparent',
                     border: 'none', textAlign: 'left', cursor: 'pointer',
                     fontSize: 13, fontFamily: 'inherit',
-                    color: sort === s ? '#1F1A14' : '#6B6354',
+                    color: sort === s ? '#142850' : '#5C6B85',
                     fontWeight: sort === s ? 600 : 400,
                   }}
                 >
@@ -715,32 +723,32 @@ function WrongNotesPage() {
             className="hover-lift"
             onClick={() => setDetailNoteId(note.id)}
             style={{
-              backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415',
+              backgroundColor: '#F8F4E9', border: '1px solid #14285015',
               borderRadius: '4px', padding: '24px', position: 'relative', cursor: 'pointer',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
               <div>
-                <div style={{ fontSize: '11px', color: '#8B7E6A', marginBottom: '6px', letterSpacing: '0.05em' }}>{note.problem}</div>
+                <div style={{ fontSize: '11px', color: '#8B95AB', marginBottom: '6px', letterSpacing: '0.05em' }}>{note.problem}</div>
                 <div className="serif" style={{ fontSize: '17px', fontWeight: 500, letterSpacing: '-0.01em' }}>
-                  {note.unit} <span style={{ color: '#8B7E6A', fontStyle: 'italic' }}>· {note.subUnit}</span>
+                  {note.unit} <span style={{ color: '#8B95AB', fontStyle: 'italic' }}>· {note.subUnit}</span>
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
                 <span style={{
                   fontSize: '10px', padding: '3px 8px',
-                  backgroundColor: note.diff === '킬러' ? '#1F1A14' : note.diff === '준킬러' ? '#8B3A1F' : '#B45309',
-                  color: '#F2EDE2', borderRadius: '2px', letterSpacing: '0.05em',
+                  backgroundColor: note.diff === '킬러' ? '#142850' : note.diff === '준킬러' ? '#C25E2E' : '#C7791F',
+                  color: '#EFEBDF', borderRadius: '2px', letterSpacing: '0.05em',
                 }}>{note.diff}</span>
                 {note.status === 'mastered' && (
-                  <span style={{ fontSize: '10px', color: '#4A5D3A', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <span style={{ fontSize: '10px', color: '#5A8A45', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}>
                     <CheckCircle2 size={11} /> {t('wn.master.completed')}
                   </span>
                 )}
                 {note.status !== 'mastered' && note.dueIn && (
                   <span style={{
                     fontSize: '10px',
-                    color: note.isDue ? '#8B3A1F' : '#6B6354',
+                    color: note.isDue ? '#C25E2E' : '#5C6B85',
                     fontWeight: note.isDue ? 600 : 400,
                     display: 'flex', alignItems: 'center', gap: '3px',
                     fontFamily: 'JetBrains Mono, monospace',
@@ -752,35 +760,35 @@ function WrongNotesPage() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '10px', padding: '2px 8px', backgroundColor: '#8B3A1F15', color: '#8B3A1F', borderRadius: '2px', fontWeight: 600 }}>{note.errorType}</span>
-              <span style={{ fontSize: '11px', color: '#A89684' }}>· {note.date}</span>
+              <span style={{ fontSize: '10px', padding: '2px 8px', backgroundColor: '#C25E2E15', color: '#C25E2E', borderRadius: '2px', fontWeight: 600 }}>{note.errorType}</span>
+              <span style={{ fontSize: '11px', color: '#AAB4C5' }}>· {note.date}</span>
             </div>
 
             {note.problemBody && (
               <div className="serif" style={{
-                padding: '12px 14px', backgroundColor: '#FAF6EB',
-                border: '1px solid #1F1A1418', borderRadius: 4, marginBottom: '12px',
-                fontSize: '14px', lineHeight: 1.6, color: '#1F1A14',
+                padding: '12px 14px', backgroundColor: '#F8F4E9',
+                border: '1px solid #14285018', borderRadius: 4, marginBottom: '12px',
+                fontSize: '14px', lineHeight: 1.6, color: '#142850',
                 display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
               }}>{note.problemBody}</div>
             )}
 
-            <div style={{ padding: '14px', backgroundColor: '#1F1A1408', borderLeft: '2px solid #1F1A1430', borderRadius: '0 2px 2px 0', marginBottom: '16px' }}>
+            <div style={{ padding: '14px', backgroundColor: '#14285008', borderLeft: '2px solid #14285030', borderRadius: '0 2px 2px 0', marginBottom: '16px' }}>
               <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
-                <Sparkles size={12} color="#8B3A1F" style={{ marginTop: '3px', flexShrink: 0 }} />
-                <div style={{ fontSize: '13px', color: '#1F1A14', lineHeight: 1.6 }}>{note.insight}</div>
+                <Sparkles size={12} color="#C25E2E" style={{ marginTop: '3px', flexShrink: 0 }} />
+                <div style={{ fontSize: '13px', color: '#142850', lineHeight: 1.6 }}>{note.insight}</div>
               </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '11px', color: '#6B6354' }}>{t('wn.similar', { n: note.similarCount })}</span>
+              <span style={{ fontSize: '11px', color: '#5C6B85' }}>{t('wn.similar', { n: note.similarCount })}</span>
               <button
                 disabled={note.status === 'mastered' || masterMut.isPending}
                 onClick={(e) => { e.stopPropagation(); masterMut.mutate(note.id); }}
                 style={{
                   fontSize: '12px', padding: '6px 12px',
-                  backgroundColor: note.status === 'mastered' ? '#4A5D3A' : '#1F1A14',
-                  color: '#F2EDE2', border: 'none', borderRadius: '2px',
+                  backgroundColor: note.status === 'mastered' ? '#5A8A45' : '#142850',
+                  color: '#EFEBDF', border: 'none', borderRadius: '2px',
                   cursor: note.status === 'mastered' ? 'default' : 'pointer',
                   display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'inherit',
                   opacity: masterMut.isPending ? 0.6 : 1,
@@ -793,20 +801,20 @@ function WrongNotesPage() {
         ))}
       </div>
 
-      <div style={{ backgroundColor: '#1F1A14', color: '#F2EDE2', borderRadius: '4px', padding: '40px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ backgroundColor: '#142850', color: '#EFEBDF', borderRadius: '4px', padding: '40px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(180,83,9,0.15) 0%, transparent 70%)' }} />
         <div style={{ position: 'relative' }}>
-          <div style={{ fontSize: '11px', letterSpacing: '0.2em', color: '#A89684', textTransform: 'uppercase', marginBottom: '6px' }}>AI Pattern Analysis</div>
+          <div style={{ fontSize: '11px', letterSpacing: '0.2em', color: '#AAB4C5', textTransform: 'uppercase', marginBottom: '6px' }}>AI Pattern Analysis</div>
           <h2 className="serif" style={{ fontSize: '32px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0, marginBottom: '32px' }}>
             {t('wn.aiPattern.title')}
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
             {(patterns.data ?? []).map((p) => (
-              <div key={p.num} style={{ borderTop: '1px solid #F2EDE220', paddingTop: '20px' }}>
-                <div className="serif mono" style={{ fontSize: '32px', color: '#D97706', fontWeight: 400, marginBottom: '12px', letterSpacing: '-0.04em' }}>{p.num}</div>
+              <div key={p.num} style={{ borderTop: '1px solid #EFEBDF20', paddingTop: '20px' }}>
+                <div className="serif mono" style={{ fontSize: '32px', color: '#D9A055', fontWeight: 400, marginBottom: '12px', letterSpacing: '-0.04em' }}>{p.num}</div>
                 <div className="serif" style={{ fontSize: '20px', fontWeight: 500, marginBottom: '12px', letterSpacing: '-0.01em' }}>{p.title}</div>
-                <div style={{ fontSize: '13px', color: '#E8DFD0', lineHeight: 1.65, marginBottom: '16px' }}>{p.desc}</div>
-                <div style={{ fontSize: '11px', color: '#A89684', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('wn.aiPattern.foundCount', { n: p.count })}</div>
+                <div style={{ fontSize: '13px', color: '#E0D8C8', lineHeight: 1.65, marginBottom: '16px' }}>{p.desc}</div>
+                <div style={{ fontSize: '11px', color: '#AAB4C5', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('wn.aiPattern.foundCount', { n: p.count })}</div>
               </div>
             ))}
           </div>
@@ -831,6 +839,7 @@ function StudyPage({ sessionId, onClear, onStartStudy }: { sessionId: string | n
 
 function StudyPlaceholder({ onStartStudy }: { onStartStudy?: (id: string) => void }) {
   const { t } = useT();
+  const [recGrade, setRecGrade] = useState<string>('__mine__');
   const startSessionMut = useMutation({
     mutationFn: (unitId: string) => M.startStudySession({ unitId }),
     onSuccess: (s) => {
@@ -839,29 +848,94 @@ function StudyPlaceholder({ onStartStudy }: { onStartStudy?: (id: string) => voi
     },
     onError: () => toast(t('toast.session.startFailed'), 'error'),
   });
+  const recommended = useQuery({
+    queryKey: ['study-recommended-units', recGrade],
+    queryFn: () => get<Array<{
+      unitId: string; unit: string; mastery: number; wrongCount: number;
+      attemptCount: number; studyMinutes: number; weight: number; reason: string;
+    }>>('/study-sessions/recommended-units', { count: 3, grade: recGrade }),
+  });
   return (
     <div className="fade-up" style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      padding: '80px 24px', textAlign: 'center', minHeight: '50vh',
+      maxWidth: 720, margin: '0 auto', padding: '40px 24px',
     }}>
-      <div style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: '12px' }}>
+      <div style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: '12px' }}>
         {t('study.placeholder.label')}
       </div>
       <h2 className="serif" style={{ fontSize: '32px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0, marginBottom: '12px' }}>
         {t('study.placeholder.title')}
       </h2>
-      <div style={{ fontSize: '14px', color: '#6B6354', maxWidth: '420px', lineHeight: 1.65, marginBottom: 24 }}>
+      <div style={{ fontSize: '14px', color: '#5C6B85', lineHeight: 1.65, marginBottom: 28 }}>
         {t('study.placeholder.desc')}
       </div>
-      <div style={{ width: '100%', maxWidth: 480 }}>
-        <UnitPicker
-          disabled={startSessionMut.isPending}
-          onPick={(unitId) => {
-            trackClick('start_study_from_studyplaceholder', { unitId });
-            startSessionMut.mutate(unitId);
-          }}
-        />
+
+      {/* 가중치 기반 추천 단원 카드 */}
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <div style={{ fontSize: '11px', letterSpacing: '0.18em', color: '#8B95AB', textTransform: 'uppercase', fontWeight: 600 }}>
+            {t('study.recommend.title')}
+          </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#5C6B85' }}>
+            <span style={{ letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('unitPicker.gradeFilter')}</span>
+            <select
+              value={recGrade}
+              onChange={(e) => setRecGrade(e.target.value)}
+              style={{
+                padding: '6px 10px', fontSize: 12,
+                border: '1px solid #14285030', borderRadius: 4,
+                backgroundColor: '#EFEBDF', outline: 'none', fontFamily: 'inherit',
+              }}
+            >
+              {(['__mine__', 'G_MIDDLE_1', 'G_MIDDLE_2', 'G_MIDDLE_3', 'G_HIGH_1', 'G_HIGH_2', 'G_HIGH_3', '__all__'] as const).map((g) => (
+                <option key={g} value={g}>
+                  {g === '__mine__' ? t('unitPicker.gradeMine') : g === '__all__' ? t('unitPicker.allGrades') : t(`grade.${g}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+          {(recommended.data ?? []).map((r) => (
+            <button
+              key={r.unitId}
+              className="hover-lift"
+              disabled={startSessionMut.isPending}
+              onClick={() => {
+                trackClick('start_study_from_recommend', { unitId: r.unitId, weight: r.weight });
+                startSessionMut.mutate(r.unitId);
+              }}
+              style={{
+                padding: 16, textAlign: 'left',
+                backgroundColor: '#F8F4E9', border: '1px solid #14285020',
+                borderLeft: '3px solid #1FB8C4', borderRadius: '0 4px 4px 0',
+                cursor: 'pointer', fontFamily: 'inherit', color: '#142850',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+                <span className="serif" style={{ fontSize: 17, fontWeight: 600 }}>{r.unit}</span>
+                <span style={{ fontSize: 10, padding: '2px 6px', backgroundColor: '#1FB8C4', color: '#142850', borderRadius: 2, fontWeight: 700 }}>
+                  {t('study.recommend.weight', { w: r.weight })}
+                </span>
+              </div>
+              <div style={{ fontSize: 11, color: '#5C6B85', lineHeight: 1.55 }}>{r.reason}</div>
+            </button>
+          ))}
+          {(recommended.data ?? []).length === 0 && (
+            <div style={{ fontSize: 12, color: '#8B95AB', padding: 16 }}>
+              {t('study.recommend.empty')}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* 수동 학년·단원 선택 */}
+      <UnitPicker
+        disabled={startSessionMut.isPending}
+        onPick={(unitId) => {
+          trackClick('start_study_from_studyplaceholder', { unitId });
+          startSessionMut.mutate(unitId);
+        }}
+      />
     </div>
   );
 }
@@ -1021,17 +1095,17 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
             </h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px' }}>
-              <Clock size={14} color="#8B7E6A" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', backgroundColor: '#F8F4E9', border: '1px solid #14285015', borderRadius: '4px' }}>
+              <Clock size={14} color="#8B95AB" />
               <span className="mono" style={{ fontSize: '14px', fontWeight: 600 }}>{mm}:{ss}</span>
-              <button onClick={() => setPaused((v) => !v)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B6354', display: 'flex' }}>
+              <button onClick={() => setPaused((v) => !v)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5C6B85', display: 'flex' }}>
                 {paused ? <Play size={14} /> : <Pause size={14} />}
               </button>
             </div>
             <button
               onClick={() => endMut.mutate()}
               disabled={endMut.isPending}
-              style={{ padding: '10px 16px', backgroundColor: 'transparent', border: '1px solid #1F1A1430', borderRadius: '4px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ padding: '10px 16px', backgroundColor: 'transparent', border: '1px solid #14285030', borderRadius: '4px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               {endMut.isPending ? t('study.session.endBusy') : t('study.session.endBtn')}
             </button>
@@ -1042,7 +1116,7 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
             const n = i + 1;
             return <div key={n} style={{
               flex: 1, height: '4px',
-              backgroundColor: n < step ? '#4A5D3A' : n === step ? '#B45309' : '#1F1A1418',
+              backgroundColor: n < step ? '#5A8A45' : n === step ? '#C7791F' : '#14285018',
               borderRadius: '2px',
             }} />;
           })}
@@ -1050,30 +1124,30 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '32px', marginBottom: '32px' }}>
-        <div className="grain" style={{ backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px', padding: '40px', position: 'relative' }}>
+        <div className="grain" style={{ backgroundColor: '#F8F4E9', border: '1px solid #14285015', borderRadius: '4px', padding: '40px', position: 'relative' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
             <div>
               <div style={sectionLabelStyle}>Problem {String(step).padStart(2, '0')}</div>
-              <div className="serif" style={{ fontSize: '14px', color: '#8B7E6A', fontStyle: 'italic' }}>
+              <div className="serif" style={{ fontSize: '14px', color: '#8B95AB', fontStyle: 'italic' }}>
                 {currentProblem?.source ?? '—'}
               </div>
             </div>
             {currentProblem && (
-              <span style={{ fontSize: '11px', padding: '4px 10px', backgroundColor: '#8B3A1F', color: '#F2EDE2', borderRadius: '2px' }}>
+              <span style={{ fontSize: '11px', padding: '4px 10px', backgroundColor: '#C25E2E', color: '#EFEBDF', borderRadius: '2px' }}>
                 {currentProblem.difficulty}
               </span>
             )}
           </div>
-          <div className="serif" style={{ fontSize: '18px', lineHeight: 1.7, color: '#1F1A14', marginBottom: '24px', whiteSpace: 'pre-wrap' }}>
+          <div className="serif" style={{ fontSize: '18px', lineHeight: 1.7, color: '#142850', marginBottom: '24px', whiteSpace: 'pre-wrap' }}>
             {problemsEmpty ? (
-              <span style={{ color: '#8B7E6A', fontStyle: 'italic', fontSize: 15 }}>
+              <span style={{ color: '#8B95AB', fontStyle: 'italic', fontSize: 15 }}>
                 {t('study.problem.empty')}
               </span>
             ) : currentProblem?.body ?? t('study.problem.loading')}
           </div>
           {currentProblem?.formula && (
-            <div style={{ padding: '24px', backgroundColor: '#1F1A1408', borderRadius: '4px', textAlign: 'center', marginBottom: '24px' }}>
-              <div className="serif mono" style={{ fontSize: '20px', color: '#1F1A14', letterSpacing: '-0.02em' }}>{currentProblem.formula}</div>
+            <div style={{ padding: '24px', backgroundColor: '#14285008', borderRadius: '4px', textAlign: 'center', marginBottom: '24px' }}>
+              <div className="serif mono" style={{ fontSize: '20px', color: '#142850', letterSpacing: '-0.02em' }}>{currentProblem.formula}</div>
             </div>
           )}
           {/* 3단계 객관식 — CONCEPT → PROCESS → ANSWER */}
@@ -1085,15 +1159,15 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                   {[1, 2, 3].map((n) => {
                     const result = stepResults[n];
                     const isCurrent = n === problemStep;
-                    const bg = result?.correct ? '#4A5D3A' :
-                               result && !result.correct ? '#8B3A1F' :
-                               isCurrent ? '#B45309' : '#1F1A1418';
+                    const bg = result?.correct ? '#5A8A45' :
+                               result && !result.correct ? '#C25E2E' :
+                               isCurrent ? '#C7791F' : '#14285018';
                     const label = n === 1 ? t('study.step.concept') : n === 2 ? t('study.step.process') : t('study.step.answer');
                     return (
                       <div key={n} style={{
                         flex: 1, padding: '6px 10px',
                         backgroundColor: bg,
-                        color: result || isCurrent ? '#F2EDE2' : '#6B6354',
+                        color: result || isCurrent ? '#EFEBDF' : '#5C6B85',
                         borderRadius: 4, fontSize: 11, fontWeight: 600,
                         textAlign: 'center', letterSpacing: '0.05em',
                       }}>
@@ -1102,7 +1176,7 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                     );
                   })}
                 </div>
-                <div style={{ fontSize: 14, color: '#1F1A14', fontWeight: 600, marginTop: 12, lineHeight: 1.5 }}>
+                <div style={{ fontSize: 14, color: '#142850', fontWeight: 600, marginTop: 12, lineHeight: 1.5 }}>
                   Q{problemStep}. {currentStep.prompt}
                 </div>
               </div>
@@ -1117,21 +1191,21 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                   const disabled = stepLocked || isAlreadyWrong;
 
                   // 색상 결정
-                  let bgColor = '#FAF6EB';
-                  let borderColor = '#1F1A1430';
+                  let bgColor = '#F8F4E9';
+                  let borderColor = '#14285030';
                   let icon: string | null = null;
-                  let textColor = '#1F1A14';
+                  let textColor = '#142850';
                   if (isFinalCorrect) {
-                    bgColor = '#4A5D3A18'; borderColor = '#4A5D3A'; icon = '✓';
+                    bgColor = '#5A8A4518'; borderColor = '#5A8A45'; icon = '✓';
                   } else if (isAlreadyWrong) {
-                    bgColor = '#8B3A1F12'; borderColor = '#8B3A1F'; icon = '✗';
-                    textColor = '#8B7E6A';
+                    bgColor = '#C25E2E12'; borderColor = '#C25E2E'; icon = '✗';
+                    textColor = '#8B95AB';
                   } else if (stepLocked) {
                     // 단계 종료 — 정답이 아니었던 다른 선택지: 회색 처리
-                    bgColor = '#1F1A1405'; borderColor = '#1F1A1418';
-                    textColor = '#A89684';
+                    bgColor = '#14285005'; borderColor = '#14285018';
+                    textColor = '#AAB4C5';
                   } else if (isCurrentSelection) {
-                    bgColor = '#1F1A1408'; borderColor = '#1F1A14';
+                    bgColor = '#14285008'; borderColor = '#142850';
                   }
 
                   return (
@@ -1152,10 +1226,10 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                       <span style={{
                         flexShrink: 0, width: 22, height: 22, borderRadius: '50%',
                         backgroundColor:
-                          isFinalCorrect ? '#4A5D3A' :
-                          isAlreadyWrong ? '#8B3A1F' :
-                          isCurrentSelection ? '#1F1A14' : '#1F1A1410',
-                        color: isFinalCorrect || isAlreadyWrong || isCurrentSelection ? '#F2EDE2' : '#6B6354',
+                          isFinalCorrect ? '#5A8A45' :
+                          isAlreadyWrong ? '#C25E2E' :
+                          isCurrentSelection ? '#142850' : '#14285010',
+                        color: isFinalCorrect || isAlreadyWrong || isCurrentSelection ? '#EFEBDF' : '#5C6B85',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 11, fontWeight: 600,
                       }}>
@@ -1171,17 +1245,17 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
               {lastFeedback && (
                 <div style={{
                   padding: 14,
-                  backgroundColor: lastFeedback.isCorrect ? '#4A5D3A12' : '#8B3A1F0E',
-                  border: `1px solid ${lastFeedback.isCorrect ? '#4A5D3A40' : '#8B3A1F40'}`,
+                  backgroundColor: lastFeedback.isCorrect ? '#5A8A4512' : '#C25E2E0E',
+                  border: `1px solid ${lastFeedback.isCorrect ? '#5A8A4540' : '#C25E2E40'}`,
                   borderRadius: 4, marginBottom: 12,
                   fontSize: 13, lineHeight: 1.65,
                 }}>
                   {lastFeedback.isCorrect ? (
                     <div>
-                      <div style={{ fontWeight: 600, color: '#4A5D3A', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ fontWeight: 600, color: '#5A8A45', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <CheckCircle2 size={14} /> {t('study.feedback.correct.title', { next: problemStep < totalSteps ? t('study.feedback.correct.continue') : t('study.feedback.correct.lastStep') })}
                       </div>
-                      <div style={{ color: '#1F1A14' }}>
+                      <div style={{ color: '#142850' }}>
                         {problemStep === 1 ? t('study.feedback.correct.step1') :
                          problemStep === 2 ? t('study.feedback.correct.step2') :
                          t('study.feedback.correct.step3')}
@@ -1189,7 +1263,7 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                     </div>
                   ) : (
                     <div>
-                      <div style={{ fontWeight: 600, color: '#8B3A1F', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ fontWeight: 600, color: '#C25E2E', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <AlertCircle size={14} />
                         {lastFeedback.distractorType === 'CONCEPT_CONFUSION' ? t('study.feedback.distractor.concept') :
                          lastFeedback.distractorType === 'CALC_ERROR' ? t('study.feedback.distractor.calc') :
@@ -1197,10 +1271,44 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                          lastFeedback.distractorType === 'TIME_PRESSURE_GUESS' ? t('study.feedback.distractor.time') : t('study.feedback.distractor.other')}
                       </div>
                       {lastFeedback.rationale && (
-                        <div style={{ color: '#1F1A14', marginBottom: 6 }}>{lastFeedback.rationale}</div>
+                        <div style={{ color: '#142850', marginBottom: 6 }}>{lastFeedback.rationale}</div>
                       )}
-                      <div style={{ fontSize: 12, color: '#6B6354' }}>
+                      <div style={{ fontSize: 12, color: '#5C6B85' }}>
                         {t('study.feedback.wrong.tryAgain')}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 핵심 개념 + 관련 공식 — 한 번이라도 틀렸거나 마지막 단계까지 정답 도달 시 노출 */}
+              {currentProblem?.concept && (lastFeedback || (stepResults[3]?.correct)) && (
+                <div style={{
+                  padding: 14, marginBottom: 12,
+                  backgroundColor: '#14285008',
+                  border: '1px solid #14285020', borderLeft: '3px solid #C25E2E',
+                  borderRadius: '0 4px 4px 0',
+                }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    fontSize: 11, letterSpacing: '0.15em', textTransform: 'uppercase',
+                    color: '#C25E2E', fontWeight: 600, marginBottom: 8,
+                  }}>
+                    <Lightbulb size={13} /> {t('study.concept.label')}
+                  </div>
+                  <div style={{ fontSize: 13, lineHeight: 1.7, color: '#142850', whiteSpace: 'pre-wrap' }}>
+                    {currentProblem.concept}
+                  </div>
+                  {currentProblem.formula && (
+                    <div style={{
+                      marginTop: 10, padding: '10px 12px',
+                      backgroundColor: '#F8F4E9', border: '1px solid #14285020', borderRadius: 4,
+                    }}>
+                      <div style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#1FB8C4', fontWeight: 700, marginBottom: 4 }}>
+                        {t('study.formula.label')}
+                      </div>
+                      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: '#142850' }}>
+                        {currentProblem.formula}
                       </div>
                     </div>
                   )}
@@ -1220,7 +1328,7 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                       disabled={!selectedChoiceId || submitStepMut.isPending}
                       style={{
                         flex: 1, padding: '14px',
-                        backgroundColor: '#1F1A14', color: '#F2EDE2', border: 'none',
+                        backgroundColor: '#142850', color: '#EFEBDF', border: 'none',
                         borderRadius: 4, fontSize: 14, fontWeight: 600,
                         cursor: 'pointer', fontFamily: 'inherit',
                         opacity: (!selectedChoiceId || submitStepMut.isPending) ? 0.55 : 1,
@@ -1233,8 +1341,8 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                     <button
                       onClick={() => setShowHint((v) => !v)}
                       style={{
-                        padding: '14px 20px', backgroundColor: 'transparent', color: '#1F1A14',
-                        border: '1px solid #1F1A1430', borderRadius: 4, fontSize: 14,
+                        padding: '14px 20px', backgroundColor: 'transparent', color: '#142850',
+                        border: '1px solid #14285030', borderRadius: 4, fontSize: 14,
                         cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6,
                       }}
                     >
@@ -1247,7 +1355,7 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                   onClick={goNextStep}
                   style={{
                     width: '100%', padding: '14px',
-                    backgroundColor: '#4A5D3A', color: '#F2EDE2', border: 'none', borderRadius: 4,
+                    backgroundColor: '#5A8A45', color: '#EFEBDF', border: 'none', borderRadius: 4,
                     fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   }}
@@ -1257,13 +1365,13 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                 </button>
               )}
               {showHint && (
-                <div style={{ marginTop: 14, padding: 14, backgroundColor: '#B4530910', border: '1px solid #B4530930', borderRadius: 4, fontSize: 13, color: '#1F1A14', lineHeight: 1.6 }}>
+                <div style={{ marginTop: 14, padding: 14, backgroundColor: '#C7791F10', border: '1px solid #C7791F30', borderRadius: 4, fontSize: 13, color: '#142850', lineHeight: 1.6 }}>
                   {hintQuery.isLoading ? t('study.hint.loading') : hintQuery.data?.hint ?? t('study.hint.empty')}
                 </div>
               )}
             </>
           ) : (
-            <div style={{ padding: 24, textAlign: 'center', color: '#8B7E6A', fontSize: 14, fontStyle: 'italic' }}>
+            <div style={{ padding: 24, textAlign: 'center', color: '#8B95AB', fontSize: 14, fontStyle: 'italic' }}>
               {t('study.problem.empty')}
             </div>
           )}
@@ -1275,8 +1383,8 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
             <h2 className="serif" style={{ fontSize: '24px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('study.aiGuide.title')}</h2>
           </div>
           <div style={{ marginBottom: '16px' }}>
-            <div style={{ fontSize: '11px', color: '#8B7E6A', marginBottom: '8px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('study.aiGuide.perspective')}</div>
-            <div style={{ display: 'flex', gap: '4px', padding: '4px', backgroundColor: '#1F1A1410', borderRadius: '4px' }}>
+            <div style={{ fontSize: '11px', color: '#8B95AB', marginBottom: '8px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('study.aiGuide.perspective')}</div>
+            <div style={{ display: 'flex', gap: '4px', padding: '4px', backgroundColor: '#14285010', borderRadius: '4px' }}>
               {(['공식 중심', '단계별', '시각화', '실생활 예시'] as const).map((p) => {
                 const label = p === '공식 중심' ? t('study.aiGuide.perspective.formula')
                   : p === '단계별' ? t('study.aiGuide.perspective.steps')
@@ -1285,31 +1393,31 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                 return (
                 <button key={p} onClick={() => { track('perspective.change', { from: perspective, to: p, sessionId }); setPerspective(p); }} style={{
                   flex: 1, padding: '8px', fontSize: '12px', fontWeight: perspective === p ? 600 : 400,
-                  backgroundColor: perspective === p ? '#FAF6EB' : 'transparent',
-                  color: perspective === p ? '#1F1A14' : '#6B6354',
+                  backgroundColor: perspective === p ? '#F8F4E9' : 'transparent',
+                  color: perspective === p ? '#142850' : '#5C6B85',
                   border: 'none', borderRadius: '2px', cursor: 'pointer', fontFamily: 'inherit',
                 }}>{label}</button>
                 );
               })}
             </div>
           </div>
-          <div style={{ backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px', padding: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #1F1A1415' }}>
-              <Brain size={16} color="#8B3A1F" />
+          <div style={{ backgroundColor: '#F8F4E9', border: '1px solid #14285015', borderRadius: '4px', padding: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #14285015' }}>
+              <Brain size={16} color="#C25E2E" />
               <span style={{ fontSize: '13px', fontWeight: 600 }}>{
                 perspective === '공식 중심' ? t('study.aiGuide.perspective.formula') :
                 perspective === '단계별' ? t('study.aiGuide.perspective.steps') :
                 perspective === '시각화' ? t('study.aiGuide.perspective.visual') :
                 t('study.aiGuide.perspective.real')
               }</span>
-              <span style={{ fontSize: '11px', color: '#6B6354', marginLeft: 'auto' }}>{t('study.aiGuide.autoAdjust')}</span>
+              <span style={{ fontSize: '11px', color: '#5C6B85', marginLeft: 'auto' }}>{t('study.aiGuide.autoAdjust')}</span>
             </div>
-            <div style={{ fontSize: 13, lineHeight: 1.75, color: '#1F1A14', whiteSpace: 'pre-wrap', minHeight: 120 }}>
+            <div style={{ fontSize: 13, lineHeight: 1.75, color: '#142850', whiteSpace: 'pre-wrap', minHeight: 120 }}>
               {guide.isLoading ? t('study.aiGuide.loading') :
                guide.data?.text ?? t('study.aiGuide.error')}
             </div>
             {guide.data && (guide.data.inputTokens > 0 || guide.data.outputTokens > 0) && (
-              <div style={{ marginTop: 12, fontSize: 11, color: '#A89684', fontFamily: 'JetBrains Mono, monospace' }}>
+              <div style={{ marginTop: 12, fontSize: 11, color: '#AAB4C5', fontFamily: 'JetBrains Mono, monospace' }}>
                 tokens · in {guide.data.inputTokens} / out {guide.data.outputTokens}
               </div>
             )}
@@ -1317,12 +1425,12 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '24px', borderTop: '1px solid #1F1A1415' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '24px', borderTop: '1px solid #14285015' }}>
         <button
           onClick={() => toast(t('toast.prev.disabled'), 'info')}
           disabled
           title={t('toast.prev.disabled')}
-          style={{ padding: '12px 20px', backgroundColor: 'transparent', border: '1px solid #1F1A1418', borderRadius: '4px', fontSize: '13px', cursor: 'not-allowed', opacity: 0.4, display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit', color: '#6B6354' }}
+          style={{ padding: '12px 20px', backgroundColor: 'transparent', border: '1px solid #14285018', borderRadius: '4px', fontSize: '13px', cursor: 'not-allowed', opacity: 0.4, display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit', color: '#5C6B85' }}
         >
           <ArrowLeft size={14} /> {t('common.previous')}
         </button>
@@ -1330,7 +1438,7 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
           onClick={() => nextMut.mutate()}
           disabled={nextMut.isPending || step >= total}
           style={{
-            padding: '12px 20px', backgroundColor: '#1F1A14', color: '#F2EDE2',
+            padding: '12px 20px', backgroundColor: '#142850', color: '#EFEBDF',
             border: 'none', borderRadius: '4px', fontSize: '13px', cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit',
             opacity: (nextMut.isPending || step >= total) ? 0.55 : 1,
@@ -1378,36 +1486,36 @@ function MockExamPage({ onStartExam }: { onStartExam: (exam: M.ExamPackage) => v
     <>
       <section style={{ marginBottom: '48px' }} className="fade-up">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#4A5D3A' }} className="pulse-warm" />
-          <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B7E6A', textTransform: 'uppercase' }}>Mock Exam Trajectory</span>
+          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#5A8A45' }} className="pulse-warm" />
+          <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B95AB', textTransform: 'uppercase' }}>Mock Exam Trajectory</span>
         </div>
         <h1 className="serif" style={{ fontSize: '48px', lineHeight: 1.15, letterSpacing: '-0.025em', fontWeight: 400, margin: 0, maxWidth: '880px' }}>
-          {t('mock.headline.up')} <em style={{ color: '#4A5D3A', fontStyle: 'italic', fontWeight: 500 }}>{t('mock.headline.gain')}</em><br />
-          <span style={{ color: '#6B6354' }}>{t('mock.headline.expected')}</span> <em style={{ fontStyle: 'italic', fontWeight: 500 }}>{t('mock.headline.gradeStable', { grade: summary.data?.expectedGrade ?? '–' })}</em>
+          {t('mock.headline.up')} <em style={{ color: '#5A8A45', fontStyle: 'italic', fontWeight: 500 }}>{t('mock.headline.gain')}</em><br />
+          <span style={{ color: '#5C6B85' }}>{t('mock.headline.expected')}</span> <em style={{ fontStyle: 'italic', fontWeight: 500 }}>{t('mock.headline.gradeStable', { grade: summary.data?.expectedGrade ?? '–' })}</em>
         </h1>
 
         <div className="deco-line" style={{ height: '1px', marginTop: '32px', marginBottom: '24px' }} />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #1F1A1415', borderBottom: '1px solid #1F1A1415' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #14285015', borderBottom: '1px solid #14285015' }}>
           {[
-            { label: t('mock.stat.lastScore'), value: String(summary.data?.lastScore ?? 0), unit: t('common.score'), sub: t('mock.stat.recent'), accent: '#1F1A14' },
-            { label: t('mock.stat.expectedGrade'), value: String(summary.data?.expectedGrade ?? 0), unit: t('common.grade'), sub: t('mock.stat.reliability', { pct: summary.data?.reliability ?? 87 }), accent: '#4A5D3A' },
-            { label: t('mock.stat.toTarget'), value: String(summary.data?.pointsToNextGrade ?? 0), unit: t('common.score'), sub: t('mock.stat.targetGrade', { from: 2, to: 1 }), accent: '#B45309' },
-            { label: t('mock.stat.peerPercentile'), value: String(summary.data?.percentile ?? 0), unit: 'p', sub: t('mock.stat.topPercent', { pct: 100 - (summary.data?.percentile ?? 0) }), accent: '#1F1A14' },
+            { label: t('mock.stat.lastScore'), value: String(summary.data?.lastScore ?? 0), unit: t('common.score'), sub: t('mock.stat.recent'), accent: '#142850' },
+            { label: t('mock.stat.expectedGrade'), value: String(summary.data?.expectedGrade ?? 0), unit: t('common.grade'), sub: t('mock.stat.reliability', { pct: summary.data?.reliability ?? 87 }), accent: '#5A8A45' },
+            { label: t('mock.stat.toTarget'), value: String(summary.data?.pointsToNextGrade ?? 0), unit: t('common.score'), sub: t('mock.stat.targetGrade', { from: 2, to: 1 }), accent: '#C7791F' },
+            { label: t('mock.stat.peerPercentile'), value: String(summary.data?.percentile ?? 0), unit: 'p', sub: t('mock.stat.topPercent', { pct: 100 - (summary.data?.percentile ?? 0) }), accent: '#142850' },
           ].map((stat, i) => (
-            <div key={i} style={{ padding: '24px 28px', borderRight: i < 3 ? '1px solid #1F1A1415' : 'none' }}>
-              <div style={{ fontSize: '11px', letterSpacing: '0.18em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: '12px' }}>{stat.label}</div>
+            <div key={i} style={{ padding: '24px 28px', borderRight: i < 3 ? '1px solid #14285015' : 'none' }}>
+              <div style={{ fontSize: '11px', letterSpacing: '0.18em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: '12px' }}>{stat.label}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '8px' }}>
                 <span className="serif mono" style={{ fontSize: '44px', fontWeight: 500, letterSpacing: '-0.04em', color: stat.accent }}>{stat.value}</span>
-                <span style={{ fontSize: '14px', color: '#6B6354', fontWeight: 500 }}>{stat.unit}</span>
+                <span style={{ fontSize: '14px', color: '#5C6B85', fontWeight: 500 }}>{stat.unit}</span>
               </div>
-              <div style={{ fontSize: '12px', color: '#6B6354' }}>{stat.sub}</div>
+              <div style={{ fontSize: '12px', color: '#5C6B85' }}>{stat.sub}</div>
             </div>
           ))}
         </div>
       </section>
 
-      <div className="grain" style={{ backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px', padding: '32px', marginBottom: '32px', position: 'relative' }}>
+      <div className="grain" style={{ backgroundColor: '#F8F4E9', border: '1px solid #14285015', borderRadius: '4px', padding: '32px', marginBottom: '32px', position: 'relative' }}>
         <div style={{ marginBottom: '24px' }}>
           <div style={sectionLabelStyle}>No 01 — Score Trajectory</div>
           <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('mock.section.trajectory')}</h2>
@@ -1417,16 +1525,16 @@ function MockExamPage({ onStartExam }: { onStartExam: (exam: M.ExamPackage) => v
             <AreaChart data={trajectory.data ?? []} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#8B3A1F" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="#8B3A1F" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#C25E2E" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#C25E2E" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="2 4" stroke="#1F1A1418" vertical={false} />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B6354', fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B6354', fontSize: 11 }} domain={[40, 100]} />
-              <Tooltip contentStyle={{ backgroundColor: '#1F1A14', border: 'none', borderRadius: '4px', color: '#F2EDE2', fontSize: '12px' }} />
-              <Area type="monotone" dataKey="target" stroke="#4A5D3A" strokeDasharray="4 4" strokeWidth={1.5} fill="none" />
-              <Area type="monotone" dataKey="score" stroke="#8B3A1F" strokeWidth={2.5} fill="url(#scoreGrad)" />
+              <CartesianGrid strokeDasharray="2 4" stroke="#14285018" vertical={false} />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#5C6B85', fontSize: 12 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#5C6B85', fontSize: 11 }} domain={[40, 100]} />
+              <Tooltip contentStyle={{ backgroundColor: '#142850', border: 'none', borderRadius: '4px', color: '#EFEBDF', fontSize: '12px' }} />
+              <Area type="monotone" dataKey="target" stroke="#5A8A45" strokeDasharray="4 4" strokeWidth={1.5} fill="none" />
+              <Area type="monotone" dataKey="score" stroke="#C25E2E" strokeWidth={2.5} fill="url(#scoreGrad)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -1438,32 +1546,32 @@ function MockExamPage({ onStartExam }: { onStartExam: (exam: M.ExamPackage) => v
             <div style={sectionLabelStyle}>No 02 — Recent Exams</div>
             <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('mock.section.recent')}</h2>
           </div>
-          <div style={{ borderTop: '1px solid #1F1A1415' }}>
+          <div style={{ borderTop: '1px solid #14285015' }}>
             {(results.data ?? []).map((exam) => (
               <div key={exam.id} style={{
                 display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
                 alignItems: 'center', padding: '20px 0',
-                borderBottom: '1px solid #1F1A1415', gap: '16px',
+                borderBottom: '1px solid #14285015', gap: '16px',
               }}>
                 <div>
                   <div className="serif" style={{ fontSize: '17px', fontWeight: 500, marginBottom: '4px', letterSpacing: '-0.01em' }}>{exam.name}</div>
-                  <div style={{ fontSize: '11px', color: '#8B7E6A' }}>{exam.date} · {exam.time}</div>
+                  <div style={{ fontSize: '11px', color: '#8B95AB' }}>{exam.date} · {exam.time}</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '10px', color: '#8B7E6A', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>{t('mock.list.col.score')}</div>
+                  <div style={{ fontSize: '10px', color: '#8B95AB', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>{t('mock.list.col.score')}</div>
                   <div className="serif mono" style={{ fontSize: '22px', fontWeight: 500 }}>{exam.score}</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '10px', color: '#8B7E6A', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>{t('mock.list.col.grade')}</div>
-                  <div className="serif mono" style={{ fontSize: '22px', fontWeight: 500, color: exam.grade <= 2 ? '#4A5D3A' : '#B45309' }}>{exam.grade}</div>
+                  <div style={{ fontSize: '10px', color: '#8B95AB', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>{t('mock.list.col.grade')}</div>
+                  <div className="serif mono" style={{ fontSize: '22px', fontWeight: 500, color: exam.grade <= 2 ? '#5A8A45' : '#C7791F' }}>{exam.grade}</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '10px', color: '#8B7E6A', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>{t('mock.list.col.percentile')}</div>
+                  <div style={{ fontSize: '10px', color: '#8B95AB', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>{t('mock.list.col.percentile')}</div>
                   <div className="serif mono" style={{ fontSize: '22px', fontWeight: 500 }}>{exam.percentile}</div>
                 </div>
                 <button
                   onClick={() => { trackClick('open_exam_result', { resultId: exam.id }); setDetailResult(exam); }}
-                  style={{ padding: '8px 14px', backgroundColor: 'transparent', border: '1px solid #1F1A1430', borderRadius: '2px', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '4px', color: '#1F1A14' }}
+                  style={{ padding: '8px 14px', backgroundColor: 'transparent', border: '1px solid #14285030', borderRadius: '2px', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '4px', color: '#142850' }}
                 >
                   {t('mock.list.col.analyze')} <ChevronRight size={12} />
                 </button>
@@ -1477,17 +1585,17 @@ function MockExamPage({ onStartExam }: { onStartExam: (exam: M.ExamPackage) => v
             <div style={sectionLabelStyle}>No 03 — Take Exam</div>
             <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('mock.section.take')}</h2>
           </div>
-          <div style={{ backgroundColor: '#1F1A14', color: '#F2EDE2', borderRadius: '4px', padding: '32px', marginBottom: '16px' }}>
-            <div style={{ fontSize: '11px', color: '#D97706', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>{t('mock.aiRec.label')}</div>
+          <div style={{ backgroundColor: '#142850', color: '#EFEBDF', borderRadius: '4px', padding: '32px', marginBottom: '16px' }}>
+            <div style={{ fontSize: '11px', color: '#D9A055', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>{t('mock.aiRec.label')}</div>
             <h3 className="serif" style={{ fontSize: '22px', fontWeight: 500, marginBottom: '12px' }}>{t('mock.aiRec.title')}</h3>
-            <div style={{ fontSize: '13px', color: '#E8DFD0', lineHeight: 1.65, marginBottom: '20px' }}>
+            <div style={{ fontSize: '13px', color: '#E0D8C8', lineHeight: 1.65, marginBottom: '20px' }}>
               {t('mock.aiRec.desc')}
             </div>
             <button
               onClick={() => recMut.mutate()}
               disabled={recMut.isPending}
               style={{
-                width: '100%', padding: '14px', backgroundColor: '#D97706', color: '#1F1A14',
+                width: '100%', padding: '14px', backgroundColor: '#D9A055', color: '#142850',
                 border: 'none', borderRadius: '4px', fontSize: '14px', fontWeight: 600,
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit',
                 opacity: recMut.isPending ? 0.6 : 1,
@@ -1509,18 +1617,18 @@ function MockExamPage({ onStartExam }: { onStartExam: (exam: M.ExamPackage) => v
                 onClick={() => typedMut.mutate(opt.kind)}
                 disabled={typedMut.isPending}
                 style={{
-                  width: '100%', padding: '16px', backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415',
+                  width: '100%', padding: '16px', backgroundColor: '#F8F4E9', border: '1px solid #14285015',
                   borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '14px',
                   cursor: 'pointer', marginBottom: '8px', fontFamily: 'inherit', textAlign: 'left',
                   opacity: typedMut.isPending ? 0.6 : 1,
                 }}
               >
-                <I size={18} color="#8B7E6A" />
+                <I size={18} color="#8B95AB" />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#1F1A14', marginBottom: '2px' }}>{opt.name}</div>
-                  <div style={{ fontSize: '11px', color: '#6B6354' }}>{opt.sub}</div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#142850', marginBottom: '2px' }}>{opt.name}</div>
+                  <div style={{ fontSize: '11px', color: '#5C6B85' }}>{opt.sub}</div>
                 </div>
-                <ChevronRight size={14} color="#6B6354" />
+                <ChevronRight size={14} color="#5C6B85" />
               </button>
             );
           })}
@@ -1547,44 +1655,44 @@ function ReportPage() {
     <>
       <section style={{ marginBottom: '48px' }} className="fade-up">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#1F1A14' }} className="pulse-warm" />
-          <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B7E6A', textTransform: 'uppercase' }}>Weekly Performance Report</span>
+          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#142850' }} className="pulse-warm" />
+          <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B95AB', textTransform: 'uppercase' }}>Weekly Performance Report</span>
         </div>
         <h1 className="serif" style={{ fontSize: '48px', lineHeight: 1.15, letterSpacing: '-0.025em', fontWeight: 400, margin: 0, maxWidth: '880px' }}>
           {t('report.headline.line1')}<br />
-          <span style={{ color: '#6B6354' }}>{t('report.headline.line2')}</span>
+          <span style={{ color: '#5C6B85' }}>{t('report.headline.line2')}</span>
         </h1>
-        <div style={{ marginTop: '16px', fontSize: '14px', color: '#6B6354', maxWidth: '680px', lineHeight: 1.6 }}>
+        <div style={{ marginTop: '16px', fontSize: '14px', color: '#5C6B85', maxWidth: '680px', lineHeight: 1.6 }}>
           {t('report.subtitle', { week: mentor.data?.week ?? '—' })}
         </div>
 
         <div className="deco-line" style={{ height: '1px', marginTop: '32px', marginBottom: '24px' }} />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #1F1A1415', borderBottom: '1px solid #1F1A1415' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #14285015', borderBottom: '1px solid #14285015' }}>
           {[
-            { label: t('report.stat.weeklyHours'), value: String(current.data?.totalHours ?? 0), unit: 'h', sub: t('report.stat.hoursDelta', { delta: current.data?.hoursDelta ?? 0 }), accent: '#1F1A14' },
-            { label: t('report.stat.weeklyProblems'), value: String(current.data?.problemsSolved ?? 0), unit: t('common.problem'), sub: t('report.stat.problemsPerDay', { n: current.data?.problemsPerDay ?? 0 }), accent: '#1F1A14' },
-            { label: t('report.stat.weeklyAccuracy'), value: String(current.data?.accuracyPct ?? 0), unit: t('common.percent'), sub: t('report.stat.accuracyDelta', { delta: current.data?.accuracyDelta ?? 0 }), accent: '#4A5D3A' },
-            { label: t('report.stat.aiScore'), value: String(current.data?.aiScore ?? 0), unit: '/ 10', sub: t('report.stat.topPercent', { pct: current.data?.topPercentile ?? 14 }), accent: '#B45309' },
+            { label: t('report.stat.weeklyHours'), value: String(current.data?.totalHours ?? 0), unit: 'h', sub: t('report.stat.hoursDelta', { delta: current.data?.hoursDelta ?? 0 }), accent: '#142850' },
+            { label: t('report.stat.weeklyProblems'), value: String(current.data?.problemsSolved ?? 0), unit: t('common.problem'), sub: t('report.stat.problemsPerDay', { n: current.data?.problemsPerDay ?? 0 }), accent: '#142850' },
+            { label: t('report.stat.weeklyAccuracy'), value: String(current.data?.accuracyPct ?? 0), unit: t('common.percent'), sub: t('report.stat.accuracyDelta', { delta: current.data?.accuracyDelta ?? 0 }), accent: '#5A8A45' },
+            { label: t('report.stat.aiScore'), value: String(current.data?.aiScore ?? 0), unit: '/ 10', sub: t('report.stat.topPercent', { pct: current.data?.topPercentile ?? 14 }), accent: '#C7791F' },
           ].map((stat, i) => (
-            <div key={i} style={{ padding: '24px 28px', borderRight: i < 3 ? '1px solid #1F1A1415' : 'none' }}>
-              <div style={{ fontSize: '11px', letterSpacing: '0.18em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: '12px' }}>{stat.label}</div>
+            <div key={i} style={{ padding: '24px 28px', borderRight: i < 3 ? '1px solid #14285015' : 'none' }}>
+              <div style={{ fontSize: '11px', letterSpacing: '0.18em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: '12px' }}>{stat.label}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '8px' }}>
                 <span className="serif mono" style={{ fontSize: '44px', fontWeight: 500, letterSpacing: '-0.04em', color: stat.accent }}>{stat.value}</span>
-                <span style={{ fontSize: '14px', color: '#6B6354', fontWeight: 500 }}>{stat.unit}</span>
+                <span style={{ fontSize: '14px', color: '#5C6B85', fontWeight: 500 }}>{stat.unit}</span>
               </div>
-              <div style={{ fontSize: '12px', color: '#6B6354' }}>{stat.sub}</div>
+              <div style={{ fontSize: '12px', color: '#5C6B85' }}>{stat.sub}</div>
             </div>
           ))}
         </div>
       </section>
 
-      <div style={{ backgroundColor: '#1F1A14', color: '#F2EDE2', borderRadius: '4px', padding: '40px', marginBottom: '32px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ backgroundColor: '#142850', color: '#EFEBDF', borderRadius: '4px', padding: '40px', marginBottom: '32px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '40px', alignItems: 'center' }}>
           <div>
-            <div style={{ fontSize: '11px', letterSpacing: '0.2em', color: '#D97706', textTransform: 'uppercase', marginBottom: '12px' }}>AI Mentor Message</div>
-            <div className="serif mono" style={{ fontSize: '72px', fontWeight: 400, lineHeight: 1, color: '#D97706', marginBottom: '12px' }}>"</div>
-            <div style={{ fontSize: '11px', color: '#A89684', letterSpacing: '0.05em' }}>
+            <div style={{ fontSize: '11px', letterSpacing: '0.2em', color: '#D9A055', textTransform: 'uppercase', marginBottom: '12px' }}>AI Mentor Message</div>
+            <div className="serif mono" style={{ fontSize: '72px', fontWeight: 400, lineHeight: 1, color: '#D9A055', marginBottom: '12px' }}>"</div>
+            <div style={{ fontSize: '11px', color: '#AAB4C5', letterSpacing: '0.05em' }}>
               {mentor.data?.generatedAt ? new Date(mentor.data.generatedAt).toLocaleDateString() : ''} · {t('report.mentor.weeklyDone')}
             </div>
           </div>
@@ -1593,12 +1701,12 @@ function ReportPage() {
               {mentor.data?.message ?? t('common.loading')}
             </p>
             <div style={{ display: 'flex', gap: '16px' }}>
-              <div style={{ flex: 1, paddingLeft: '16px', borderLeft: '2px solid #4A5D3A' }}>
-                <div style={{ fontSize: '10px', color: '#A89684', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>{t('report.mentor.strength')}</div>
+              <div style={{ flex: 1, paddingLeft: '16px', borderLeft: '2px solid #5A8A45' }}>
+                <div style={{ fontSize: '10px', color: '#AAB4C5', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>{t('report.mentor.strength')}</div>
                 <div style={{ fontSize: '13px' }}>{mentor.data?.strength ?? '–'}</div>
               </div>
-              <div style={{ flex: 1, paddingLeft: '16px', borderLeft: '2px solid #B45309' }}>
-                <div style={{ fontSize: '10px', color: '#A89684', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>{t('report.mentor.nextGoal')}</div>
+              <div style={{ flex: 1, paddingLeft: '16px', borderLeft: '2px solid #C7791F' }}>
+                <div style={{ fontSize: '10px', color: '#AAB4C5', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>{t('report.mentor.nextGoal')}</div>
                 <div style={{ fontSize: '13px' }}>{mentor.data?.nextGoal ?? '–'}</div>
               </div>
             </div>
@@ -1607,7 +1715,7 @@ function ReportPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '32px', marginBottom: '32px' }}>
-        <div className="grain" style={{ backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px', padding: '32px' }}>
+        <div className="grain" style={{ backgroundColor: '#F8F4E9', border: '1px solid #14285015', borderRadius: '4px', padding: '32px' }}>
           <div style={{ marginBottom: '24px' }}>
             <div style={sectionLabelStyle}>No 01 — Time vs Accuracy</div>
             <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('report.section.timeAcc')}</h2>
@@ -1615,19 +1723,19 @@ function ReportPage() {
           <div style={{ height: '300px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={tva.data ?? []} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#1F1A1418" vertical={false} />
-                <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fill: '#6B6354', fontSize: 11 }} />
-                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#6B6354', fontSize: 11 }} />
-                <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: '#6B6354', fontSize: 11 }} />
-                <Tooltip contentStyle={{ backgroundColor: '#1F1A14', border: 'none', borderRadius: '4px', color: '#F2EDE2', fontSize: '12px' }} />
-                <Line yAxisId="left" type="monotone" dataKey="time" stroke="#8B3A1F" strokeWidth={2} dot={{ fill: '#8B3A1F', r: 4 }} name={t('report.stat.weeklyHours')} />
-                <Line yAxisId="right" type="monotone" dataKey="accuracy" stroke="#4A5D3A" strokeWidth={2} dot={{ fill: '#4A5D3A', r: 4 }} name={t('report.stat.weeklyAccuracy')} />
+                <CartesianGrid strokeDasharray="2 4" stroke="#14285018" vertical={false} />
+                <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fill: '#5C6B85', fontSize: 11 }} />
+                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#5C6B85', fontSize: 11 }} />
+                <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: '#5C6B85', fontSize: 11 }} />
+                <Tooltip contentStyle={{ backgroundColor: '#142850', border: 'none', borderRadius: '4px', color: '#EFEBDF', fontSize: '12px' }} />
+                <Line yAxisId="left" type="monotone" dataKey="time" stroke="#C25E2E" strokeWidth={2} dot={{ fill: '#C25E2E', r: 4 }} name={t('report.stat.weeklyHours')} />
+                <Line yAxisId="right" type="monotone" dataKey="accuracy" stroke="#5A8A45" strokeWidth={2} dot={{ fill: '#5A8A45', r: 4 }} name={t('report.stat.weeklyAccuracy')} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px', padding: '32px' }}>
+        <div style={{ backgroundColor: '#F8F4E9', border: '1px solid #14285015', borderRadius: '4px', padding: '32px' }}>
           <div style={{ marginBottom: '24px' }}>
             <div style={sectionLabelStyle}>No 02 — Unit Mastery</div>
             <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('report.section.unitMastery')}</h2>
@@ -1635,13 +1743,13 @@ function ReportPage() {
           {(mastery.data ?? []).map((u, i) => (
             <div key={i} style={{ marginBottom: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}>
-                <span style={{ color: '#1F1A14', fontWeight: 500 }}>{u.subject}</span>
-                <span className="mono" style={{ color: '#6B6354' }}>{u.value}%</span>
+                <span style={{ color: '#142850', fontWeight: 500 }}>{u.subject}</span>
+                <span className="mono" style={{ color: '#5C6B85' }}>{u.value}%</span>
               </div>
-              <div style={{ height: '6px', backgroundColor: '#1F1A1410', borderRadius: '3px', overflow: 'hidden' }}>
+              <div style={{ height: '6px', backgroundColor: '#14285010', borderRadius: '3px', overflow: 'hidden' }}>
                 <div style={{
                   height: '100%', width: `${u.value}%`,
-                  backgroundColor: u.value >= 80 ? '#4A5D3A' : u.value >= 60 ? '#B45309' : '#8B3A1F',
+                  backgroundColor: u.value >= 80 ? '#5A8A45' : u.value >= 60 ? '#C7791F' : '#C25E2E',
                   borderRadius: '3px',
                 }} />
               </div>
@@ -1651,39 +1759,39 @@ function ReportPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-        <div style={{ backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px', padding: '32px' }}>
+        <div style={{ backgroundColor: '#F8F4E9', border: '1px solid #14285015', borderRadius: '4px', padding: '32px' }}>
           <div style={{ marginBottom: '24px' }}>
             <div style={sectionLabelStyle}>No 03 — Next Focus</div>
             <h2 className="serif" style={{ fontSize: '24px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('report.section.nextFocus')}</h2>
           </div>
           {(focus.data ?? []).map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', padding: '16px 0', borderBottom: i < (focus.data!.length - 1) ? '1px solid #1F1A1415' : 'none' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', padding: '16px 0', borderBottom: i < (focus.data!.length - 1) ? '1px solid #14285015' : 'none' }}>
               <div className="serif mono" style={{ fontSize: '24px', color: item.color, fontWeight: 500, letterSpacing: '-0.02em' }}>0{i+1}</div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '11px', color: '#8B7E6A', marginBottom: '4px' }}>{item.unit}</div>
+                <div style={{ fontSize: '11px', color: '#8B95AB', marginBottom: '4px' }}>{item.unit}</div>
                 <div className="serif" style={{ fontSize: '17px', fontWeight: 500, marginBottom: '6px', letterSpacing: '-0.01em' }}>{item.area}</div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <span style={{ fontSize: '10px', padding: '2px 8px', backgroundColor: item.color + '15', color: item.color, borderRadius: '2px', fontWeight: 600 }}>{item.priority}</span>
-                  <span style={{ fontSize: '10px', padding: '2px 8px', backgroundColor: '#4A5D3A15', color: '#4A5D3A', borderRadius: '2px', fontWeight: 600 }}>{item.impact}</span>
+                  <span style={{ fontSize: '10px', padding: '2px 8px', backgroundColor: '#5A8A4515', color: '#5A8A45', borderRadius: '2px', fontWeight: 600 }}>{item.impact}</span>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        <div style={{ backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px', padding: '32px' }}>
+        <div style={{ backgroundColor: '#F8F4E9', border: '1px solid #14285015', borderRadius: '4px', padding: '32px' }}>
           <div style={{ marginBottom: '24px' }}>
             <div style={sectionLabelStyle}>No 04 — Achievements</div>
             <h2 className="serif" style={{ fontSize: '24px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('report.section.achievements')}</h2>
           </div>
           {(ach.data ?? []).map((a, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 0', borderBottom: i < (ach.data!.length - 1) ? '1px solid #1F1A1415' : 'none' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 0', borderBottom: i < (ach.data!.length - 1) ? '1px solid #14285015' : 'none' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '4px', backgroundColor: a.color + '15', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {Icon(a.icon, 18, a.color)}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '2px' }}>{a.title}</div>
-                <div style={{ fontSize: '11px', color: '#6B6354' }}>{a.sub}</div>
+                <div style={{ fontSize: '11px', color: '#5C6B85' }}>{a.sub}</div>
               </div>
             </div>
           ))}
@@ -1691,18 +1799,18 @@ function ReportPage() {
       </div>
 
       {/* No 05 — 메타인지 캘리브레이션 */}
-      <div className="grain" style={{ marginTop: '32px', backgroundColor: '#FAF6EB', border: '1px solid #1F1A1415', borderRadius: '4px', padding: '32px', position: 'relative' }}>
+      <div className="grain" style={{ marginTop: '32px', backgroundColor: '#F8F4E9', border: '1px solid #14285015', borderRadius: '4px', padding: '32px', position: 'relative' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
           <div>
             <div style={sectionLabelStyle}>No 05 — Metacognitive Calibration</div>
             <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('report.section.calibration')}</h2>
-            <div style={{ fontSize: '12px', color: '#6B6354', marginTop: '4px' }}>
+            <div style={{ fontSize: '12px', color: '#5C6B85', marginTop: '4px' }}>
               {cal.data && cal.data.attemptCount > 0
                 ? t('report.calibration.brier', { brier: cal.data.brier?.toFixed(3) ?? '–', n: cal.data.attemptCount })
                 : t('report.calibration.empty')}
             </div>
           </div>
-          <Brain size={20} color="#8B3A1F" />
+          <Brain size={20} color="#C25E2E" />
         </div>
 
         {cal.data && cal.data.attemptCount > 0 ? (
@@ -1715,23 +1823,23 @@ function ReportPage() {
                   acc: b.meanAccuracy ?? null,
                   ideal: b.meanConfidence ?? null,
                 }))} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="2 4" stroke="#1F1A1418" vertical={false} />
-                  <XAxis dataKey="bucket" axisLine={false} tickLine={false} tick={{ fill: '#6B6354', fontSize: 11 }} />
-                  <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#6B6354', fontSize: 11 }} />
-                  <Tooltip contentStyle={{ backgroundColor: '#1F1A14', border: 'none', borderRadius: '4px', color: '#F2EDE2', fontSize: '12px' }} />
-                  <Line type="monotone" dataKey="ideal" stroke="#4A5D3A" strokeDasharray="4 4" strokeWidth={1.5} dot={false} name="ideal (y=x)" />
-                  <Line type="monotone" dataKey="conf" stroke="#A89684" strokeWidth={2} dot={{ fill: '#A89684', r: 4 }} name={t('study.confidence.label')} />
-                  <Line type="monotone" dataKey="acc" stroke="#8B3A1F" strokeWidth={2.5} dot={{ fill: '#8B3A1F', r: 5 }} name={t('report.stat.weeklyAccuracy')} />
+                  <CartesianGrid strokeDasharray="2 4" stroke="#14285018" vertical={false} />
+                  <XAxis dataKey="bucket" axisLine={false} tickLine={false} tick={{ fill: '#5C6B85', fontSize: 11 }} />
+                  <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#5C6B85', fontSize: 11 }} />
+                  <Tooltip contentStyle={{ backgroundColor: '#142850', border: 'none', borderRadius: '4px', color: '#EFEBDF', fontSize: '12px' }} />
+                  <Line type="monotone" dataKey="ideal" stroke="#5A8A45" strokeDasharray="4 4" strokeWidth={1.5} dot={false} name="ideal (y=x)" />
+                  <Line type="monotone" dataKey="conf" stroke="#AAB4C5" strokeWidth={2} dot={{ fill: '#AAB4C5', r: 4 }} name={t('study.confidence.label')} />
+                  <Line type="monotone" dataKey="acc" stroke="#C25E2E" strokeWidth={2.5} dot={{ fill: '#C25E2E', r: 5 }} name={t('report.stat.weeklyAccuracy')} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            <div style={{ padding: '16px', backgroundColor: '#1F1A1408', borderLeft: '2px solid #B45309', borderRadius: '0 4px 4px 0', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-              <Lightbulb size={14} color="#D97706" style={{ marginTop: '2px', flexShrink: 0 }} />
-              <div style={{ fontSize: '13px', lineHeight: 1.65, color: '#1F1A14' }}>{cal.data.insight}</div>
+            <div style={{ padding: '16px', backgroundColor: '#14285008', borderLeft: '2px solid #C7791F', borderRadius: '0 4px 4px 0', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+              <Lightbulb size={14} color="#D9A055" style={{ marginTop: '2px', flexShrink: 0 }} />
+              <div style={{ fontSize: '13px', lineHeight: 1.65, color: '#142850' }}>{cal.data.insight}</div>
             </div>
           </>
         ) : (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#8B7E6A', fontSize: '13px' }}>
+          <div style={{ padding: '40px', textAlign: 'center', color: '#8B95AB', fontSize: '13px' }}>
             {cal.data?.insight ?? t('common.loading')}
           </div>
         )}

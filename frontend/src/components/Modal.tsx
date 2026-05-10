@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react';
+﻿import { ReactNode, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useT } from '../lib/i18n';
 
@@ -42,8 +42,8 @@ export default function Modal({ open, onClose, title, subtitle, width = 640, chi
         onClick={(e) => e.stopPropagation()}
         style={{
           width, maxWidth: '100%', maxHeight: '90vh', overflow: 'auto',
-          backgroundColor: '#FAF6EB', border: '1px solid #1F1A1420',
-          borderRadius: 6, padding: 32, position: 'relative', color: '#1F1A14',
+          backgroundColor: '#F8F4E9', border: '1px solid #14285020',
+          borderRadius: 6, padding: 32, position: 'relative', color: '#142850',
           boxShadow: '0 20px 60px rgba(31,26,20,0.25)',
         }}
       >
@@ -53,7 +53,7 @@ export default function Modal({ open, onClose, title, subtitle, width = 640, chi
           style={{
             position: 'absolute', top: 16, right: 16,
             background: 'none', border: 'none', cursor: 'pointer',
-            color: '#6B6354', padding: 4,
+            color: '#5C6B85', padding: 4,
           }}
         >
           <X size={18} />
@@ -61,7 +61,7 @@ export default function Modal({ open, onClose, title, subtitle, width = 640, chi
         {(title || subtitle) && (
           <div style={{ marginBottom: 20 }}>
             {subtitle && (
-              <div style={{ fontSize: 11, letterSpacing: '0.2em', color: '#8B7E6A', textTransform: 'uppercase', marginBottom: 6 }}>
+              <div style={{ fontSize: 11, letterSpacing: '0.2em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: 6 }}>
                 {subtitle}
               </div>
             )}

@@ -222,6 +222,73 @@ export const HINT_EN: Record<string, string> = {
     'Step-by-step guidance is available in the AI Guide panel on the Study page.',
 };
 
+/** Problem.formula EN — 공식 영문 매핑 (개념 박스의 공식 라인) */
+export const FORMULA_EN: Record<string, string> = {
+  '2024 9월 모의평가 30번': 'V = π ∫ₐᵇ [f(x)]² dx (revolution about x-axis)',
+  '수능특강 미적분 III-2-15': '∫ u dv = uv − ∫ v du',
+  '2024 6월 모의평가 28번': 'P(A | B) = P(A ∩ B) / P(B)',
+  '2024 9월 모의평가 21번': 'cos θ = |u·v| / (|u| · |v|)',
+  '교육청 학평 18번': 't = g(x) ⇒ dt = g\'(x) dx',
+  '수능기출 2023 22번': '∫ₐᵇ f(x) dx = lim Σ f(xₖ*) · Δx ; Σ k² = n(n+1)(2n+1)/6',
+  '2024 6월 모의평가 21번': 'log_a A ≥ b ⇔ A ≥ aᵇ (a > 1, A > 0)',
+  '중1 · 정수와 유리수 1': '(opposite-sign sum) = sign(larger |·|) × (larger |·| − smaller |·|)',
+  '중1 · 정수와 유리수 2': 'a − (−b) = a + b',
+  '중1 · 정수와 유리수 3': 'sign of product = (−1)^(count of negatives)',
+  '중1 · 정수와 유리수 4': '|x| = x (x ≥ 0), |x| = −x (x < 0)',
+  '중1 · 정수와 유리수 5': '0.abc = abc / 1000 → reduce',
+  '중1 · 문자와 식 1': 'a × x = ax (number before variable)',
+  '중1 · 문자와 식 2': 'mx + nx = (m + n)x (combine like terms)',
+  '중1 · 문자와 식 3': '(−a)² = a² ≠ −a²',
+  '중1 · 문자와 식 4': 'a(b + c) = ab + ac;  −a(b − c) = −ab + ac',
+  '중1 · 일차방정식 1': 'ax + b = c ⇒ x = (c − b) / a',
+  '중1 · 일차방정식 2': 'a(x + b) = c ⇒ ax + ab = c (distribute then transpose)',
+  '중1 · 일차방정식 3': '−ax + b = c ⇒ x = (b − c) / a',
+  '중1 · 일차방정식 4': 'x/n + b = c ⇒ x + nb = nc (multiply both sides by n)',
+  '중1 · 일차방정식 5': 'square perimeter = 4 × side',
+  '중1 · 일차방정식 6': 'sum of 3 consecutive naturals = 3 × (middle) = 3x + 3',
+  '중1 · 일차방정식 7': 'a : b = c : d ⇔ ad = bc',
+  '중1 · 좌표와 그래프 1': 'I(+,+), II(−,+), III(−,−), IV(+,−)',
+  '중1 · 좌표와 그래프 2': '(x, y) → x-axis: (x, −y), y-axis: (−x, y), origin: (−x, −y)',
+  '중1 · 좌표와 그래프 3': 'y = ax (direct proportion) ⇒ a = y/x',
+  '중1 · 좌표와 그래프 4': 'y = ax (a ≠ 0) passes the origin; a > 0: I·III, a < 0: II·IV',
+};
+
+/** Problem.concept EN — 핵심 개념 영문 매핑 (학습 피드백·오답노트 상세) */
+export const CONCEPT_EN: Record<string, string> = {
+  // 고3 featured
+  '2024 9월 모의평가 30번': 'Volume of revolution about the x-axis: V = π ∫ [f(x)]² dx. Distinguish from a plain definite integral (area) or the shell method (2π ∫ x f(x) dx, used for y-axis revolution).',
+  '수능특강 미적분 III-2-15': 'Integration by parts: ∫ u dv = uv − ∫ v du. Common when integrating products of polynomials with exp/trig/log. Pick u and dv carefully, compute du, v, and track signs.',
+  '2024 6월 모의평가 28번': 'Conditional probability: P(A|B) = P(A ∩ B) / P(B). Once B is known, the sample space shrinks to B. Don’t confuse with the multiplication rule or Bayes’ theorem.',
+  '2024 9월 모의평가 21번': 'Angle between two lines in space: cos θ = |u·v| / (|u|·|v|). The absolute value forces an acute angle; compute direction vectors as coordinate differences, then dot product and magnitudes.',
+  '교육청 학평 18번': 'Substitution: when t = g(x), also change dt = g\'(x) dx. After integrating, substitute back to the original variable x.',
+  '수능기출 2023 22번': 'Riemann definition: ∫ f(x) dx = lim Σ f(xₖ*) · Δx. Take xₖ = k/n with width 1/n, then use sums like Σ k² = n(n+1)(2n+1)/6.',
+  '2024 6월 모의평가 21번': 'Logarithmic inequality log_a A ≥ b (a > 1) ⇔ A ≥ aᵇ together with A > 0 (domain). Final answer = intersection of solution and domain.',
+  // 중1 — 정수와 유리수
+  '중1 · 정수와 유리수 1': 'Sum of opposite-sign numbers = (sign of larger absolute value) × (larger |·| − smaller |·|). Distinguish from the same-sign rule (add absolute values).',
+  '중1 · 정수와 유리수 2': 'Subtracting a negative flips its sign: a − (−b) = a + b. Only the subtrahend changes sign — the leading number stays.',
+  '중1 · 정수와 유리수 3': 'Sign of a product: even count of negatives → +, odd → −. Multiply absolute values for the magnitude.',
+  '중1 · 정수와 유리수 4': '|x| is the distance from 0 (≥ 0). Negative numbers flip; positives and 0 stay. Don’t confuse with squaring.',
+  '중1 · 정수와 유리수 5': 'Decimal → fraction: use 10ⁿ as the denominator (n = decimal places), then reduce. 0.4 = 4/10 = 2/5.',
+  // 중1 — 문자와 식
+  '중1 · 문자와 식 1': '"a times x" is written ax (multiplication). The number comes before the variable, with the × sign omitted. Don’t mix × with +.',
+  '중1 · 문자와 식 2': 'Like terms = same variable AND same degree. Add or subtract only the coefficients; keep the variable part unchanged.',
+  '중1 · 문자와 식 3': 'Evaluate by substituting numbers for variables. Be careful: (−2)² = 4 but −2² = −4 (parentheses matter).',
+  '중1 · 문자와 식 4': 'A negative outside parentheses distributes a sign flip to every term: −2(3x − 5) = −6x + 10. Then combine like terms.',
+  // 중1 — 일차방정식
+  '중1 · 일차방정식 1': 'Solving a linear equation: (1) move constants to the other side (sign flips), (2) divide both sides by the coefficient. Sign change on transposition is the key.',
+  '중1 · 일차방정식 2': 'With parentheses: distribute → combine like terms → transpose → divide both sides.',
+  '중1 · 일차방정식 3': 'With a negative coefficient: transpose constants first, then divide both sides by the negative number. No need to multiply by −1 first.',
+  '중1 · 일차방정식 4': 'With fractional coefficients: multiply both sides by the LCM of the denominators to clear fractions, then solve normally.',
+  '중1 · 일차방정식 5': 'Word problem → equation: define a variable, then apply the relevant formula (e.g., perimeter of a square = 4 × side).',
+  '중1 · 일차방정식 6': 'Three consecutive natural numbers: x, x+1, x+2. Their sum is 3x + 3 (or 3 × the middle value).',
+  '중1 · 일차방정식 7': 'Proportion a : b = c : d ⇔ b · c = a · d (product of inner terms = product of outer terms). Set unknown as one term and solve.',
+  // 중1 — 좌표와 그래프
+  '중1 · 좌표와 그래프 1': 'Quadrants: I (+,+), II (−,+), III (−,−), IV (+,−), counter-clockwise.',
+  '중1 · 좌표와 그래프 2': 'Reflect across the x-axis: only the y-coordinate flips sign. y-axis reflection flips x; origin reflection flips both.',
+  '중1 · 좌표와 그래프 3': 'Direct proportion y = ax. The constant a = y/x. One point (x, y) determines a, hence the equation.',
+  '중1 · 좌표와 그래프 4': 'y = ax with a < 0: passes through the origin and goes upper-left → lower-right (Quadrants II and IV).',
+};
+
 /** 7 problems EN content — body·answer·hint per source */
 export const PROBLEM_EN: Record<string, { body: string; answer: string; hint?: string }> = {
   '2024 9월 모의평가 30번': {

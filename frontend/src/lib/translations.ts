@@ -7,7 +7,7 @@
 
 const ko = {
   // ===== App brand =====
-  'app.brand': 'Mathēma',
+  'app.brand': 'matheo',
   'app.tagline': '· 입시 수학',
 
   // ===== Common =====
@@ -77,6 +77,11 @@ const ko = {
   'unitPicker.empty': '학년에 맞는 단원이 아직 등록되지 않았습니다.',
   'unitPicker.byGrade': '내 학년 단원만 보기',
   'unitPicker.allGrades': '전체 학년',
+  'unitPicker.gradeFilter': '학년',
+  'unitPicker.gradeMine': '내 학년',
+  'study.recommend.title': '오늘의 학습 추천 (가중치)',
+  'study.recommend.weight': 'W{w}',
+  'study.recommend.empty': '추천을 위해 단원 데이터가 더 필요합니다 (몇 문제만 더 풀어보세요).',
   'exam.step.locked': '잠김',
   'exam.step.lockedHint': '이전 단계의 답을 선택하면 열립니다.',
   'exam.exit.home': '홈으로',
@@ -161,7 +166,11 @@ const ko = {
   'wn.detail.fallbackTitle': '오답 분석',
   'wn.detail.problemBody': '문제',
   'wn.detail.answer': '정답',
+  'wn.detail.concept': '핵심 개념',
+  'wn.detail.formula': '관련 공식',
   'wn.detail.hint': '힌트',
+  'study.concept.label': '이 문제의 핵심 개념',
+  'study.formula.label': '관련 공식',
   'wn.detail.similar': '유사 문제 {n}개',
   'wn.detail.review.label': '복습 평가 (SM-2)',
   'wn.detail.review.unreviewed': '미복습',
@@ -359,7 +368,7 @@ const ko = {
 
 const en: typeof ko = {
   // Brand
-  'app.brand': 'Mathēma',
+  'app.brand': 'matheo',
   'app.tagline': '· SAT Math',
 
   // Common
@@ -429,6 +438,11 @@ const en: typeof ko = {
   'unitPicker.empty': 'No units registered for your grade yet.',
   'unitPicker.byGrade': 'Only my grade',
   'unitPicker.allGrades': 'All grades',
+  'unitPicker.gradeFilter': 'Grade',
+  'unitPicker.gradeMine': 'My grade',
+  'study.recommend.title': "Today's recommended units (weighted)",
+  'study.recommend.weight': 'W{w}',
+  'study.recommend.empty': 'Not enough unit data yet — answer a few more problems to enable recommendations.',
   'exam.step.locked': 'Locked',
   'exam.step.lockedHint': 'Answer the previous step to unlock.',
   'exam.exit.home': 'Home',
@@ -512,7 +526,11 @@ const en: typeof ko = {
   'wn.detail.fallbackTitle': 'Wrong-Note Analysis',
   'wn.detail.problemBody': 'Problem',
   'wn.detail.answer': 'Answer',
+  'wn.detail.concept': 'Core concept',
+  'wn.detail.formula': 'Formula',
   'wn.detail.hint': 'Hint',
+  'study.concept.label': 'Core concept for this problem',
+  'study.formula.label': 'Formula',
   'wn.detail.similar': '{n} similar problems',
   'wn.detail.review.label': 'SM-2 Review',
   'wn.detail.review.unreviewed': 'Not reviewed',

@@ -18,6 +18,10 @@ export type WrongNoteCard = {
   problemBody?: string;
   /** 정답 — 상세 모달에서 노출 */
   problemAnswer?: string;
+  /** 핵심 개념 — 상세 모달의 정답 ↔ AI 분석 사이에 표시 */
+  problemConcept?: string | null;
+  /** 관련 공식 — 개념 박스의 공식 라인 */
+  problemFormula?: string | null;
   unit: string; subUnit: string;
   errorType: string; errorTypeRaw: string; insight: string;
   diff: string; date: string; similarCount: number; status: string;
@@ -106,6 +110,8 @@ export type ProblemStep = {
 export type Problem = {
   id: string; source: string; unitId: string; subUnitId: string | null;
   difficulty: string; body: string; formula: string | null;
+  /** 핵심 개념 — 정답/오답 피드백에 사용 */
+  concept: string | null;
   // answer 필드는 응시 중 클라이언트로 노출되지 않음
   imageUrl: string | null; hint: string | null;
   steps?: ProblemStep[];

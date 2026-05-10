@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { Lang } from '../../common/i18n/current-lang.decorator';
-import { PROBLEM_EN, STEP_PROMPT_EN, CHOICE_EN, SOURCE_EN, HINT_EN } from '../../common/i18n/content-en';
+import { PROBLEM_EN, STEP_PROMPT_EN, CHOICE_EN, SOURCE_EN, HINT_EN, CONCEPT_EN, FORMULA_EN } from '../../common/i18n/content-en';
 
 /**
  * 학습/응시 시 클라이언트로 전달할 때는 isCorrect/distractorType/rationale은 숨겨야 함.
@@ -29,6 +29,8 @@ const sanitizeForClient = (p: any, lang: Lang = 'ko') => {
     if (en) rest.body = en.body;
     if (SOURCE_EN[p.source]) rest.source = SOURCE_EN[p.source];
     if (rest.hint && HINT_EN[rest.hint]) rest.hint = HINT_EN[rest.hint];
+    if (CONCEPT_EN[p.source]) rest.concept = CONCEPT_EN[p.source];
+    if (FORMULA_EN[p.source]) rest.formula = FORMULA_EN[p.source];
   }
   if (Array.isArray(rest.steps)) {
     rest.steps = rest.steps.map((s: any) => {
