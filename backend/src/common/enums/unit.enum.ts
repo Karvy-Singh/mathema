@@ -26,23 +26,33 @@ export const GRADE_LABEL_KO: Record<GradeLevel, string> = {
   G_HIGH_3: '고3',
 };
 
+// 영어 학년 표기는 미국 K-12 체계로 통일 (한국 중1=Grade 7 ... 고3=Grade 12)
 export const GRADE_LABEL_EN: Record<GradeLevel, string> = {
-  G_MIDDLE_1: 'Middle 1',
-  G_MIDDLE_2: 'Middle 2',
-  G_MIDDLE_3: 'Middle 3',
-  G_HIGH_1: 'High 1',
-  G_HIGH_2: 'High 2',
-  G_HIGH_3: 'High 3',
+  G_MIDDLE_1: 'Grade 7',
+  G_MIDDLE_2: 'Grade 8',
+  G_MIDDLE_3: 'Grade 9',
+  G_HIGH_1: 'Grade 10',
+  G_HIGH_2: 'Grade 11',
+  G_HIGH_3: 'Grade 12',
 };
 
-/** 학년별 학습 단원 (좁은 범위만 — 빠른 데모를 위함) */
+/**
+ * 학년별 학습 단원 — 영어판은 NCERT/CBSE 정합 기준으로 재배치 (한국 학년 ≠ 인도 학년).
+ *  - 좌표평면 → Class 9 (NCERT 9 Ch 3)
+ *  - 일차부등식 → Class 11 (NCERT 11 Ch 5)
+ *  - 이차방정식 → Class 10 (NCERT 10 Ch 4)
+ *  - 함수와 그래프 → Class 11 (NCERT 11 Ch 2)
+ *
+ * 동일 단원이 한국에선 다른 학년에서 학습되더라도, 인도 학생 입장에서 NCERT 학년에 맞게 노출.
+ * 한국어 사용자에게도 큰 차이 없음 (Korean 중1=Grade 7, 중3=Grade 9 정합)
+ */
 export const GRADE_TO_UNITS: Record<GradeLevel, string[]> = {
-  G_MIDDLE_1: ['정수와 유리수', '문자와 식', '일차방정식', '좌표평면과 그래프'],
-  G_MIDDLE_2: ['유리수와 순환소수', '식의 계산', '일차부등식', '일차함수'],
-  G_MIDDLE_3: ['제곱근과 실수', '인수분해', '이차방정식', '이차함수'],
-  G_HIGH_1: ['다항식', '방정식과 부등식', '도형의 방정식', '함수와 그래프'],
-  G_HIGH_2: ['지수와 로그', '삼각함수', '수열', '함수의 극한'],
-  G_HIGH_3: ['미적분 I', '미적분 II', '확률·통계', '기하·벡터'],
+  G_MIDDLE_1: ['정수와 유리수', '문자와 식', '일차방정식'],                                                  // Class 7
+  G_MIDDLE_2: ['유리수와 순환소수', '식의 계산', '일차함수'],                                                // Class 8
+  G_MIDDLE_3: ['제곱근과 실수', '인수분해', '좌표평면과 그래프', '이차함수'],                                // Class 9
+  G_HIGH_1:   ['다항식', '방정식과 부등식', '도형의 방정식', '이차방정식'],                                 // Class 10
+  G_HIGH_2:   ['지수와 로그', '삼각함수', '수열', '함수의 극한', '함수와 그래프', '일차부등식'],            // Class 11
+  G_HIGH_3:   ['미적분 I', '미적분 II', '확률·통계', '기하·벡터'],                                          // Class 12
 };
 
 /** 모든 단원 (중복 제거, 순서 유지) — 시드용 */

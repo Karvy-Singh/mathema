@@ -16,6 +16,12 @@ export class StudySessionsController {
     return this.service.start(userId, dto, lang);
   }
 
+  /** 특정 문제로 학습 시작 — 유사문제 "풀어보기" 동선용 */
+  @Post('start-from-problem/:problemId')
+  startFromProblem(@CurrentUser('id') userId: string, @Param('problemId') problemId: string) {
+    return this.service.startFromProblem(userId, problemId);
+  }
+
   /** 가중치 기반 추천 단원 — 학습 시작 화면용 */
   @Get('recommended-units')
   recommendedUnits(

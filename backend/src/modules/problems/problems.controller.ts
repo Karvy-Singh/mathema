@@ -18,4 +18,8 @@ export class ProblemsController {
 
   @Get(':id') one(@Param('id') id: string, @CurrentLang() lang: Lang) { return this.service.one(id, lang); }
   @Get(':id/hint') hint(@Param('id') id: string) { return this.service.hint(id); }
+
+  /** 풀이 공개 (오답노트/복습용) — body + concept + formula + 단계별 풀이 + 정답 */
+  @Get(':id/solution')
+  solution(@Param('id') id: string, @CurrentLang() lang: Lang) { return this.service.solution(id, lang); }
 }

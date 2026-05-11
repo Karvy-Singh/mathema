@@ -90,3 +90,24 @@ export async function patch<T>(url: string, body?: any): Promise<T> {
   const r = await api.patch(url, body);
   return r.data.data as T;
 }
+export async function del<T>(url: string): Promise<T> {
+  const r = await api.delete(url);
+  return r.data.data as T;
+}
+
+/**
+ * 인증된 사용자의 데이터 export — JSON 파일을 브라우저가 직접 다운받게 한다.
+ * 백엔드는 Content-Disposition: attachment 로 응답.
+ */
+export async function downloadExport(): Promise<void> {
+  const r = await api.get('/users/me/export', { responseType: 'blob' });
+  const blob = new Blob([r.data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `matheo-data-export-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}

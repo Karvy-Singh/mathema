@@ -16,6 +16,7 @@ import { PrismaModule } from './infrastructure/prisma/prisma.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { AiModule } from './infrastructure/ai/ai.module';
 import { StorageModule } from './infrastructure/storage/storage.module';
+import { MailModule } from './infrastructure/mail/mail.module';
 
 // 도메인 모듈 — UI 화면별 1:1
 import { AuthModule } from './modules/auth/auth.module';
@@ -34,6 +35,8 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { HealthModule } from './modules/health/health.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { PushModule } from './modules/push/push.module';
 
 @Module({
   imports: [
@@ -49,6 +52,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     RedisModule,
     AiModule,
     StorageModule,
+    MailModule,
 
     // 도메인 (의존성 방향: 위 → 아래)
     AuthModule,
@@ -67,6 +71,8 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     DashboardModule,
     HealthModule,
     AnalyticsModule,
+    AdminModule,
+    PushModule,
   ],
 })
 export class AppModule {}

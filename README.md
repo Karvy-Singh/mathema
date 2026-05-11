@@ -1,8 +1,9 @@
-# matheo · Korean math learning app
+# matheo · adaptive math learning (India-first)
 
-A full-stack technical PoC for an adaptive math learning app targeting Korean middle/high school curricula (중1 ~ 고3). Built as a teaching-aid prototype with a deliberately rich pedagogical model — three-step distractor analysis, SM-2 spaced repetition, weighted unit recommendations, and bilingual content delivery.
+A full-stack adaptive math learning app, **launching India-first** with NCERT/CBSE curriculum (Class 7~12), then expanding country by country. Built around three-step distractor analysis, SM-2 spaced repetition, weighted unit recommendations, and bilingual content delivery (EN default, KO available).
 
-> **Project stage**: **technical PoC, late stage** — architecture and data model are production-grade; content (~27 problems) and AI integrations (LLM/Vision keys are stubs) are demo-only. See [Status](#status) for an honest assessment.
+> **Project stage**: **late-stage technical PoC, India Phase 1**.
+> Architecture and data model are production-grade; content (~27 problems, mostly Class 7) and AI integrations (LLM/Vision keys are stubs) are demo-only. See [Status](#status) and [`COUNTRY_ROADMAP.md`](./COUNTRY_ROADMAP.md) for honest scope.
 
 [![Stack](https://img.shields.io/badge/stack-NestJS%2010%20%2B%20Vite%2FReact%2018-142850)](https://github.com/prior89/mathema)
 [![Lang](https://img.shields.io/badge/i18n-KO%2FEN-1FB8C4)](#bilingual)
@@ -187,10 +188,75 @@ Seeded data:
 - 6 mock exam results (3월~10월 모의고사) showing a 62→84 progression
 - 8 weekly reports with mentor messages
 
+## Mobile build (Android — Capacitor)
+
+The frontend wraps as an Android app via **Capacitor**. Web build → Capacitor sync → Gradle build.
+
+### Prerequisites
+- Java 17+ + Android Studio (https://developer.android.com/studio) — for `./gradlew assembleRelease`
+- A signing keystore (don't commit) — Play Console requires app signing
+
+### Build steps
+```bash
+cd frontend
+echo "VITE_API_BASE_URL=https://your-backend.example.com/api/v1" > .env.production
+npm run build               # → dist/
+npx cap sync android        # copies dist/ into android/app/src/main/assets/public/
+npx cap open android        # opens Android Studio for Gradle build
+# OR command-line:
+cd android && ./gradlew assembleRelease
+```
+
+The `android/` directory is a real Android project (Gradle, AndroidManifest, Java sources). Open it in Android Studio for icon/splash customization, then upload the AAB to Play Console.
+
+### Capacitor scripts
+```bash
+npm run cap:sync           # rebuild dist + sync to android
+npm run cap:open           # open in Android Studio
+```
+
+App identifiers (in `frontend/capacitor.config.ts`):
+- `appId`: `ai.matheo.app` (change before Play submission)
+- `appName`: `matheo`
+- `webDir`: `dist`
+
+## Google Sign-In (Web + Android)
+
+OAuth setup in **Google Cloud Console**:
+
+1. https://console.cloud.google.com/apis/credentials → Create OAuth 2.0 Client
+2. **Web** application:
+   - Authorized JavaScript origins: `http://localhost:5173`, `https://your-domain.example.com`
+   - Authorized redirect URIs: not used (we use One Tap / GIS button flow)
+3. **Android** application (for Capacitor build):
+   - Package name: `ai.matheo.app` (matches `capacitor.config.ts`)
+   - SHA-1 fingerprint: from your signing keystore (`keytool -list -v -keystore ...`)
+
+### Frontend env
+```bash
+# frontend/.env.local (web dev)
+VITE_GOOGLE_CLIENT_ID=YOUR_WEB_CLIENT_ID.apps.googleusercontent.com
+
+# frontend/.env.production (Capacitor build)
+VITE_API_BASE_URL=https://your-backend.example.com/api/v1
+VITE_GOOGLE_CLIENT_ID=YOUR_WEB_CLIENT_ID.apps.googleusercontent.com
+```
+
+### Backend env
+```bash
+# backend/.env
+GOOGLE_CLIENT_ID=YOUR_WEB_CLIENT_ID.apps.googleusercontent.com   # used to verify ID tokens
+```
+
+The backend `POST /auth/google/id-token` accepts a Google ID token, verifies it via `google-auth-library`, and either logs in or creates a new user (default `country: IN`, `gradeLevel: G_HIGH_2`). Without `GOOGLE_CLIENT_ID` set, the endpoint returns 401 and only seed-account login works.
+
+For mobile native sign-in, install `@codetrix-studio/capacitor-google-auth` and call `GoogleAuth.signIn()` on the login screen, then post `idToken` to the same backend endpoint.
+
 ### Environment variables
 
 `backend/.env.example` — key entries:
 - `DATABASE_URL` — Postgres connection string
+- `GOOGLE_CLIENT_ID` — Google OAuth web client ID (for ID token verification)
 - `REDIS_HOST` / `REDIS_PORT`
 - `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` — replace with random strings in production
 - `AI_LLM_API_KEY` / `AI_VISION_API_KEY` / `AI_EMBEDDING_API_KEY` — `api입력칸` placeholder; fill to enable real LLM/Vision calls

@@ -31,6 +31,28 @@ export const uploadWrongNotePdf = (file: File) =>
 export const startStudySession = (body: { unitId: string; sessionNumber?: number; totalSessions?: number }) =>
   post<{ id: string; unitId: string; currentStep: number }>('/study-sessions/start', body);
 
+export const startStudySessionFromProblem = (problemId: string) =>
+  post<{ id: string; unitId: string; currentStep: number; focusProblemId: string }>(
+    `/study-sessions/start-from-problem/${problemId}`, {},
+  );
+
+export type ExamStepAnswerResponse = {
+  id: string;
+  isCorrect: boolean;
+  choice: {
+    id: string; choiceIndex: number; text: string; isCorrect: boolean;
+    distractorType: string | null; rationale: string | null;
+  } | null;
+};
+export const submitExamStepAnswer = (resultId: string, body: {
+  problemId: string; choiceId: string; stepIndex: number; durationSec: number; confidence?: number;
+}) => post<ExamStepAnswerResponse>(`/mock-exams/results/${resultId}/answer`, body);
+
+export const finalizeExam = (resultId: string) =>
+  post<{ id: string; score: number; grade: number; percentile: number; durationMin: number }>(
+    `/mock-exams/results/${resultId}/finalize`, {},
+  );
+
 export type StudyAnswerResponse = {
   id: string;
   isCorrect: boolean;

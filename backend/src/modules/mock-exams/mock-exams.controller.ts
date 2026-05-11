@@ -37,4 +37,21 @@ export class MockExamsController {
   submit(@CurrentUser('id') userId: string, @Param('id') id: string, @Body() dto: SubmitExamDto) {
     return this.service.submit(userId, id, dto);
   }
+
+  /** Per-step 답안 제출 — 학습과 동일한 흐름으로 즉시 피드백 반환 */
+  @Post('results/:id/answer')
+  answer(
+    @CurrentUser('id') userId: string,
+    @CurrentLang() lang: Lang,
+    @Param('id') id: string,
+    @Body() dto: { problemId: string; choiceId: string; stepIndex: number; durationSec: number; confidence?: number },
+  ) {
+    return this.service.submitStepAnswer(userId, id, dto, lang);
+  }
+
+  /** 모든 문제 완료 시 호출 — 저장된 attempts 로 점수 산출 */
+  @Post('results/:id/finalize')
+  finalize(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.service.finalize(userId, id);
+  }
 }

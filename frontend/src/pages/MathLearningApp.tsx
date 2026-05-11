@@ -1,4 +1,5 @@
 ﻿import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
@@ -9,7 +10,7 @@ import {
   Eye, Layers, Zap, Camera, Plus, Filter, Clock, Pause, Play,
   RotateCcw, ArrowLeft, ArrowRight, Award, Target,
   ChevronDown, FileText, Image as ImageIcon, TrendingUp,
-  Brain, CheckCircle2, Hash, LogOut, LucideIcon,
+  Brain, CheckCircle2, Hash, LogOut, LucideIcon, Settings as SettingsIcon,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import * as Q from '../lib/queries';
@@ -24,6 +25,7 @@ import MockExamResultModal from '../components/MockExamResultModal';
 import ExamTakingScreen from '../components/ExamTakingScreen';
 import ConfidenceSlider from '../components/ConfidenceSlider';
 import { UnitPicker } from '../components/UnitPicker';
+import MathText from '../components/MathText';
 
 const SESSION_KEY = 'mathema.activeSession';
 
@@ -76,11 +78,16 @@ const writeHash = (nav: NavKey, exam: boolean, replace = false) => {
 };
 
 // ============ MAIN APP ============
+const FOCUS_PROBLEM_KEY = 'mathema.focusProblemId';
+
 export default function MathLearningApp() {
   const initial = readHash();
   const [activeNav, setActiveNavState] = useState<NavKey>(initial.nav);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(
     () => sessionStorage.getItem(SESSION_KEY),
+  );
+  const [focusProblemId, setFocusProblemId] = useState<string | null>(
+    () => sessionStorage.getItem(FOCUS_PROBLEM_KEY),
   );
   const [activeExam, setActiveExam] = useState<M.ExamPackage | null>(null);
 
@@ -98,20 +105,31 @@ export default function MathLearningApp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // setActiveNav 호출 시 history 에 push
+  // setActiveNav 호출 시 history 에 push.
+  // 시험 중이라면 시험을 자동 종료(abandon)하고 새 탭으로 이동 — 사용자 요청.
   const setActiveNav = (n: NavKey) => {
+    if (activeExam) setActiveExam(null);
     setActiveNavState(n);
     writeHash(n, false);
   };
 
-  const enterStudy = (sessionId: string) => {
+  const enterStudy = (sessionId: string, focus?: string | null) => {
     sessionStorage.setItem(SESSION_KEY, sessionId);
     setActiveSessionId(sessionId);
+    if (focus) {
+      sessionStorage.setItem(FOCUS_PROBLEM_KEY, focus);
+      setFocusProblemId(focus);
+    } else {
+      sessionStorage.removeItem(FOCUS_PROBLEM_KEY);
+      setFocusProblemId(null);
+    }
     setActiveNav('학습');
   };
   const clearSession = () => {
     sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(FOCUS_PROBLEM_KEY);
     setActiveSessionId(null);
+    setFocusProblemId(null);
   };
   const enterExam = (exam: M.ExamPackage) => {
     setActiveExam(exam);
@@ -155,16 +173,19 @@ export default function MathLearningApp() {
       <TopNav activeNav={activeNav} setActiveNav={setActiveNav} />
 
       <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '48px 40px 80px' }}>
-        {activeNav === '대시보드' && <DashboardPage onStartStudy={enterStudy} onGotoWrongNotes={() => setActiveNav('오답노트')} />}
-        {activeNav === '오답노트' && <WrongNotesPage />}
-        {activeNav === '학습' && <StudyPage sessionId={activeSessionId} onClear={clearSession} onStartStudy={enterStudy} />}
-        {activeNav === '모의고사' && <MockExamPage onStartExam={enterExam} />}
-        {activeNav === '리포트' && <ReportPage />}
+        {/* 시험 응시 중 — 메인 영역에 인라인으로 렌더 (TopNav 그대로 노출, 학습 페이지와 동일한 레이아웃) */}
+        {activeExam ? (
+          <ExamTakingScreen exam={activeExam} onClose={() => exitExam()} />
+        ) : (
+          <>
+            {activeNav === '대시보드' && <DashboardPage onStartStudy={enterStudy} onGotoWrongNotes={() => setActiveNav('오답노트')} />}
+            {activeNav === '오답노트' && <WrongNotesPage onStartStudy={enterStudy} />}
+            {activeNav === '학습' && <StudyPage sessionId={activeSessionId} focusProblemId={focusProblemId} onClear={clearSession} onStartStudy={enterStudy} />}
+            {activeNav === '모의고사' && <MockExamPage onStartExam={enterExam} />}
+            {activeNav === '리포트' && <ReportPage />}
+          </>
+        )}
       </main>
-
-      {activeExam && (
-        <ExamTakingScreen exam={activeExam} onClose={() => exitExam()} />
-      )}
     </div>
   );
 }
@@ -173,6 +194,8 @@ export default function MathLearningApp() {
 function TopNav({ activeNav, setActiveNav }: { activeNav: NavKey; setActiveNav: (v: NavKey) => void }) {
   const { user, logout } = useAuth();
   const { t, lang, setLang } = useT();
+  const navigate = useNavigate();
+  const goSettings = () => { navigate('/settings'); };
   const items: NavKey[] = ['대시보드', '오답노트', '학습', '모의고사', '리포트'];
   const navLabel = (k: NavKey): string => ({
     '대시보드': t('nav.dashboard'),
@@ -254,6 +277,9 @@ function TopNav({ activeNav, setActiveNav }: { activeNav: NavKey; setActiveNav: 
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#142850', color: '#EFEBDF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 600 }}>
             {user?.name?.[0] ?? '?'}
           </div>
+          <button onClick={goSettings} title={t('settings.title')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5C6B85' }}>
+            <SettingsIcon size={16} />
+          </button>
           <button onClick={logout} title={t('nav.logout')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5C6B85' }}>
             <LogOut size={16} />
           </button>
@@ -264,7 +290,7 @@ function TopNav({ activeNav, setActiveNav }: { activeNav: NavKey; setActiveNav: 
 }
 
 // ============ DASHBOARD ============
-function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sessionId: string) => void; onGotoWrongNotes: () => void }) {
+function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sessionId: string, focus?: string) => void; onGotoWrongNotes: () => void }) {
   const { t } = useT();
   const summary = useQuery({ queryKey: ['dashboard'], queryFn: Q.fetchDashboardSummary });
   const mastery = useQuery({ queryKey: ['mastery'], queryFn: Q.fetchMastery });
@@ -282,6 +308,17 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
     onSuccess: (s) => {
       toast(t('toast.session.started'), 'success');
       onStartStudy(s.id);
+    },
+    onError: () => toast(t('toast.session.startFailed'), 'error'),
+  });
+
+  // 유사문제 "풀어보기" — 해당 문제의 단원으로 세션 시작 + focus 설정
+  const practiceSimilarMut = useMutation({
+    mutationFn: (problemId: string) => M.startStudySessionFromProblem(problemId),
+    onSuccess: (s) => {
+      setDetailNoteId(null);
+      toast(t('toast.session.started'), 'success');
+      onStartStudy(s.id, s.focusProblemId);
     },
     onError: () => toast(t('toast.session.startFailed'), 'error'),
   });
@@ -552,13 +589,17 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
         <div className="serif" style={{ fontSize: '13px', fontStyle: 'italic', color: '#5C6B85' }}>"Excellence is a habit not an act" — Aristotle</div>
       </div>
 
-      <WrongNoteDetailModal noteId={detailNoteId} onClose={() => setDetailNoteId(null)} />
+      <WrongNoteDetailModal
+        noteId={detailNoteId}
+        onClose={() => setDetailNoteId(null)}
+        onPracticeSimilar={(pid) => practiceSimilarMut.mutate(pid)}
+      />
     </>
   );
 }
 
 // ============ WRONG NOTES PAGE ============
-function WrongNotesPage() {
+function WrongNotesPage({ onStartStudy }: { onStartStudy: (sessionId: string, focus?: string) => void }) {
   const { t, lang } = useT();
   const [filter, setFilter] = useState<string>('전체');
   const [sort, setSort] = useState<'newest' | 'oldest'>('newest');
@@ -566,6 +607,16 @@ function WrongNotesPage() {
   const [detailNoteId, setDetailNoteId] = useState<string | null>(null);
   const [registerMode, setRegisterMode] = useState<'text' | 'photo' | 'pdf' | null>(null);
   const qc = useQueryClient();
+
+  const practiceSimilarMut = useMutation({
+    mutationFn: (problemId: string) => M.startStudySessionFromProblem(problemId),
+    onSuccess: (s) => {
+      setDetailNoteId(null);
+      toast(t('toast.session.started'), 'success');
+      onStartStudy(s.id, s.focusProblemId);
+    },
+    onError: () => toast(t('toast.session.startFailed'), 'error'),
+  });
 
   const stats = useQuery({ queryKey: ['wn-stats'], queryFn: Q.fetchWrongNotesStats });
   const list = useQuery({
@@ -821,7 +872,11 @@ function WrongNotesPage() {
         </div>
       </div>
 
-      <WrongNoteDetailModal noteId={detailNoteId} onClose={() => setDetailNoteId(null)} />
+      <WrongNoteDetailModal
+        noteId={detailNoteId}
+        onClose={() => setDetailNoteId(null)}
+        onPracticeSimilar={(pid) => practiceSimilarMut.mutate(pid)}
+      />
       <RegisterWrongNoteModal
         open={registerMode !== null}
         initialMode={registerMode ?? 'text'}
@@ -832,9 +887,14 @@ function WrongNotesPage() {
 }
 
 // ============ STUDY PAGE (동적: 활성 세션이 있으면 데이터 연결, 없으면 안내) ============
-function StudyPage({ sessionId, onClear, onStartStudy }: { sessionId: string | null; onClear: () => void; onStartStudy?: (id: string) => void }) {
+function StudyPage({ sessionId, focusProblemId, onClear, onStartStudy }: {
+  sessionId: string | null;
+  focusProblemId?: string | null;
+  onClear: () => void;
+  onStartStudy?: (id: string, focus?: string) => void;
+}) {
   if (!sessionId) return <StudyPlaceholder onStartStudy={onStartStudy} />;
-  return <StudySession sessionId={sessionId} onClear={onClear} />;
+  return <StudySession sessionId={sessionId} focusProblemId={focusProblemId} onClear={onClear} />;
 }
 
 function StudyPlaceholder({ onStartStudy }: { onStartStudy?: (id: string) => void }) {
@@ -940,7 +1000,7 @@ function StudyPlaceholder({ onStartStudy }: { onStartStudy?: (id: string) => voi
   );
 }
 
-function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () => void }) {
+function StudySession({ sessionId, focusProblemId, onClear }: { sessionId: string; focusProblemId?: string | null; onClear: () => void }) {
   const qc = useQueryClient();
   const { t } = useT();
   const session = useQuery({
@@ -987,7 +1047,11 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
 
   const step = session.data?.currentStep ?? 1;
   const total = session.data?.totalSessions ?? 5;
-  const problemList = problems.data ?? [];
+  // focusProblemId 가 지정된 경우 해당 문제를 맨 앞으로 이동 — 유사문제 "풀어보기" 동선
+  const problemListRaw = problems.data ?? [];
+  const problemList = focusProblemId
+    ? [...problemListRaw].sort((a, b) => (a.id === focusProblemId ? -1 : b.id === focusProblemId ? 1 : 0))
+    : problemListRaw;
   const currentProblem = problemList[Math.min(step - 1, problemList.length - 1)] ?? problemList[0];
   const problemsEmpty = problems.isSuccess && problemList.length === 0;
   const currentStep = currentProblem?.steps?.find((s) => s.stepIndex === problemStep);
@@ -1143,13 +1207,9 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
               <span style={{ color: '#8B95AB', fontStyle: 'italic', fontSize: 15 }}>
                 {t('study.problem.empty')}
               </span>
-            ) : currentProblem?.body ?? t('study.problem.loading')}
+            ) : currentProblem?.body ? <MathText text={currentProblem.body} /> : t('study.problem.loading')}
           </div>
-          {currentProblem?.formula && (
-            <div style={{ padding: '24px', backgroundColor: '#14285008', borderRadius: '4px', textAlign: 'center', marginBottom: '24px' }}>
-              <div className="serif mono" style={{ fontSize: '20px', color: '#142850', letterSpacing: '-0.02em' }}>{currentProblem.formula}</div>
-            </div>
-          )}
+          {/* 공식은 정답 스포일러가 되므로 여기서는 표시하지 않음 — 풀이 후 핵심 개념 패널에서만 노출 */}
           {/* 3단계 객관식 — CONCEPT → PROCESS → ANSWER */}
           {currentStep ? (
             <>
@@ -1297,7 +1357,7 @@ function StudySession({ sessionId, onClear }: { sessionId: string; onClear: () =
                     <Lightbulb size={13} /> {t('study.concept.label')}
                   </div>
                   <div style={{ fontSize: 13, lineHeight: 1.7, color: '#142850', whiteSpace: 'pre-wrap' }}>
-                    {currentProblem.concept}
+                    <MathText text={currentProblem.concept} />
                   </div>
                   {currentProblem.formula && (
                     <div style={{

@@ -1,12 +1,16 @@
-﻿import { useAuth } from '../context/AuthContext';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useT } from '../lib/i18n';
 
 export default function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { user, ready } = useAuth();
   const { t } = useT();
+  const location = useLocation();
   if (!ready) return <FullPageMessage text={t('common.loading')} />;
-  // 데모 모드: 자동 로그인이 실패하면 백엔드 연결 안내 메시지를 그대로 표시.
-  if (!user) return <FullPageMessage text={t('demo.backendDown')} />;
+  if (!user) {
+    // 미인증 → /login 으로 (원래 경로 state 로 보존, 로그인 후 복귀).
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
   return children;
 }
 

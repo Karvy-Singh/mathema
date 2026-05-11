@@ -1,18 +1,20 @@
-﻿import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Sparkles, CheckCircle2, RotateCcw, Clock, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
+﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Sparkles, CheckCircle2, RotateCcw, Clock, Lightbulb, ChevronRight } from 'lucide-react';
 import Modal from './Modal';
 import { toast } from './Toast';
-import { fetchWrongNote, fetchProblemHint, fetchProblem } from '../lib/queries';
+import { fetchWrongNote, fetchProblemHint, fetchProblemSolution } from '../lib/queries';
 import { updateWrongNoteStatus, reviewWrongNote, ReviewQuality } from '../lib/mutations';
 import { useT } from '../lib/i18n';
+import MathText from './MathText';
 
 type Props = {
   noteId: string | null;
   onClose: () => void;
+  /** 유사문제 "풀어보기" 클릭 시 호출 — 학습 페이지로 이동하면서 해당 문제를 우선 노출 */
+  onPracticeSimilar?: (problemId: string) => void;
 };
 
-export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
+export default function WrongNoteDetailModal({ noteId, onClose, onPracticeSimilar }: Props) {
   const qc = useQueryClient();
   const { t } = useT();
   const open = !!noteId;
@@ -33,6 +35,13 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
   const hint = useQuery({
     queryKey: ['hint', detail.data?.problemId],
     queryFn: () => fetchProblemHint(detail.data!.problemId),
+    enabled: !!detail.data?.problemId,
+  });
+
+  // 풀이 공개 — 본문/단계/정답 한 번에 가져옴
+  const solution = useQuery({
+    queryKey: ['problem-solution', detail.data?.problemId],
+    queryFn: () => fetchProblemSolution(detail.data!.problemId),
     enabled: !!detail.data?.problemId,
   });
 
@@ -88,7 +97,7 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
             <span style={{ marginLeft: 'auto' }}>{detail.data.date}</span>
           </div>
 
-          {/* 문제 본문 — 어떤 문제였는지 즉시 확인 */}
+          {/* 문제 본문 → 풀이 과정 → 정답 순서로 재구성 */}
           {detail.data.problemBody && (
             <div>
               <div style={{ fontSize: 11, letterSpacing: '0.15em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: 8 }}>
@@ -98,13 +107,74 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
                 padding: 16, backgroundColor: '#F8F4E9', border: '1px solid #14285018',
                 borderRadius: 4, fontSize: 15, lineHeight: 1.7, color: '#142850',
                 whiteSpace: 'pre-wrap',
-              }}>{detail.data.problemBody}</div>
-              {detail.data.problemAnswer && (
-                <div style={{ marginTop: 8, padding: '10px 14px', backgroundColor: '#5A8A4512', border: '1px solid #5A8A4540', borderRadius: 4, fontSize: 13, color: '#142850' }}>
-                  <span style={{ fontWeight: 600, color: '#5A8A45', marginRight: 6 }}>{t('wn.detail.answer')}</span>
-                  <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{detail.data.problemAnswer}</span>
-                </div>
-              )}
+              }}><MathText text={detail.data.problemBody} /></div>
+            </div>
+          )}
+
+          {/* 풀이 과정 — solution.steps 의 각 단계 prompt + 정답 보기 */}
+          {solution.data && solution.data.steps.length > 0 && (
+            <div>
+              <div style={{ fontSize: 11, letterSpacing: '0.15em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: 8 }}>
+                {t('wn.detail.solution')}
+              </div>
+              <ol style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {solution.data.steps.map((s) => {
+                  const stepLabel = s.stepType === 'CONCEPT' ? t('study.step.concept')
+                                  : s.stepType === 'PROCESS' ? t('study.step.process')
+                                  : t('study.step.answer');
+                  return (
+                    <li key={s.stepIndex} style={{
+                      padding: '12px 14px', backgroundColor: '#F8F4E9',
+                      border: '1px solid #14285018', borderRadius: 4,
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, padding: '2px 8px',
+                          backgroundColor: '#142850', color: '#EFEBDF', borderRadius: 2,
+                          letterSpacing: '0.05em',
+                        }}>{s.stepIndex}/{solution.data!.steps.length} · {stepLabel}</span>
+                      </div>
+                      <div style={{ fontSize: 13, color: '#142850', fontWeight: 600, marginBottom: 6 }}>
+                        {s.prompt}
+                      </div>
+                      {s.correctChoice && (
+                        <div style={{
+                          fontSize: 13, color: '#142850',
+                          fontFamily: 'JetBrains Mono, monospace',
+                          padding: '6px 10px',
+                          backgroundColor: '#5A8A4515',
+                          border: '1px solid #5A8A4540',
+                          borderRadius: 4,
+                          display: 'inline-flex', alignItems: 'center', gap: 8,
+                        }}>
+                          <CheckCircle2 size={12} color="#5A8A45" />
+                          <span>{s.correctChoice.text}</span>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          )}
+
+          {/* 최종 정답 — 풀이 과정 다음에 단독으로 강조 */}
+          {detail.data.problemAnswer && (
+            <div style={{
+              padding: '14px 16px', backgroundColor: '#5A8A4515',
+              border: '1px solid #5A8A4540', borderLeft: '3px solid #5A8A45',
+              borderRadius: '0 4px 4px 0',
+              display: 'flex', alignItems: 'center', gap: 10,
+            }}>
+              <CheckCircle2 size={16} color="#5A8A45" />
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: 10, letterSpacing: '0.18em', color: '#5A8A45', textTransform: 'uppercase', fontWeight: 700 }}>
+                  {t('wn.detail.answer')}
+                </span>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, color: '#142850', fontWeight: 600 }}>
+                  {detail.data.problemAnswer}
+                </span>
+              </div>
             </div>
           )}
 
@@ -120,7 +190,7 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
                 borderRadius: '0 4px 4px 0',
                 fontSize: 13, lineHeight: 1.7, color: '#142850', whiteSpace: 'pre-wrap',
               }}>
-                <div>{detail.data.problemConcept}</div>
+                <div><MathText text={detail.data.problemConcept} /></div>
                 {detail.data.problemFormula && (
                   <div style={{
                     marginTop: 10, padding: '10px 12px',
@@ -130,7 +200,7 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
                       {t('wn.detail.formula')}
                     </div>
                     <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: '#142850' }}>
-                      {detail.data.problemFormula}
+                      <MathText text={detail.data.problemFormula} />
                     </div>
                   </div>
                 )}
@@ -163,7 +233,10 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {detail.data.similar.map((s) => (
-                  <SimilarProblemRow key={s.id} id={s.id} source={s.source} difficulty={s.difficulty} />
+                  <SimilarProblemRow
+                    key={s.id} id={s.id} source={s.source} difficulty={s.difficulty}
+                    onPractice={onPracticeSimilar ? () => onPracticeSimilar(s.id) : undefined}
+                  />
                 ))}
               </div>
             </div>
@@ -236,69 +309,34 @@ export default function WrongNoteDetailModal({ noteId, onClose }: Props) {
 }
 
 /**
- * 유사문제 한 줄 — 클릭하면 그 문제의 본문/개념/공식/정답을 인라인으로 펼쳐 보여준다.
- * 별도 모달을 쌓지 않고 같은 모달 안에서 read-only 미리보기.
+ * 유사문제 한 줄 — 클릭하면 학습 페이지로 이동해 그 문제부터 풀이 시작.
  */
-function SimilarProblemRow({ id, source, difficulty }: { id: string; source: string; difficulty: string }) {
+function SimilarProblemRow({ id, source, difficulty, onPractice }: {
+  id: string; source: string; difficulty: string;
+  onPractice?: () => void;
+}) {
   const { t } = useT();
-  const [open, setOpen] = useState(false);
-  const problem = useQuery({
-    queryKey: ['problem-preview', id],
-    queryFn: () => fetchProblem(id),
-    enabled: open,
-  });
   return (
-    <div style={{ border: '1px solid #14285018', borderRadius: 4, backgroundColor: '#F8F4E9' }}>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        style={{
-          width: '100%', padding: '10px 12px', background: 'transparent', border: 'none',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          fontFamily: 'inherit', fontSize: 12, color: '#142850', cursor: 'pointer',
-        }}
-      >
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          <span>{source}</span>
+    <button
+      onClick={onPractice}
+      disabled={!onPractice}
+      style={{
+        width: '100%', padding: '12px 14px', textAlign: 'left',
+        backgroundColor: '#F8F4E9', border: '1px solid #14285018', borderRadius: 4,
+        cursor: onPractice ? 'pointer' : 'default', fontFamily: 'inherit', color: '#142850',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+        transition: 'all 0.15s',
+      }}
+      onMouseEnter={(e) => onPractice && (e.currentTarget.style.borderColor = '#142850')}
+      onMouseLeave={(e) => onPractice && (e.currentTarget.style.borderColor = '#14285018')}
+    >
+      <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <span style={{ fontSize: 13, fontWeight: 500 }}>{source}</span>
+        <span style={{ fontSize: 11, color: '#5C6B85', letterSpacing: '0.05em' }}>
+          {t('wn.detail.similar.practice')} · {difficulty}
         </span>
-        <span style={{ color: '#5C6B85' }}>{difficulty}</span>
-      </button>
-      {open && (
-        <div style={{ padding: '0 12px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {problem.isLoading && <div style={{ fontSize: 12, color: '#5C6B85' }}>{t('common.loading')}</div>}
-          {problem.data && (
-            <>
-              <div className="serif" style={{
-                padding: '10px 12px', backgroundColor: '#EFEBDF',
-                border: '1px solid #14285018', borderRadius: 4,
-                fontSize: 14, lineHeight: 1.65, color: '#142850', whiteSpace: 'pre-wrap',
-              }}>
-                {problem.data.body}
-              </div>
-              {(problem.data as any).concept && (
-                <div style={{
-                  padding: 10, backgroundColor: '#14285008',
-                  border: '1px solid #14285020', borderLeft: '3px solid #C25E2E',
-                  borderRadius: '0 4px 4px 0', fontSize: 12, lineHeight: 1.6, color: '#142850',
-                }}>
-                  <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#C25E2E', fontWeight: 700, marginBottom: 4 }}>
-                    {t('wn.detail.concept')}
-                  </div>
-                  {(problem.data as any).concept}
-                  {problem.data.formula && (
-                    <div style={{
-                      marginTop: 8, padding: '8px 10px',
-                      backgroundColor: '#F8F4E9', border: '1px solid #14285020', borderRadius: 4,
-                      fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#142850',
-                    }}>{problem.data.formula}</div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      )}
-    </div>
+      </span>
+      <ChevronRight size={14} color="#5C6B85" />
+    </button>
   );
 }

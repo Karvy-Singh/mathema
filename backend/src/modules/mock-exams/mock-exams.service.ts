@@ -198,7 +198,73 @@ export class MockExamsService {
   }
 
   /**
-   * 모의고사 제출.
+   * 모의고사 — 학습과 같은 방식으로 per-step 제출.
+   * choice를 선택하면 attempt 생성 + isCorrect/distractorType/rationale 즉시 반환.
+   * 학습페이지의 study-sessions/:id/answer 와 동일한 흐름.
+   */
+  async submitStepAnswer(userId: string, resultId: string, dto: {
+    problemId: string; choiceId: string;
+    stepIndex: number; durationSec: number; confidence?: number;
+  }, lang: Lang = 'ko') {
+    const attempt = await this.attempts.create(userId, {
+      problemId: dto.problemId,
+      answer: '',
+      durationSec: dto.durationSec,
+      confidence: dto.confidence,
+      stepIndex: dto.stepIndex,
+      choiceId: dto.choiceId,
+      context: SessionContext.EXAM,
+      mockExamResultId: resultId,
+    });
+    const choice = await this.prisma.problemChoice.findUnique({
+      where: { id: dto.choiceId },
+      select: {
+        id: true, choiceIndex: true, text: true, isCorrect: true, distractorType: true, rationale: true,
+        step: { select: { stepIndex: true, problem: { select: { source: true } } } },
+      },
+    });
+    if (choice && lang === 'en' && choice.step) {
+      const key = `${choice.step.problem.source}:${choice.step.stepIndex}:${choice.choiceIndex}`;
+      const en = CHOICE_EN[key];
+      if (en) return { ...attempt, choice: { ...choice, text: en.text, rationale: en.rationale ?? null } };
+    }
+    return { ...attempt, choice };
+  }
+
+  /**
+   * 모의고사 종료 — 저장된 attempt 들로부터 점수 산출.
+   * (학습형 per-step 흐름에서 모든 문제 완료 시 호출)
+   */
+  async finalize(userId: string, resultId: string) {
+    const result = await this.prisma.mockExamResult.findFirstOrThrow({
+      where: { id: resultId, userId },
+      include: { attempts: { include: { choice: true } } },
+    });
+    // 한 문제당 모든 단계가 정답이면 정답으로 카운트 (study mastery 와 동일 기준)
+    const byProblem = new Map<string, { correctSteps: Set<number>; totalSteps: Set<number> }>();
+    for (const a of result.attempts) {
+      if (!a.stepIndex || !a.choice) continue;
+      const cur = byProblem.get(a.problemId) ?? { correctSteps: new Set(), totalSteps: new Set() };
+      cur.totalSteps.add(a.stepIndex);
+      if (a.choice.isCorrect) cur.correctSteps.add(a.stepIndex);
+      byProblem.set(a.problemId, cur);
+    }
+    let correctCount = 0;
+    for (const [, v] of byProblem) {
+      if (v.totalSteps.size > 0 && v.correctSteps.size === v.totalSteps.size) correctCount += 1;
+    }
+    const totalProblems = byProblem.size || 1;
+    const score = Math.round((correctCount / totalProblems) * 100);
+    const grade = score >= 96 ? 1 : score >= 88 ? 2 : score >= 78 ? 3 : score >= 65 ? 4 : score >= 50 ? 5 : 6;
+    const percentile = Math.min(99, Math.max(1, score));
+    const durationMin = Math.max(1, Math.round(
+      result.attempts.reduce((s, a) => s + (a.durationSec ?? 0), 0) / 60,
+    ));
+    return this.repo.saveResult(resultId, { score, grade, percentile, durationMin });
+  }
+
+  /**
+   * 모의고사 제출 (레거시 — 한 번에 모든 답안 제출).
    *   1) 각 답안을 Attempt로 저장 (context: EXAM, mockExamResultId 연결)
    *      → attempt.completed 이벤트가 mastery·activity·wrong-note 자동 갱신
    *   2) totalScore 기반 등급/백분위 계산 후 MockExamResult 업데이트

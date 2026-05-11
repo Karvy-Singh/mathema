@@ -39,6 +39,15 @@ export class RedisService implements OnModuleDestroy {
     return this.client.incr(key);
   }
 
+  async exists(key: string): Promise<boolean> {
+    return (await this.client.exists(key)) === 1;
+  }
+
+  async setNx(key: string, value: string, ttlSec: number): Promise<boolean> {
+    const r = await this.client.set(key, value, 'EX', ttlSec, 'NX');
+    return r === 'OK';
+  }
+
   async withLock<T>(key: string, ttlSec: number, fn: () => Promise<T>): Promise<T> {
     const ok = await this.client.set(`lock:${key}`, '1', 'EX', ttlSec, 'NX');
     if (!ok) throw new Error(`Lock busy: ${key}`);

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 백엔드 콘텐츠 EN 번역 사전.
  *
  * 데모용으로 한국 수능 수학 콘텐츠를 영문 SAT/AP-style 표현으로 옮긴 것.
@@ -13,130 +13,134 @@
  *   - DASHBOARD_TAG_EN, RECOMMENDATION_EN: 추천 카드 라벨
  */
 
+// 영어판은 인도 NCERT/CBSE 학년 정합 기준 (Class 7~12).
+// 학년 재배치는 unit.enum.ts 의 GRADE_TO_UNITS 에서 관리. 여기는 NCERT 챕터명 매핑만.
 export const UNIT_NAME_EN: Record<string, string> = {
-  // 고3 (legacy)
+  // legacy 고3
   '수와 식':   'Numbers & Expressions',
-  '함수':       'Functions',
-  '미적분 I':  'Calculus I',
-  '미적분 II': 'Calculus II',
-  '확률·통계': 'Probability & Statistics',
-  '기하·벡터': 'Geometry & Vectors',
-  // 중1
-  '정수와 유리수':       'Integers & Rationals',
-  '문자와 식':           'Variables & Expressions',
-  '일차방정식':          'Linear Equations',
-  '좌표평면과 그래프':   'Coordinate Plane & Graphs',
-  // 중2
-  '유리수와 순환소수':   'Rationals & Repeating Decimals',
-  '식의 계산':           'Algebraic Manipulation',
-  '일차부등식':          'Linear Inequalities',
-  '일차함수':            'Linear Functions',
-  // 중3
-  '제곱근과 실수':       'Square Roots & Reals',
-  '인수분해':            'Factoring',
-  '이차방정식':          'Quadratic Equations',
-  '이차함수':            'Quadratic Functions',
-  // 고1
-  '다항식':              'Polynomials',
-  '방정식과 부등식':     'Equations & Inequalities',
-  '도형의 방정식':       'Equations of Geometric Figures',
-  '함수와 그래프':       'Functions & Graphs',
-  // 고2
-  '지수와 로그':         'Exponents & Logarithms',
-  '삼각함수':            'Trigonometric Functions',
-  '수열':                'Sequences',
-  '함수의 극한':         'Limits of Functions',
+  '함수':       'Relations and Functions',
+  // Class 7 NCERT
+  '정수와 유리수':       'Integers',                            // NCERT 7 · Ch 1
+  '문자와 식':           'Algebraic Expressions',               // NCERT 7 · Ch 10
+  '일차방정식':          'Simple Equations',                    // NCERT 7 · Ch 4
+  // Class 8 NCERT
+  '유리수와 순환소수':   'Rational Numbers',                    // NCERT 8 · Ch 1
+  '식의 계산':           'Algebraic Expressions and Identities',// NCERT 8 · Ch 8
+  '일차함수':            'Introduction to Graphs',              // NCERT 8 · Ch 13
+  // Class 9 NCERT
+  '제곱근과 실수':       'Number Systems',                      // NCERT 9 · Ch 1
+  '인수분해':            'Polynomials (Factorisation)',         // NCERT 9 · Ch 2
+  '좌표평면과 그래프':   'Cartesian Plane',                     // NCERT 9 · Ch 3 (재배치)
+  '이차함수':            'Polynomials (Quadratic)',             // NCERT 9 · Ch 2 / 10 · Ch 2
+  // Class 10 NCERT
+  '다항식':              'Polynomials',                         // NCERT 10 · Ch 2
+  '방정식과 부등식':     'Pair of Linear Equations',            // NCERT 10 · Ch 3
+  '도형의 방정식':       'Coordinate Geometry',                 // NCERT 10 · Ch 7
+  '이차방정식':          'Quadratic Equations',                 // NCERT 10 · Ch 4 (재배치)
+  // Class 11 NCERT
+  '삼각함수':            'Trigonometric Functions',             // NCERT 11 · Ch 3
+  '수열':                'Sequences and Series',                // NCERT 11 · Ch 8
+  '함수의 극한':         'Limits and Derivatives',              // NCERT 11 · Ch 12
+  '함수와 그래프':       'Relations and Functions',             // NCERT 11 · Ch 2 (재배치)
+  '일차부등식':          'Linear Inequalities',                 // NCERT 11 · Ch 5 (재배치)
+  '지수와 로그':         'Exponential & Logarithmic Functions', // NCERT 11 (Functions/Sequences) + 12 (Differentiability) — 단독 챕터 X
+  // Class 12 NCERT
+  '미적분 I':            'Continuity and Differentiability',    // NCERT 12 · Ch 5
+  '미적분 II':           'Integrals',                           // NCERT 12 · Ch 7-8
+  '확률·통계':           'Probability',                         // NCERT 12 · Ch 13 (Statistics는 Class 11 Ch 13)
+  '기하·벡터':           'Vector Algebra & Three-Dimensional Geometry', // NCERT 12 · Ch 10-11
 };
 
+// 서브유닛도 NCERT 표현으로 통일 (A.P., G.P., Vieta's, surd, mensuration, identities, etc.)
 export const SUB_UNIT_NAME_EN: Record<string, string> = {
-  // 고3 legacy
-  '정적분의 활용':       'Applications of Definite Integrals',
+  // Class 12 legacy
+  '정적분의 활용':       'Applications of Integrals',
   '부분적분':            'Integration by Parts',
   '치환적분':            'Integration by Substitution',
   '조건부확률':          'Conditional Probability',
-  '공간벡터':            'Spatial Vectors',
+  '공간벡터':            'Vectors in 3D',
   '정적분':              'Definite Integral',
   '지수·로그함수':       'Exponential & Logarithmic Functions',
   '핵심 영역':           'Core area',
   '핵심 개념':           'Core concepts',
   '실전 응용':           'Applied practice',
-  // 중1
-  '정수의 사칙연산':     'Integer Arithmetic',
-  '유리수와 절댓값':     'Rationals & Absolute Value',
+  // Class 7 (중1)
+  '정수의 사칙연산':     'Operations on Integers',
+  '유리수와 절댓값':     'Rational Numbers & Modulus',
   '소수와 분수의 변환':  'Decimal–Fraction Conversion',
-  '문자식 표현':         'Expressions with Variables',
+  '문자식 표현':         'Forming Algebraic Expressions',
   '동류항 정리':         'Combining Like Terms',
   '식의 값 계산':        'Evaluating Expressions',
-  '일차방정식 풀이':     'Solving Linear Equations',
-  '비례식과 활용':       'Ratios & Proportions',
-  '일차방정식의 활용':   'Linear Equation Word Problems',
+  '일차방정식 풀이':     'Solving Simple Equations',
+  '비례식과 활용':       'Ratio and Proportion',
+  '일차방정식의 활용':   'Word Problems on Equations',
   '순서쌍과 좌표':       'Ordered Pairs & Coordinates',
-  '정비례·반비례':       'Direct & Inverse Proportion',
-  '그래프 해석':         'Graph Interpretation',
-  // 중2
+  '정비례·반비례':       'Direct & Inverse Variation',
+  '그래프 해석':         'Reading Graphs',
+  // Class 8 (중2)
   '순환소수와 분수':     'Repeating Decimals & Fractions',
-  '유한·무한소수':       'Finite & Infinite Decimals',
+  '유한·무한소수':       'Terminating & Non-Terminating Decimals',
   '지수법칙':            'Laws of Exponents',
-  '다항식의 곱셈':       'Polynomial Multiplication',
-  '곱셈공식':            'Special Products',
+  '다항식의 곱셈':       'Multiplication of Polynomials',
+  '곱셈공식':            'Algebraic Identities',
   '일차부등식 풀이':     'Solving Linear Inequalities',
-  '연립일차부등식':      'Systems of Linear Inequalities',
-  '일차함수의 그래프':   'Graphs of Linear Functions',
-  '기울기와 절편':       'Slope & Intercepts',
-  '연립방정식과 그래프': 'Systems of Equations & Graphs',
-  // 중3
-  '제곱근의 계산':       'Square-Root Operations',
-  '무리수와 실수':       'Irrationals & Reals',
-  '근호의 사칙연산':     'Radical Arithmetic',
+  '연립일차부등식':      'System of Linear Inequalities',
+  '일차함수의 그래프':   'Linear Graphs',
+  '기울기와 절편':       'Slope & Intercept Form',
+  '연립방정식과 그래프': 'Graphical Method for Systems',
+  // Class 9 (중3)
+  '제곱근의 계산':       'Operations on Surds',
+  '무리수와 실수':       'Irrational & Real Numbers',
+  '근호의 사칙연산':     'Operations with Radicals',
   '공통인수':            'Common Factors',
-  '완전제곱식':          'Perfect Squares',
-  '인수분해 공식':       'Factoring Formulas',
-  '인수분해로 풀이':     'Solving by Factoring',
+  '완전제곱식':          'Perfect-Square Identity',
+  '인수분해 공식':       'Factorisation by Identities',
+  '인수분해로 풀이':     'Solving by Factorisation',
   '근의 공식':           'Quadratic Formula',
-  '판별식':              'Discriminant',
-  '근과 계수의 관계':    'Roots & Coefficients (Vieta)',
-  '이차함수의 그래프':   'Graphs of Quadratics',
-  '꼭짓점·축':           'Vertex & Axis',
-  '최댓값·최솟값':       'Maxima & Minima',
-  // 고1
-  '다항식의 사칙연산':   'Polynomial Operations',
+  '판별식':              'Discriminant (b² − 4ac)',
+  '근과 계수의 관계':    "Vieta's Formulas (Sum & Product of Roots)",
+  '이차함수의 그래프':   'Graphs of Quadratic Polynomials',
+  '꼭짓점·축':           'Vertex & Axis of Symmetry',
+  '최댓값·최솟값':       'Maximum & Minimum Values',
+  // Class 10 (고1)
+  '다항식의 사칙연산':   'Operations on Polynomials',
   '나머지정리':          'Remainder Theorem',
   '인수정리':            'Factor Theorem',
-  '이차방정식의 활용':   'Quadratic Word Problems',
-  '연립이차방정식':      'Systems with Quadratics',
+  '이차방정식의 활용':   'Word Problems on Quadratics',
+  '연립이차방정식':      'Systems Involving Quadratics',
   '이차부등식':          'Quadratic Inequalities',
-  '절댓값 부등식':       'Absolute-Value Inequalities',
+  '절댓값 부등식':       'Modulus Inequalities',
   '직선의 방정식':       'Equation of a Line',
   '원의 방정식':         'Equation of a Circle',
   '도형의 이동':         'Translations & Reflections',
   '함수의 정의':         'Definition of a Function',
-  '합성함수':            'Composite Functions',
+  '합성함수':            'Composition of Functions',
   '역함수':              'Inverse Functions',
-  '유리·무리함수':       'Rational & Radical Functions',
-  // 고2
-  '지수의 확장':         'Generalized Exponents',
+  '유리·무리함수':       'Rational & Surd Functions',
+  // Class 11 (고2)
+  '지수의 확장':         'Generalised Exponents',
   '로그의 정의':         'Definition of Logarithm',
   '지수·로그함수의 그래프': 'Graphs of Exp/Log Functions',
-  '일반각과 호도법':     'General Angle & Radians',
-  '삼각함수의 정의':     'Definitions of Trig Functions',
+  '일반각과 호도법':     'Angle Measure & Radian System',
+  '삼각함수의 정의':     'Trigonometric Ratios & Identities',
   '삼각함수의 그래프':   'Graphs of Trig Functions',
-  '삼각함수의 활용':     'Applications of Trig',
-  '등차수열':            'Arithmetic Sequences',
-  '등비수열':            'Geometric Sequences',
-  '수열의 합 (Σ)':       'Sums of Sequences (Σ)',
-  '수학적 귀납법':       'Mathematical Induction',
+  '삼각함수의 활용':     'Applications of Trigonometry',
+  '등차수열':            'Arithmetic Progression (A.P.)',
+  '등비수열':            'Geometric Progression (G.P.)',
+  '수열의 합 (Σ)':       'Sigma Notation & Series',
+  '수학적 귀납법':       'Principle of Mathematical Induction',
   '함수의 극한':         'Limits',
   '함수의 연속':         'Continuity',
-  '미분계수의 정의':     'Definition of the Derivative',
-  // 고3
+  '미분계수의 정의':     'First-Principle Derivative',
+  // Class 12 (고3)
   '도함수':              'Derivatives',
-  '미분의 활용':         'Applications of Differentiation',
-  '적분의 기초':         'Foundations of Integration',
-  '경우의 수':           'Counting',
+  '미분의 활용':         'Applications of Derivatives',
+  '적분의 기초':         'Indefinite Integrals',
+  '경우의 수':           'Permutations & Combinations',
   '정규분포':            'Normal Distribution',
-  '통계적 추정':         'Statistical Estimation',
-  '공간도형':            'Solid Geometry',
-  '공간좌표':            'Spatial Coordinates',
+  '통계적 추정':         'Estimation in Statistics',
+  '공간도형':            'Three-Dimensional Geometry',
+  '공간좌표':            '3D Coordinate System',
 };
 
 export const DIFFICULTY_EN: Record<string, string> = {
@@ -156,34 +160,34 @@ export const ERROR_TYPE_EN: Record<string, string> = {
 /** Problem.source EN — 시험명·문항번호 표시 */
 export const SOURCE_EN: Record<string, string> = {
   // 고3 legacy
-  '2024 9월 모의평가 30번':   '2024 Sep Mock · #30',
-  '수능특강 미적분 III-2-15': 'Calc Workbook III-2-15',
-  '2024 6월 모의평가 28번':   '2024 Jun Mock · #28',
-  '2024 9월 모의평가 21번':   '2024 Sep Mock · #21',
-  '교육청 학평 18번':         'Practice Exam · #18',
-  '수능기출 2023 22번':       '2023 SAT Math · #22',
-  '2024 6월 모의평가 21번':   '2024 Jun Mock · #21',
+  '2024 9월 모의평가 30번':   'NCERT 12 · Integrals · Q30',
+  '수능특강 미적분 III-2-15': 'NCERT 12 · Integrals · Practice 15',
+  '2024 6월 모의평가 28번':   'NCERT 12 · Probability · Q28',
+  '2024 9월 모의평가 21번':   'NCERT 12 · Vector Algebra · Q21',
+  '교육청 학평 18번':         'NCERT 12 · Integrals · Practice 18',
+  '수능기출 2023 22번':       'NCERT 12 · Integrals (Riemann) · Q22',
+  '2024 6월 모의평가 21번':   'NCERT 11 · Logarithms · Q21',
   // 신규 — 중1 데모 (20문제 × 3단계)
-  '중1 · 정수와 유리수 1': 'Mid-1 · Integers & Rationals #1',
-  '중1 · 정수와 유리수 2': 'Mid-1 · Integers & Rationals #2',
-  '중1 · 정수와 유리수 3': 'Mid-1 · Integers & Rationals #3',
-  '중1 · 정수와 유리수 4': 'Mid-1 · Integers & Rationals #4',
-  '중1 · 정수와 유리수 5': 'Mid-1 · Integers & Rationals #5',
-  '중1 · 문자와 식 1':     'Mid-1 · Variables & Expressions #1',
-  '중1 · 문자와 식 2':     'Mid-1 · Variables & Expressions #2',
-  '중1 · 문자와 식 3':     'Mid-1 · Variables & Expressions #3',
-  '중1 · 문자와 식 4':     'Mid-1 · Variables & Expressions #4',
-  '중1 · 일차방정식 1':    'Mid-1 · Linear Eq #1',
-  '중1 · 일차방정식 2':    'Mid-1 · Linear Eq #2',
-  '중1 · 일차방정식 3':    'Mid-1 · Linear Eq #3',
-  '중1 · 일차방정식 4':    'Mid-1 · Linear Eq #4',
-  '중1 · 일차방정식 5':    'Mid-1 · Linear Eq #5',
-  '중1 · 일차방정식 6':    'Mid-1 · Linear Eq #6',
-  '중1 · 일차방정식 7':    'Mid-1 · Linear Eq #7',
-  '중1 · 좌표와 그래프 1': 'Mid-1 · Coords & Graphs #1',
-  '중1 · 좌표와 그래프 2': 'Mid-1 · Coords & Graphs #2',
-  '중1 · 좌표와 그래프 3': 'Mid-1 · Coords & Graphs #3',
-  '중1 · 좌표와 그래프 4': 'Mid-1 · Coords & Graphs #4',
+  '중1 · 정수와 유리수 1': 'Grade 7 · Integers · Q1',
+  '중1 · 정수와 유리수 2': 'Grade 7 · Integers · Q2',
+  '중1 · 정수와 유리수 3': 'Grade 7 · Integers · Q3',
+  '중1 · 정수와 유리수 4': 'Grade 7 · Integers · Q4',
+  '중1 · 정수와 유리수 5': 'Grade 7 · Integers · Q5',
+  '중1 · 문자와 식 1':     'Grade 7 · Algebraic Expressions · Q1',
+  '중1 · 문자와 식 2':     'Grade 7 · Algebraic Expressions · Q2',
+  '중1 · 문자와 식 3':     'Grade 7 · Algebraic Expressions · Q3',
+  '중1 · 문자와 식 4':     'Grade 7 · Algebraic Expressions · Q4',
+  '중1 · 일차방정식 1':    'Grade 7 · Simple Equations · Q1',
+  '중1 · 일차방정식 2':    'Grade 7 · Simple Equations · Q2',
+  '중1 · 일차방정식 3':    'Grade 7 · Simple Equations · Q3',
+  '중1 · 일차방정식 4':    'Grade 7 · Simple Equations · Q4',
+  '중1 · 일차방정식 5':    'Grade 7 · Simple Equations · Q5',
+  '중1 · 일차방정식 6':    'Grade 7 · Simple Equations · Q6',
+  '중1 · 일차방정식 7':    'Grade 7 · Simple Equations · Q7',
+  '중1 · 좌표와 그래프 1': 'Grade 7 · Coordinate Plane · Q1',
+  '중1 · 좌표와 그래프 2': 'Grade 7 · Coordinate Plane · Q2',
+  '중1 · 좌표와 그래프 3': 'Grade 7 · Coordinate Plane · Q3',
+  '중1 · 좌표와 그래프 4': 'Grade 7 · Coordinate Plane · Q4',
 };
 
 /** WrongNote.insight EN — 시드된 한국어 insight 영문 매핑 */

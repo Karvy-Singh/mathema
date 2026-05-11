@@ -21,6 +21,16 @@ export class StudySessionsService {
   start(userId: string, dto: StartSessionDto, _lang: Lang = 'ko') { return this.repo.create(userId, dto); }
   get(userId: string, id: string, _lang: Lang = 'ko') { return this.repo.findOne(userId, id); }
 
+  /** 특정 문제로 학습 세션 시작 — 그 문제의 단원으로 세션을 만들고 focusProblemId 도 함께 반환. */
+  async startFromProblem(userId: string, problemId: string) {
+    const p = await this.prisma.problem.findUnique({
+      where: { id: problemId }, select: { unitId: true },
+    });
+    if (!p) throw new Error('problem not found');
+    const session = await this.repo.create(userId, { unitId: p.unitId } as any);
+    return { ...session, focusProblemId: problemId };
+  }
+
   /**
    * 가중치 기반 추천 단원 — 학습 시작 화면에 노출.
    * weight = α·(100-mastery) + β·wrongNoteCount + γ·(timeBudget - timeSpent)

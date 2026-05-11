@@ -35,17 +35,22 @@ async function main() {
     units[name] = { id: unit.id, subs };
   }
 
-  // ===== User: 데모 (중1) =====
-  // 데모 단계 — 중1 과정으로 통일해 진입장벽을 낮춘다.
+  // ===== Demo user — India launch (Class 7 NCERT, building foundation) =====
+  // Phase 1 출시: Class 7 (G_MIDDLE_1) NCERT — 시드 문제 20개가 모두 이 학년에 매핑되어 데모가 풍부.
+  // Phase 2: Class 11 (JEE prep) 콘텐츠 확보 후 페르소나 추가 예정.
   const examDate = new Date();
   examDate.setDate(examDate.getDate() + 287);
   const user = await prisma.user.upsert({
     where: { email: 'polopot123@gmail.com' },
-    update: { gradeLevel: 'G_MIDDLE_1' },
+    update: { gradeLevel: 'G_MIDDLE_1', country: 'IN', name: 'Arjun Sharma' } as any,
     create: {
       email: 'polopot123@gmail.com',
       passwordHash: await bcrypt.hash('password1234', 10),
-      name: '민준', examDate, targetGrade: 1, gradeLevel: 'G_MIDDLE_1',
+      name: 'Arjun Sharma',
+      examDate,
+      targetGrade: 1,
+      gradeLevel: 'G_MIDDLE_1',
+      country: 'IN' as any,
     },
   });
 
@@ -126,6 +131,36 @@ async function main() {
       body: 'y 가 x 에 정비례하고, x = 4 일 때 y = 12 이다. y 를 x 의 식으로 나타내시오.', answer: 'y = 3x' },
     { source: '중1 · 좌표와 그래프 4', unit: '좌표평면과 그래프', sub: '정비례·반비례', difficulty: 'UPPER_MIDDLE',
       body: '함수 y = -2x 의 그래프가 지나는 사분면을 모두 고르시오.', answer: '제2사분면, 제4사분면' },
+
+    // ============ Class 8 NCERT (4) ============
+    { source: 'Class 8 · Rational Numbers · Q1', unit: '유리수와 순환소수', sub: '순환소수와 분수', difficulty: 'MIDDLE',
+      body: 'Express 0.\\overline{3} (0.3 repeating) as a fraction in lowest terms.', answer: '1/3' },
+    { source: 'Class 8 · Algebraic Identities · Q1', unit: '식의 계산', sub: '곱셈공식', difficulty: 'UPPER_MIDDLE',
+      body: 'Use an identity to expand (x + 5)².', answer: 'x² + 10x + 25' },
+    { source: 'Class 8 · Linear Equations · Q1', unit: '식의 계산', sub: '동류항 정리', difficulty: 'MIDDLE',
+      body: 'Solve for x:  2x − 3 = 5x + 9.', answer: 'x = -4' },
+    { source: 'Class 8 · Graphs · Q1', unit: '일차함수', sub: '기울기와 절편', difficulty: 'MIDDLE',
+      body: 'A line passes through (0, 2) and (3, 8). Find its slope.', answer: '2' },
+
+    // ============ Class 9 NCERT (4) ============
+    { source: 'Class 9 · Number Systems · Q1', unit: '제곱근과 실수', sub: '근호의 사칙연산', difficulty: 'MIDDLE',
+      body: 'Simplify √50 + √8.', answer: '7√2' },
+    { source: 'Class 9 · Polynomials · Q1', unit: '인수분해', sub: '인수분해 공식', difficulty: 'UPPER_MIDDLE',
+      body: 'Factorise x² + 7x + 12.', answer: '(x + 3)(x + 4)' },
+    { source: 'Class 9 · Coordinate Geometry · Q1', unit: '좌표평면과 그래프', sub: '순서쌍과 좌표', difficulty: 'MIDDLE',
+      body: 'Find the distance between A(2, 3) and B(5, 7).', answer: '5' },
+    { source: 'Class 9 · Polynomials · Q2', unit: '이차함수', sub: '이차함수의 그래프', difficulty: 'UPPER_MIDDLE',
+      body: 'For p(x) = 2x² − 3x − 2, find p(2).', answer: '0' },
+
+    // ============ Class 10 NCERT (4) ============
+    { source: 'Class 10 · Polynomials · Q1', unit: '다항식', sub: '나머지정리', difficulty: 'UPPER_MIDDLE',
+      body: 'Find the remainder when p(x) = x³ − 3x² + 4 is divided by (x − 2).', answer: '0' },
+    { source: 'Class 10 · Quadratic Equations · Q1', unit: '이차방정식', sub: '근의 공식', difficulty: 'UPPER_MIDDLE',
+      body: 'Solve x² − 4x − 5 = 0 using factorisation.', answer: 'x = 5 or x = -1' },
+    { source: 'Class 10 · Coordinate Geometry · Q1', unit: '도형의 방정식', sub: '직선의 방정식', difficulty: 'UPPER_MIDDLE',
+      body: 'Find the midpoint of the segment joining A(-2, 4) and B(6, -2).', answer: '(2, 1)' },
+    { source: 'Class 10 · Trigonometry · Q1', unit: '도형의 방정식', sub: '직선의 방정식', difficulty: 'UPPER_MIDDLE',
+      body: 'In a right triangle, sin θ = 3/5. Find cos θ.', answer: '4/5' },
   ];
 
   const problemsSpec: ProblemSpec[] = [...featured, ...general];
@@ -169,6 +204,21 @@ async function main() {
     '중1 · 좌표와 그래프 2': '(x, y) → x축 대칭: (x, −y), y축 대칭: (−x, y), 원점 대칭: (−x, −y)',
     '중1 · 좌표와 그래프 3': 'y = ax (정비례) ⇒ a = y/x',
     '중1 · 좌표와 그래프 4': 'y = ax (a ≠ 0) → 원점을 지나는 직선, a > 0: I·III, a < 0: II·IV',
+    // Class 8
+    'Class 8 · Rational Numbers · Q1':     'x = 0.\\overline{abc...n}  ⇒  10ⁿx − x = (정수부) ⇒ x = (정수부)/(10ⁿ − 1)',
+    'Class 8 · Algebraic Identities · Q1': '(a + b)² = a² + 2ab + b²',
+    'Class 8 · Linear Equations · Q1':     'ax + b = cx + d  ⇒  (a − c)x = d − b  ⇒  x = (d − b)/(a − c)',
+    'Class 8 · Graphs · Q1':               'slope m = (y₂ − y₁)/(x₂ − x₁)',
+    // Class 9
+    'Class 9 · Number Systems · Q1':       '√(a²·b) = a√b ;  √m + √n 은 같은 surd 일 때만 합칠 수 있음',
+    'Class 9 · Polynomials · Q1':          'x² + (p+q)x + pq = (x + p)(x + q)',
+    'Class 9 · Coordinate Geometry · Q1':  'd = √[(x₂ − x₁)² + (y₂ − y₁)²]',
+    'Class 9 · Polynomials · Q2':          'p(c) = c 를 변수에 대입한 식의 값 (function evaluation)',
+    // Class 10
+    'Class 10 · Polynomials · Q1':         '(x − c) 로 나눈 나머지 = p(c)  (Remainder Theorem)',
+    'Class 10 · Quadratic Equations · Q1': 'x² − (sum)x + (product) = 0  ⇒  factor as (x − r₁)(x − r₂) = 0',
+    'Class 10 · Coordinate Geometry · Q1': 'midpoint M = ((x₁ + x₂)/2, (y₁ + y₂)/2)',
+    'Class 10 · Trigonometry · Q1':        'sin²θ + cos²θ = 1  ⇒  cos θ = √(1 − sin²θ) (예각)',
   };
 
   // source → 핵심 개념 설명 (학습 피드백·오답노트 상세에 노출)
@@ -205,7 +255,24 @@ async function main() {
     '중1 · 좌표와 그래프 2': 'x축 대칭: y 좌표 부호만 반전. y축 대칭은 x 부호만, 원점 대칭은 둘 다.',
     '중1 · 좌표와 그래프 3': '정비례 y = ax 의 비례상수 a = y/x. 한 점 (x, y) 만 알면 a 결정 → y = ax 식 완성.',
     '중1 · 좌표와 그래프 4': 'y = ax (a < 0): 원점을 지나는 직선이며 좌상-우하 방향 → 2사분면·4사분면 통과.',
+    // Class 8 NCERT
+    'Class 8 · Rational Numbers · Q1':     'Repeating decimals: multiply by 10ⁿ (n = repeating block length), subtract original, solve for x. Every repeating decimal is rational.',
+    'Class 8 · Algebraic Identities · Q1': 'Square of a binomial identity: (a + b)² = a² + 2ab + b². Always check the cross-term 2ab — most-missed step.',
+    'Class 8 · Linear Equations · Q1':     'Linear equation in one variable: collect x terms on one side, constants on the other (transposition flips signs), then divide.',
+    'Class 8 · Graphs · Q1':               'Slope (gradient) of a line through two points = rise / run = (Δy)/(Δx). Sign of slope tells direction.',
+    // Class 9 NCERT
+    'Class 9 · Number Systems · Q1':       'Surds: √(a²·b) simplifies to a√b. Only like surds (same b) can be added or subtracted directly.',
+    'Class 9 · Polynomials · Q1':          'Factorising a quadratic x² + bx + c: find two numbers p, q with p + q = b and pq = c. Then split bx and group.',
+    'Class 9 · Coordinate Geometry · Q1':  'Distance formula derives from the Pythagorean theorem applied to the horizontal and vertical legs of the segment.',
+    'Class 9 · Polynomials · Q2':          'Evaluating a polynomial at x = c means substituting and computing — a building block for the Remainder Theorem (Class 10).',
+    // Class 10 NCERT
+    'Class 10 · Polynomials · Q1':         'Remainder Theorem: when polynomial p(x) is divided by (x − c), the remainder equals p(c). If p(c) = 0, then (x − c) is a factor (Factor Theorem).',
+    'Class 10 · Quadratic Equations · Q1': 'Solving by factorisation: write as (x − r₁)(x − r₂) = 0. Look for two numbers that multiply to the constant term and add to the linear coefficient (with sign).',
+    'Class 10 · Coordinate Geometry · Q1': 'Midpoint formula: average of x-coordinates and average of y-coordinates. Section formula generalises to any ratio.',
+    'Class 10 · Trigonometry · Q1':        'Pythagorean identity sin²θ + cos²θ = 1. Given one ratio, the others can be derived (mind the sign by quadrant for general angles).',
   };
+
+  // (NCERT 신규 문제는 본문/공식이 이미 영문/수식 표기 — content-en.ts 에 별도 EN 사전 불필요)
 
   const problems: Record<string, string> = {};
   for (const p of problemsSpec) {

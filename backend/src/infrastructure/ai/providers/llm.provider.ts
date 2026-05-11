@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import Anthropic from '@anthropic-ai/sdk';
 
 export interface LlmRequest {
   prompt: string;
@@ -60,8 +61,7 @@ export class LlmProvider {
    */
   async generate(req: LlmRequest): Promise<LlmResponse> {
     if (!this.apiKey || this.apiKey === 'api입력칸') {
-      this.logger.warn('AI_LLM_API_KEY 가 설정되지 않았습니다 (api입력칸) — fallback 텍스트 반환.');
-      // Locale 정보가 prompt 에 포함될 수도 있으므로 매우 간단한 휴리스틱 — 한국어 prompt면 한국어, 아니면 영어
+      this.logger.warn('AI_LLM_API_KEY not configured — returning fallback text.');
       const isKo = /[ㄱ-힝]/.test(req.prompt + (req.system ?? ''));
       return {
         text: isKo
@@ -71,10 +71,24 @@ export class LlmProvider {
         outputTokens: 0,
       };
     }
-    // ⚑ api입력칸 ⚑ — 실제 SDK 호출부 (provider별 분기)
-    throw new Error(
-      `LlmProvider.generate not implemented — provider=${this.provider}, model=${this.model}. ` +
-        '실제 SDK 호출부를 채워 넣으세요.',
-    );
+
+    if (this.provider === 'anthropic') {
+      const client = new Anthropic({ apiKey: this.apiKey });
+      const res = await client.messages.create({
+        model: this.model || 'claude-sonnet-4-6',
+        max_tokens: req.maxTokens ?? 1024,
+        temperature: req.temperature ?? 0.4,
+        system: req.system,
+        messages: [{ role: 'user', content: req.prompt }],
+      });
+      const textBlock = res.content.find((b) => b.type === 'text') as { type: 'text'; text: string } | undefined;
+      return {
+        text: textBlock?.text ?? '',
+        inputTokens: res.usage?.input_tokens ?? 0,
+        outputTokens: res.usage?.output_tokens ?? 0,
+      };
+    }
+
+    throw new Error(`LlmProvider: provider=${this.provider} not implemented yet (only 'anthropic' wired).`);
   }
 }

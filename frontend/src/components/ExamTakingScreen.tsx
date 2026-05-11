@@ -1,40 +1,57 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Clock, ArrowLeft, ArrowRight, CheckCircle2, X, Send, Home } from 'lucide-react';
+import { Clock, ArrowRight, CheckCircle2, AlertCircle, Lightbulb, Home } from 'lucide-react';
 import { toast } from './Toast';
 import * as M from '../lib/mutations';
 import ConfidenceSlider from './ConfidenceSlider';
 import { useT } from '../lib/i18n';
+import MathText from './MathText';
 
 type Props = {
   exam: M.ExamPackage;
   onClose: (result: { id: string; score: number; grade: number; percentile: number; durationMin: number } | null) => void;
 };
 
+type Feedback = {
+  isCorrect: boolean;
+  choiceId: string;
+  choiceText: string;
+  distractorType?: string | null;
+  rationale?: string | null;
+};
+
 /**
- * 모의고사 응시 화면 — 전체화면 오버레이.
+ * 모의고사 응시 화면 — 학습(StudySession) 과 동일한 per-step 흐름.
+ * 1) 한 단계씩만 노출 (이전 단계는 잠긴 채 가려짐)
+ * 2) choice 선택 → submit → backend 가 isCorrect/distractorType/rationale 반환 → 즉시 피드백
+ * 3) 정답이면 다음 단계, 오답이면 그 보기 잠그고 재시도
+ * 4) 한 문제의 3 단계 모두 정답 후 → 다음 문제 자동 진행
+ * 5) 모든 문제 완료 → finalize 호출 → 결과 모달
  *
- * 흐름: 문제 1번부터 N번까지 순서대로 풀이 → 마지막 문제에서 「제출」.
- * 타이머: totalMinutes 카운트다운 (만료 시 자동 제출).
- * 답안 표기: 객관식 1~5 또는 주관식 텍스트 입력.
- * 진척률: 답안 입력된 문제 비율.
- *
- * 답안은 클라이언트가 모아두었다가 한 번에 백엔드로 제출.
- * 백엔드: 각 답안을 Attempt로 저장 → mastery·activity 자동 갱신 → 점수 채점.
+ * 오버레이 아니라 메인 레이아웃 안에 인라인 렌더되어 TopNav 가 그대로 노출됨.
  */
 export default function ExamTakingScreen({ exam, onClose }: Props) {
   const qc = useQueryClient();
   const { t } = useT();
+
+  // 문제 인덱스 / 단계 / 선택 / 결과
   const [idx, setIdx] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [confidences, setConfidences] = useState<Record<string, number>>({});
-  // 객관식 모드: 문제별 stepIndex → choiceId
-  const [choiceIds, setChoiceIds] = useState<Record<string, Record<number, string>>>({});
+  const [problemStep, setProblemStep] = useState<1 | 2 | 3>(1);
+  const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
+  // 문제별로 단계별 결과 저장: { [problemId]: { [stepIndex]: { correct, choiceId } } }
+  const [results, setResults] = useState<Record<string, Record<number, { correct: boolean; choiceId: string }>>>({});
+  const [wrongChoiceIds, setWrongChoiceIds] = useState<Set<string>>(new Set());
+  const [lastFeedback, setLastFeedback] = useState<Feedback | null>(null);
+  const [confidence, setConfidence] = useState(50);
+
+  // 타이머
   const [seconds, setSeconds] = useState(0);
   const startedAt = useRef<number>(Date.now());
-  const perStartedAt = useRef<Record<string, number>>({}); // 문제별 시작시각 (durationSec 추적)
-  const [confirmSubmit, setConfirmSubmit] = useState(false);
+  const stepStartedAt = useRef<number>(Date.now());
+
   const [confirmExit, setConfirmExit] = useState(false);
+  const [confirmFinalize, setConfirmFinalize] = useState(false);
+  const finalizedRef = useRef(false);
 
   const totalSec = exam.totalMinutes * 60;
   const remaining = Math.max(0, totalSec - seconds);
@@ -42,16 +59,18 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
   const ss = String(remaining % 60).padStart(2, '0');
 
   const current = exam.problems[idx];
-  const progress = useMemo(() => {
-    const filled = exam.problems.filter((p) => {
-      if (p.steps && p.steps.length > 0) {
-        const cs = choiceIds[p.id] ?? {};
-        return p.steps.every((s) => cs[s.stepIndex]);
-      }
-      return (answers[p.id] ?? '').trim() !== '';
-    }).length;
-    return { filled, total: exam.problems.length };
-  }, [answers, choiceIds, exam.problems]);
+  const currentStep = current?.steps?.find((s) => s.stepIndex === problemStep);
+  const totalSteps = current?.steps?.length ?? 3;
+  const stepLocked = !!results[current?.id ?? '']?.[problemStep];
+
+  // 문제 / 단계가 바뀌면 상태 리셋
+  useEffect(() => {
+    setSelectedChoiceId(null);
+    setLastFeedback(null);
+    setWrongChoiceIds(new Set());
+    setConfidence(50);
+    stepStartedAt.current = Date.now();
+  }, [current?.id, problemStep]);
 
   // 타이머
   useEffect(() => {
@@ -59,52 +78,51 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
     return () => clearInterval(t);
   }, []);
 
-  // 문제별 시작 시각 기록
+  // 시간 만료 자동 종료
   useEffect(() => {
-    if (current && !perStartedAt.current[current.id]) {
-      perStartedAt.current[current.id] = Date.now();
-    }
-  }, [current]);
-
-  const submittedRef = useRef(false);
-  // 시간 만료 자동 제출 — submittedRef 로 멱등 보장 (에러 시에도 재시도 안 함)
-  useEffect(() => {
-    if (remaining === 0 && exam.resultId && !submittedRef.current) {
-      submittedRef.current = true;
+    if (remaining === 0 && exam.resultId && !finalizedRef.current) {
+      finalizedRef.current = true;
       toast(t('exam.timer.expired'), 'info');
-      submitMut.mutate();
+      finalizeMut.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remaining]);
 
-  const setAnswer = (problemId: string, value: string) => {
-    setAnswers((prev) => ({ ...prev, [problemId]: value }));
-  };
-
-  const submitMut = useMutation({
-    mutationFn: () => {
-      const payload = exam.problems.map((p) => {
-        const start = perStartedAt.current[p.id] ?? startedAt.current;
-        const dur = Math.max(1, Math.round((Date.now() - start) / 1000));
-        // 객관식 모드: choiceIds 배열 (stepIndex 1, 2, 3 순)
-        const cs = choiceIds[p.id];
-        const hasChoices = p.steps && p.steps.length > 0 && cs;
-        if (hasChoices) {
-          const ordered = p.steps!.sort((a, b) => a.stepIndex - b.stepIndex)
-            .map((s) => cs[s.stepIndex]).filter(Boolean);
-          return {
-            problemId: p.id, answer: '', durationSec: dur,
-            confidence: confidences[p.id],
-            choiceIds: ordered,
-          };
-        }
-        return {
-          problemId: p.id, answer: answers[p.id] ?? '', durationSec: dur,
-          confidence: confidences[p.id],
-        };
+  const submitStepMut = useMutation({
+    mutationFn: (choiceId: string) => M.submitExamStepAnswer(exam.resultId!, {
+      problemId: current.id,
+      choiceId,
+      stepIndex: problemStep,
+      durationSec: Math.max(1, Math.round((Date.now() - stepStartedAt.current) / 1000)),
+      confidence: wrongChoiceIds.size === 0 ? confidence : undefined,
+    }),
+    onSuccess: (res) => {
+      const c = res.choice;
+      if (!c) return;
+      setLastFeedback({
+        isCorrect: !!res.isCorrect,
+        choiceId: c.id,
+        choiceText: c.text,
+        distractorType: c.distractorType,
+        rationale: c.rationale,
       });
-      return M.submitExamResult(exam.resultId!, { answers: payload });
+      if (res.isCorrect) {
+        // 단계 잠금
+        setResults((prev) => ({
+          ...prev,
+          [current.id]: { ...(prev[current.id] ?? {}), [problemStep]: { correct: true, choiceId: c.id } },
+        }));
+      } else {
+        // 오답 → wrongChoiceIds 추가, selection 해제 (다른 보기로 재시도)
+        setWrongChoiceIds((prev) => new Set(prev).add(c.id));
+        setSelectedChoiceId(null);
+      }
     },
+    onError: () => toast(t('toast.exam.submitFailed'), 'error'),
+  });
+
+  const finalizeMut = useMutation({
+    mutationFn: () => M.finalizeExam(exam.resultId!),
     onSuccess: (r) => {
       toast(t('toast.exam.submitDone', { score: r.score, grade: r.grade }), 'success');
       qc.invalidateQueries({ queryKey: ['mock-summary'] });
@@ -119,297 +137,292 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
     onError: () => toast(t('toast.exam.submitFailed'), 'error'),
   });
 
+  const advanceAfterCorrect = () => {
+    if (problemStep < totalSteps) {
+      setProblemStep((problemStep + 1) as 1 | 2 | 3);
+    } else if (idx < exam.problems.length - 1) {
+      setIdx(idx + 1);
+      setProblemStep(1);
+    } else {
+      // 마지막 문제의 마지막 단계 정답 → 종료 확인
+      setConfirmFinalize(true);
+    }
+  };
+
   // 응시 가능한 문제가 없는 경우
   if (!exam.resultId || exam.problems.length === 0) {
     return (
-      <Overlay>
-        <div style={card}>
-          <div style={{ textAlign: 'center' }}>
-            <h2 className="serif" style={{ fontSize: 24, fontWeight: 500, margin: 0, marginBottom: 12 }}>
-              {exam.name}
-            </h2>
-            <p style={{ fontSize: 13, color: '#5C6B85', lineHeight: 1.65, marginBottom: 24 }}>
-              <strong>{t('exam.empty.title')}</strong><br />
-              {t('exam.empty.desc')}
-            </p>
-            <button onClick={() => onClose(null)} style={btnPrimary}>{t('common.close')}</button>
-          </div>
-        </div>
-      </Overlay>
+      <div style={{ padding: 40, textAlign: 'center' }}>
+        <h2 className="serif" style={{ fontSize: 22, fontWeight: 500, margin: 0, marginBottom: 12 }}>{exam.name}</h2>
+        <p style={{ fontSize: 13, color: '#5C6B85', lineHeight: 1.65, marginBottom: 20 }}>
+          <strong>{t('exam.empty.title')}</strong><br />
+          {t('exam.empty.desc')}
+        </p>
+        <button onClick={() => onClose(null)} style={btnPrimary}>{t('common.close')}</button>
+      </div>
     );
   }
 
+  const progressDone = exam.problems.filter((p) => {
+    const r = results[p.id];
+    return r && Object.keys(r).length === (p.steps?.length ?? 0);
+  }).length;
+  const progressPct = Math.round((progressDone / exam.problems.length) * 100);
+
   return (
-    <Overlay>
-      {/* 헤더 */}
+    <div style={{ maxWidth: 880, margin: '0 auto' }}>
+      {/* Exam 서브바: 시험명 + 진행 + 타이머 + 종료. TopNav 는 부모에서 노출됨. */}
       <div style={{
-        backgroundColor: '#142850', color: '#EFEBDF',
-        padding: '16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        borderBottom: '1px solid #EFEBDF18',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
+        marginBottom: 24, padding: '14px 18px',
+        backgroundColor: '#142850', color: '#EFEBDF', borderRadius: 6,
       }}>
         <div>
-          <div style={{ fontSize: 11, letterSpacing: '0.2em', color: '#AAB4C5', textTransform: 'uppercase' }}>
-            {t('exam.label.takingNumOf', { filled: progress.filled, total: progress.total })}
+          <div style={{ fontSize: 11, letterSpacing: '0.18em', color: '#AAB4C5', textTransform: 'uppercase' }}>
+            {t('exam.problem.label', { n: String(idx + 1).padStart(2, '0'), total: exam.problems.length })} · {progressPct}%
           </div>
-          <h1 className="serif" style={{ fontSize: 22, fontWeight: 500, margin: 0, marginTop: 2, letterSpacing: '-0.02em' }}>
+          <div className="serif" style={{ fontSize: 18, fontWeight: 500, marginTop: 2 }}>
             {exam.name}
-          </h1>
+          </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            padding: '8px 14px', backgroundColor: remaining < 60 ? '#C25E2E' : '#EFEBDF18',
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '6px 12px', backgroundColor: remaining < 60 ? '#C25E2E' : '#EFEBDF18',
             borderRadius: 4, fontFamily: 'JetBrains Mono, monospace',
-            transition: 'background-color 0.3s',
           }}>
             <Clock size={14} />
-            <span style={{ fontSize: 16, fontWeight: 600 }}>{mm}:{ss}</span>
+            <span style={{ fontSize: 15, fontWeight: 600 }}>{mm}:{ss}</span>
           </div>
           <button
             onClick={() => setConfirmExit(true)}
             title={t('exam.exit.btn')}
-            style={{ background: 'transparent', border: '1px solid #EFEBDF50', color: '#EFEBDF', padding: '8px 14px', borderRadius: 4, cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}
+            style={{ background: 'transparent', border: '1px solid #EFEBDF50', color: '#EFEBDF', padding: '6px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}
           >
-            <Home size={14} /> {t('exam.exit.home')}
+            <Home size={13} /> {t('exam.exit.home')}
           </button>
         </div>
       </div>
 
       {/* 진척률 바 */}
-      <div style={{ height: 4, backgroundColor: '#EFEBDF20' }}>
+      <div style={{ height: 4, backgroundColor: '#14285015', borderRadius: 2, marginBottom: 24, overflow: 'hidden' }}>
         <div style={{
-          height: '100%',
-          width: `${(progress.filled / progress.total) * 100}%`,
-          backgroundColor: '#D9A055', transition: 'width 0.3s',
+          height: '100%', width: `${progressPct}%`,
+          backgroundColor: '#5A8A45', transition: 'width 0.3s',
         }} />
       </div>
 
-      {/* 본문 */}
-      <div style={{
-        flex: 1, overflow: 'auto', padding: '40px',
-        display: 'flex', justifyContent: 'center',
+      {/* 문제 메타 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 16 }}>
+        <div>
+          <div style={{ fontSize: 11, letterSpacing: '0.18em', color: '#8B95AB', textTransform: 'uppercase' }}>
+            {current.source}
+          </div>
+        </div>
+        <span style={{
+          fontSize: 11, padding: '4px 10px',
+          backgroundColor:
+            current.difficulty === 'KILLER' ? '#142850' :
+            current.difficulty === 'SEMI_KILLER' ? '#C25E2E' :
+            current.difficulty === 'UPPER_MIDDLE' ? '#C7791F' : '#AAB4C5',
+          color: '#EFEBDF', borderRadius: 2,
+        }}>{current.difficulty}</span>
+      </div>
+
+      {/* 본문 — KaTeX 로 $...$ / $$...$$ 수식 렌더링 */}
+      <div className="serif" style={{
+        fontSize: 18, lineHeight: 1.75, color: '#142850', marginBottom: 24,
+        whiteSpace: 'pre-wrap',
+        padding: 24, backgroundColor: '#F8F4E9', border: '1px solid #14285018', borderRadius: 4,
       }}>
-        <div style={{ width: '100%', maxWidth: 720 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24 }}>
-            <div>
-              <div style={{ fontSize: 11, letterSpacing: '0.18em', color: '#8B95AB', textTransform: 'uppercase' }}>
-                {t('exam.problem.label', { n: String(idx + 1).padStart(2, '0'), total: exam.problems.length })}
+        <MathText text={current.body} />
+      </div>
+
+      {/* 단계 표시 */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
+          {[1, 2, 3].map((n) => {
+            const r = results[current.id]?.[n];
+            const isCurrent = n === problemStep;
+            const bg = r?.correct ? '#5A8A45' : isCurrent ? '#C7791F' : '#14285018';
+            const label = n === 1 ? t('study.step.concept') : n === 2 ? t('study.step.process') : t('study.step.answer');
+            return (
+              <div key={n} style={{
+                flex: 1, padding: '6px 10px', backgroundColor: bg,
+                color: r || isCurrent ? '#EFEBDF' : '#5C6B85',
+                borderRadius: 4, fontSize: 11, fontWeight: 600, textAlign: 'center', letterSpacing: '0.05em',
+              }}>
+                {`${n}/3`} · {label} {r?.correct ? '✓' : ''}
               </div>
-              <div className="serif" style={{ fontSize: 17, color: '#142850', fontStyle: 'italic', marginTop: 4 }}>
-                {current.source}
+            );
+          })}
+        </div>
+        {currentStep && (
+          <div style={{ fontSize: 14, color: '#142850', fontWeight: 600, marginTop: 12, lineHeight: 1.5 }}>
+            Q{problemStep}. {currentStep.prompt}
+          </div>
+        )}
+      </div>
+
+      {/* 5지선다 — 학습과 동일한 mastery learning */}
+      {currentStep && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
+          {currentStep.choices.map((c, ci) => {
+            const isAlreadyWrong = wrongChoiceIds.has(c.id);
+            const isCurrentSelection = !stepLocked && selectedChoiceId === c.id;
+            const isFinalCorrect = stepLocked && results[current.id]?.[problemStep]?.choiceId === c.id;
+            const disabled = stepLocked || isAlreadyWrong;
+
+            let bgColor = '#F8F4E9';
+            let borderColor = '#14285030';
+            let icon: string | null = null;
+            let textColor = '#142850';
+            if (isFinalCorrect) { bgColor = '#5A8A4518'; borderColor = '#5A8A45'; icon = '✓'; }
+            else if (isAlreadyWrong) { bgColor = '#C25E2E12'; borderColor = '#C25E2E'; icon = '✗'; textColor = '#8B95AB'; }
+            else if (stepLocked) { bgColor = '#14285005'; borderColor = '#14285018'; textColor = '#AAB4C5'; }
+            else if (isCurrentSelection) { bgColor = '#14285008'; borderColor = '#142850'; }
+
+            return (
+              <button
+                key={c.id}
+                onClick={() => !disabled && setSelectedChoiceId(c.id)}
+                disabled={disabled}
+                style={{
+                  padding: '10px 14px', textAlign: 'left',
+                  border: '1px solid ' + borderColor, backgroundColor: bgColor, color: textColor,
+                  borderRadius: 4, fontSize: 14, fontFamily: 'inherit',
+                  cursor: disabled ? 'default' : 'pointer',
+                  display: 'flex', alignItems: 'flex-start', gap: 10, transition: 'all 0.15s',
+                }}
+              >
+                <span style={{
+                  flexShrink: 0, width: 22, height: 22, borderRadius: '50%',
+                  backgroundColor:
+                    isFinalCorrect ? '#5A8A45' :
+                    isAlreadyWrong ? '#C25E2E' :
+                    isCurrentSelection ? '#142850' : '#14285010',
+                  color: isFinalCorrect || isAlreadyWrong || isCurrentSelection ? '#EFEBDF' : '#5C6B85',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11, fontWeight: 600,
+                }}>{icon ?? (ci + 1)}</span>
+                <span style={{ flex: 1, fontFamily: 'JetBrains Mono, monospace', fontSize: 13, lineHeight: 1.5 }}>{c.text}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* 즉시 피드백 — 정답이면 초록, 오답이면 distractor 설명 */}
+      {lastFeedback && (
+        <div style={{
+          padding: 14,
+          backgroundColor: lastFeedback.isCorrect ? '#5A8A4512' : '#C25E2E0E',
+          border: `1px solid ${lastFeedback.isCorrect ? '#5A8A4540' : '#C25E2E40'}`,
+          borderRadius: 4, marginBottom: 12, fontSize: 13, lineHeight: 1.65,
+        }}>
+          {lastFeedback.isCorrect ? (
+            <div>
+              <div style={{ fontWeight: 600, color: '#5A8A45', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <CheckCircle2 size={14} /> {t('study.feedback.correct.title', { next: problemStep < totalSteps ? t('study.feedback.correct.continue') : t('study.feedback.correct.lastStep') })}
+              </div>
+              <div style={{ color: '#142850' }}>
+                {problemStep === 1 ? t('study.feedback.correct.step1') :
+                 problemStep === 2 ? t('study.feedback.correct.step2') :
+                 t('study.feedback.correct.step3')}
               </div>
             </div>
-            <span style={{
-              fontSize: 11, padding: '4px 10px',
-              backgroundColor:
-                current.difficulty === 'KILLER' ? '#142850' :
-                current.difficulty === 'SEMI_KILLER' ? '#C25E2E' :
-                current.difficulty === 'UPPER_MIDDLE' ? '#C7791F' : '#AAB4C5',
-              color: '#EFEBDF', borderRadius: 2,
-            }}>
-              {current.difficulty}
-            </span>
-          </div>
+          ) : (
+            <div>
+              <div style={{ fontWeight: 600, color: '#C25E2E', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <AlertCircle size={14} />
+                {lastFeedback.distractorType === 'CONCEPT_CONFUSION' ? t('study.feedback.distractor.concept') :
+                 lastFeedback.distractorType === 'CALC_ERROR' ? t('study.feedback.distractor.calc') :
+                 lastFeedback.distractorType === 'PROCESS_SKIP' ? t('study.feedback.distractor.process') :
+                 lastFeedback.distractorType === 'TIME_PRESSURE_GUESS' ? t('study.feedback.distractor.time') : t('study.feedback.distractor.other')}
+              </div>
+              {lastFeedback.rationale && (
+                <div style={{ color: '#142850', marginBottom: 6 }}>{lastFeedback.rationale}</div>
+              )}
+              <div style={{ fontSize: 12, color: '#5C6B85' }}>{t('study.feedback.wrong.tryAgain')}</div>
+            </div>
+          )}
+        </div>
+      )}
 
-          <div className="serif" style={{
-            fontSize: 18, lineHeight: 1.75, color: '#142850', marginBottom: 24,
-            whiteSpace: 'pre-wrap',
-            padding: 24, backgroundColor: '#F8F4E9', border: '1px solid #14285018', borderRadius: 4,
-          }}>
-            {current.body}
+      {/* 핵심 개념 + 공식 — 한 번이라도 틀리거나 마지막 단계 정답 시 노출 */}
+      {(current as any).concept && (lastFeedback || (results[current.id]?.[3]?.correct)) && (
+        <div style={{
+          padding: 14, marginBottom: 12,
+          backgroundColor: '#14285008',
+          border: '1px solid #14285020', borderLeft: '3px solid #C25E2E',
+          borderRadius: '0 4px 4px 0',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#C25E2E', fontWeight: 600, marginBottom: 8 }}>
+            <Lightbulb size={13} /> {t('study.concept.label')}
           </div>
-
+          <div style={{ fontSize: 13, lineHeight: 1.7, color: '#142850', whiteSpace: 'pre-wrap' }}>
+            {(current as any).concept}
+          </div>
           {current.formula && (
             <div style={{
-              padding: 18, backgroundColor: '#14285008', borderRadius: 4,
-              textAlign: 'center', marginBottom: 24,
+              marginTop: 10, padding: '10px 12px',
+              backgroundColor: '#F8F4E9', border: '1px solid #14285020', borderRadius: 4,
             }}>
-              <div className="serif mono" style={{ fontSize: 18, color: '#142850' }}>
+              <div style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#1FB8C4', fontWeight: 700, marginBottom: 4 }}>
+                {t('study.formula.label')}
+              </div>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: '#142850' }}>
                 {current.formula}
               </div>
             </div>
           )}
-
-          {/* 3단계 객관식 (CONCEPT → PROCESS → ANSWER) — 순차 공개:
-              이전 단계 답을 선택하기 전까지 다음 단계 보기는 가려둔다 (전단계 답 유출 방지).
-              한 번 선택한 단계는 잠긴 채 이후 단계가 열린다. */}
-          {current.steps && current.steps.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 18, marginBottom: 8 }}>
-              {(() => {
-                const sorted = [...current.steps].sort((a, b) => a.stepIndex - b.stepIndex);
-                const selectedFor = (idx: number) => choiceIds[current.id]?.[idx];
-                return sorted.map((s, i) => {
-                  const stepLabel = s.stepType === 'CONCEPT' ? t('study.step.concept') : s.stepType === 'PROCESS' ? t('study.step.process') : t('study.step.answer');
-                  const selected = selectedFor(s.stepIndex);
-                  // 이전 모든 단계가 선택됐을 때만 잠금 해제
-                  const prevAllAnswered = sorted.slice(0, i).every((p) => !!selectedFor(p.stepIndex));
-                  const isLockedNext = !prevAllAnswered && !selected; // 아직 열리지 않은 후속 단계
-                  return (
-                    <div key={s.id} style={{
-                      padding: 16, backgroundColor: '#F8F4E9',
-                      border: '1px solid #14285018', borderRadius: 4,
-                      opacity: isLockedNext ? 0.55 : 1,
-                    }}>
-                      <div style={{
-                        display: 'inline-block', padding: '3px 10px', marginBottom: 10,
-                        backgroundColor: selected ? '#5A8A45' : isLockedNext ? '#AAB4C5' : '#C7791F',
-                        color: '#EFEBDF', borderRadius: 2, fontSize: 11, fontWeight: 600,
-                      }}>
-                        {`${s.stepIndex}/${sorted.length}`} · {stepLabel}{selected ? ' ✓' : isLockedNext ? ' · ' + t('exam.step.locked') : ''}
-                      </div>
-                      <div style={{ fontSize: 14, color: '#142850', fontWeight: 600, marginBottom: 12, lineHeight: 1.5 }}>
-                        {isLockedNext ? t('exam.step.lockedHint') : s.prompt}
-                      </div>
-                      {!isLockedNext && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          {s.choices.map((c, ci) => {
-                            const isSelected = selected === c.id;
-                            return (
-                              <button
-                                key={c.id}
-                                onClick={() => setChoiceIds((prev) => ({
-                                  ...prev,
-                                  [current.id]: { ...(prev[current.id] ?? {}), [s.stepIndex]: c.id },
-                                }))}
-                                style={{
-                                  padding: '8px 12px', textAlign: 'left',
-                                  border: '1px solid ' + (isSelected ? '#142850' : '#14285030'),
-                                  backgroundColor: isSelected ? '#14285008' : '#EFEBDF',
-                                  color: '#142850',
-                                  borderRadius: 3, fontSize: 13, fontFamily: 'inherit',
-                                  cursor: 'pointer',
-                                  display: 'flex', alignItems: 'flex-start', gap: 8,
-                                  transition: 'all 0.15s',
-                                }}
-                              >
-                                <span style={{
-                                  flexShrink: 0, width: 20, height: 20, borderRadius: '50%',
-                                  backgroundColor: isSelected ? '#142850' : '#14285010',
-                                  color: isSelected ? '#EFEBDF' : '#5C6B85',
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  fontSize: 10, fontWeight: 600,
-                                }}>{ci + 1}</span>
-                                <span style={{ flex: 1, fontFamily: 'JetBrains Mono, monospace', fontSize: 12, lineHeight: 1.5 }}>{c.text}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                });
-              })()}
-              <ConfidenceSlider
-                value={confidences[current.id] ?? 50}
-                onChange={(v) => setConfidences((prev) => ({ ...prev, [current.id]: v }))}
-              />
-            </div>
-          ) : (
-            <div style={{ marginBottom: 8 }}>
-              <div style={{ fontSize: 11, letterSpacing: '0.15em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: 8 }}>
-                {t('exam.answer.label')}
-              </div>
-              <input
-                type="text"
-                value={answers[current.id] ?? ''}
-                onChange={(e) => setAnswer(current.id, e.target.value)}
-                placeholder={t('exam.answer.placeholder')}
-                style={{
-                  width: '100%', padding: '14px 16px', fontSize: 16,
-                  border: '1px solid #14285030', borderRadius: 4,
-                  backgroundColor: '#EFEBDF', fontFamily: 'JetBrains Mono, monospace',
-                  outline: 'none', boxSizing: 'border-box',
-                }}
-              />
-              <ConfidenceSlider
-                value={confidences[current.id] ?? 50}
-                onChange={(v) => setConfidences((prev) => ({ ...prev, [current.id]: v }))}
-              />
-            </div>
-          )}
-
-          {/* 문제 번호 그리드 (5×N 격자) */}
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: 4,
-            marginTop: 32, paddingTop: 20, borderTop: '1px solid #14285018',
-          }}>
-            {exam.problems.map((p, i) => {
-              const cs = choiceIds[p.id] ?? {};
-              const allStepsAnswered = p.steps && p.steps.length > 0
-                ? p.steps.every((s) => cs[s.stepIndex])
-                : !!answers[p.id]?.trim();
-              const filled = allStepsAnswered;
-              const isCurrent = i === idx;
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => setIdx(i)}
-                  style={{
-                    aspectRatio: '1', fontSize: 11, fontWeight: isCurrent ? 700 : 500,
-                    backgroundColor: isCurrent ? '#142850' : filled ? '#5A8A4520' : '#F8F4E9',
-                    color: isCurrent ? '#EFEBDF' : filled ? '#5A8A45' : '#5C6B85',
-                    border: '1px solid ' + (isCurrent ? '#142850' : filled ? '#5A8A4540' : '#14285020'),
-                    borderRadius: 2, cursor: 'pointer', fontFamily: 'inherit',
-                  }}
-                >
-                  {i + 1}
-                </button>
-              );
-            })}
-          </div>
         </div>
-      </div>
-
-      {/* 푸터 (이전/다음/제출) */}
-      <div style={{
-        backgroundColor: '#F8F4E9', borderTop: '1px solid #14285018',
-        padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      }}>
-        <button
-          onClick={() => setIdx((i) => Math.max(0, i - 1))}
-          disabled={idx === 0}
-          style={{
-            ...btnGhost,
-            opacity: idx === 0 ? 0.4 : 1,
-          }}
-        >
-          <ArrowLeft size={14} /> {t('exam.prev.label')}
-        </button>
-        <div style={{ fontSize: 12, color: '#5C6B85' }}>
-          {progress.filled === progress.total
-            ? t('exam.progress.allDone')
-            : t('exam.progress.remaining', { n: progress.total - progress.filled })}
-        </div>
-        {idx < exam.problems.length - 1 ? (
-          <button
-            onClick={() => setIdx((i) => Math.min(exam.problems.length - 1, i + 1))}
-            style={btnPrimary}
-          >
-            {t('exam.next.label')} <ArrowRight size={14} />
-          </button>
-        ) : (
-          <button
-            onClick={() => setConfirmSubmit(true)}
-            disabled={submitMut.isPending}
-            style={{ ...btnPrimary, backgroundColor: '#D9A055', color: '#142850' }}
-          >
-            <Send size={14} /> {submitMut.isPending ? t('exam.submit.busy') : t('exam.submit.label')}
-          </button>
-        )}
-      </div>
-
-      {/* 제출 확인 모달 */}
-      {confirmSubmit && (
-        <ConfirmDialog
-          title={t('exam.submit.title')}
-          desc={t('exam.submit.desc', { filled: progress.filled, total: progress.total })}
-          confirmLabel={submitMut.isPending ? t('exam.submit.busy') : t('exam.submit.confirm')}
-          cancelLabel={t('common.cancel')}
-          confirmDisabled={submitMut.isPending}
-          onConfirm={() => { setConfirmSubmit(false); submitMut.mutate(); }}
-          onCancel={() => setConfirmSubmit(false)}
-        />
       )}
+
+      {/* 액션 영역 — 학습과 동일한 흐름 */}
+      {!stepLocked ? (
+        <>
+          {wrongChoiceIds.size === 0 && (
+            <ConfidenceSlider value={confidence} onChange={setConfidence} />
+          )}
+          <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+            <button
+              onClick={() => selectedChoiceId && submitStepMut.mutate(selectedChoiceId)}
+              disabled={!selectedChoiceId || submitStepMut.isPending}
+              style={{
+                flex: 1, padding: '14px',
+                backgroundColor: '#142850', color: '#EFEBDF', border: 'none',
+                borderRadius: 4, fontSize: 14, fontWeight: 600,
+                cursor: 'pointer', fontFamily: 'inherit',
+                opacity: (!selectedChoiceId || submitStepMut.isPending) ? 0.55 : 1,
+              }}
+            >
+              {submitStepMut.isPending ? t('study.submit.busy') :
+               wrongChoiceIds.size > 0 ? t('study.submit.retry', { n: wrongChoiceIds.size }) :
+               t('study.submit.firstAttempt', { n: problemStep })}
+            </button>
+          </div>
+        </>
+      ) : (
+        <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+          <button
+            onClick={advanceAfterCorrect}
+            style={{
+              flex: 1, padding: '14px',
+              backgroundColor: '#5A8A45', color: '#EFEBDF', border: 'none',
+              borderRadius: 4, fontSize: 14, fontWeight: 600,
+              cursor: 'pointer', fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            }}
+          >
+            {problemStep < totalSteps ? t('study.next.step', { next: problemStep + 1, total: totalSteps }) :
+             idx < exam.problems.length - 1 ? t('study.next.problem') : t('exam.finalize')}
+            <ArrowRight size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* 종료 확인 모달 */}
       {confirmExit && (
         <ConfirmDialog
           title={t('exam.exit.title')}
@@ -422,19 +435,17 @@ export default function ExamTakingScreen({ exam, onClose }: Props) {
           danger
         />
       )}
-    </Overlay>
-  );
-}
-
-function Overlay({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 90,
-      backgroundColor: '#EFEBDF', color: '#142850',
-      display: 'flex', flexDirection: 'column',
-      fontFamily: '"Pretendard", sans-serif',
-    }}>
-      {children}
+      {confirmFinalize && (
+        <ConfirmDialog
+          title={t('exam.submit.title')}
+          desc={t('exam.submit.desc', { filled: progressDone, total: exam.problems.length })}
+          confirmLabel={finalizeMut.isPending ? t('exam.submit.busy') : t('exam.submit.confirm')}
+          cancelLabel={t('common.cancel')}
+          confirmDisabled={finalizeMut.isPending}
+          onConfirm={() => { setConfirmFinalize(false); finalizeMut.mutate(); }}
+          onCancel={() => setConfirmFinalize(false)}
+        />
+      )}
     </div>
   );
 }
@@ -446,7 +457,7 @@ function ConfirmDialog({ title, desc, confirmLabel, cancelLabel, confirmDisabled
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 95,
-      backgroundColor: 'rgba(31,26,20,0.55)',
+      backgroundColor: 'rgba(20,40,80,0.55)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
       <div style={{
@@ -470,10 +481,6 @@ function ConfirmDialog({ title, desc, confirmLabel, cancelLabel, confirmDisabled
   );
 }
 
-const card: React.CSSProperties = {
-  margin: 'auto', width: 480, padding: 32, backgroundColor: '#F8F4E9',
-  border: '1px solid #14285020', borderRadius: 6,
-};
 const btnPrimary: React.CSSProperties = {
   padding: '10px 18px', backgroundColor: '#142850', color: '#EFEBDF',
   border: 'none', borderRadius: 4, fontSize: 13, fontWeight: 600,

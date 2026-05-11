@@ -16,19 +16,19 @@ const STORAGE_KEY = 'mathema.lang';
  * 다국어 컨텍스트 — UI 라벨 번역 (ko/en).
  *
  * 백엔드 생성 텍스트(문제 본문·AI 코치 메시지·distractor rationale 등)는
- * 한국어로 유지 — 수능 수학 문제와 AI 코치 처방은 본질적으로 한국어 콘텐츠.
+ * KO/EN 양방향 사전(content-en.ts) 으로 동시 지원.
+ * 1차 launch 인도 시장: EN 디폴트, 명시적 한국어 사용자만 KO.
  *
  * 사용:
  *   const { t, lang, setLang } = useT();
  *   <h1>{t('nav.dashboard')}</h1>
- *   <span>{t('header.dDay', { days: 287 })}</span>  // "D-287" / "D-287"
  */
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(() => {
-    if (typeof window === 'undefined') return 'ko';
+    if (typeof window === 'undefined') return 'en';
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === 'ko' || saved === 'en') return saved;
-    // 브라우저 언어 자동 감지
+    // 브라우저 언어 감지 — Korean 만 명시적으로 KO, 그 외(IN/US/GB/...)는 EN.
     return navigator.language.startsWith('ko') ? 'ko' : 'en';
   });
 

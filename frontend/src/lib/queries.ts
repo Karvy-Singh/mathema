@@ -136,6 +136,20 @@ export const fetchProblemHint = (id: string) => get<Hint>(`/problems/${id}/hint`
 export const fetchStudySession = (id: string) => get<StudySession>(`/study-sessions/${id}`);
 export const fetchSessionGuide = (id: string, perspective: string) =>
   get<SessionGuide>(`/study-sessions/${id}/guide`, { perspective });
+export type ProblemSolution = {
+  id: string; source: string;
+  unit: string | null; subUnit: string | null;
+  difficulty: string;
+  body: string; concept: string | null; formula: string | null; answer: string;
+  steps: Array<{
+    stepIndex: number;
+    stepType: 'CONCEPT' | 'PROCESS' | 'ANSWER';
+    prompt: string;
+    correctChoice: { choiceIndex: number; text: string } | null;
+  }>;
+};
+export const fetchProblemSolution = (id: string) => get<ProblemSolution>(`/problems/${id}/solution`);
+
 export const fetchCurriculum = (grade?: string) =>
   get<Unit[]>('/curriculum', grade ? { grade } : undefined);
 export const fetchUnitsForUser = (grade?: string) =>

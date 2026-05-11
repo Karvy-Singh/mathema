@@ -846,8 +846,329 @@ const SPEC_M1: ProblemStepsSpec[] = [
   },
 ];
 
+// =============== NCERT Class 8/9/10 — 12문제 (India Phase 1 추가 콘텐츠) ===============
+const SPEC_NCERT: ProblemStepsSpec[] = [
+  // ---- Class 8 ----
+  {
+    source: 'Class 8 · Rational Numbers · Q1',
+    steps: [
+      { stepIndex: 1, stepType: 'CONCEPT', prompt: 'How do you convert a repeating decimal to a fraction?', choices: [
+        { text: 'Let x equal the decimal, multiply by 10ⁿ where n = repeating block length, then subtract', isCorrect: true },
+        { text: 'Multiply numerator and denominator by 10', distractorType: 'CONCEPT_CONFUSION', rationale: 'Confused with terminating decimals.' },
+        { text: 'Use long division to find the next 10 digits', distractorType: 'PROCESS_SKIP', rationale: 'Brute force, not algebraic.' },
+        { text: 'Round to 2 decimal places', distractorType: 'CONCEPT_CONFUSION', rationale: 'Loses information; result is rational only by approximation.' },
+        { text: 'Repeating decimals cannot be expressed as fractions', distractorType: 'TIME_PRESSURE_GUESS', rationale: 'False — every repeating decimal is rational.' },
+      ]},
+      { stepIndex: 2, stepType: 'PROCESS', prompt: 'For x = 0.333…, what is 10x − x?', choices: [
+        { text: '10x − x = 9x = 3', isCorrect: true },
+        { text: '10x − x = 9x = 3.333…', distractorType: 'CALC_ERROR', rationale: 'Forgot the subtraction cancels the repeating tail.' },
+        { text: '10x − x = 11x = 3', distractorType: 'CALC_ERROR', rationale: 'Sign or coefficient error.' },
+        { text: '10x − x = x', distractorType: 'CONCEPT_CONFUSION', rationale: 'Treats x as if 10x = x.' },
+        { text: '10x − x = 0', distractorType: 'TIME_PRESSURE_GUESS', rationale: 'Random guess.' },
+      ]},
+      { stepIndex: 3, stepType: 'ANSWER', prompt: 'So x equals:', choices: [
+        { text: '1/3', isCorrect: true },
+        { text: '3/10', distractorType: 'PROCESS_SKIP', rationale: 'Did not subtract — just took 0.3 ≈ 3/10.' },
+        { text: '1/9', distractorType: 'CALC_ERROR', rationale: '9x = 1 instead of 9x = 3.' },
+        { text: '3/9', distractorType: 'PROCESS_SKIP', rationale: 'Did not reduce to lowest terms.' },
+        { text: '0.33', distractorType: 'CONCEPT_CONFUSION', rationale: 'Gave a decimal, not a fraction.' },
+      ]},
+    ],
+  },
+  {
+    source: 'Class 8 · Algebraic Identities · Q1',
+    steps: [
+      { stepIndex: 1, stepType: 'CONCEPT', prompt: 'Which identity expands (a + b)²?', choices: [
+        { text: '(a + b)² = a² + 2ab + b²', isCorrect: true },
+        { text: '(a + b)² = a² + b²', distractorType: 'PROCESS_SKIP', rationale: 'Forgets the middle term 2ab — most common error.' },
+        { text: '(a + b)² = a² + ab + b²', distractorType: 'CALC_ERROR', rationale: 'Halved the cross-term coefficient.' },
+        { text: '(a + b)² = (a + b)(a − b)', distractorType: 'CONCEPT_CONFUSION', rationale: 'Confused with difference of squares.' },
+        { text: '(a + b)² = 2a² + 2b²', distractorType: 'CONCEPT_CONFUSION', rationale: 'Misapplied distributive property.' },
+      ]},
+      { stepIndex: 2, stepType: 'PROCESS', prompt: 'Substitute a = x, b = 5:', choices: [
+        { text: 'x² + 2·x·5 + 5²', isCorrect: true },
+        { text: 'x² + 5²', distractorType: 'PROCESS_SKIP', rationale: 'Skipped the cross-term.' },
+        { text: 'x² + 5x + 5²', distractorType: 'CALC_ERROR', rationale: 'Cross-term coefficient should be 2·5 = 10, not 5.' },
+        { text: '2x² + 5²', distractorType: 'CONCEPT_CONFUSION', rationale: 'Doubled the wrong term.' },
+        { text: 'x² · 5²', distractorType: 'CONCEPT_CONFUSION', rationale: 'Replaced + with · between terms.' },
+      ]},
+      { stepIndex: 3, stepType: 'ANSWER', prompt: 'Simplified result:', choices: [
+        { text: 'x² + 10x + 25', isCorrect: true },
+        { text: 'x² + 25', distractorType: 'PROCESS_SKIP', rationale: 'Dropped middle term.' },
+        { text: 'x² + 5x + 25', distractorType: 'CALC_ERROR', rationale: 'Half coefficient on the cross-term.' },
+        { text: 'x² + 10x + 10', distractorType: 'CALC_ERROR', rationale: '5² = 10 instead of 25.' },
+        { text: 'x² + 10x', distractorType: 'PROCESS_SKIP', rationale: 'Forgot the constant term.' },
+      ]},
+    ],
+  },
+  {
+    source: 'Class 8 · Linear Equations · Q1',
+    steps: [
+      { stepIndex: 1, stepType: 'CONCEPT', prompt: 'First step to solve 2x − 3 = 5x + 9?', choices: [
+        { text: 'Move x-terms to one side, constants to the other (transposition flips signs)', isCorrect: true },
+        { text: 'Divide both sides by x', distractorType: 'CONCEPT_CONFUSION', rationale: 'Cannot divide by an unknown.' },
+        { text: 'Square both sides', distractorType: 'CONCEPT_CONFUSION', rationale: 'Squaring is for radical equations, not linear.' },
+        { text: 'Try x = 1 and check', distractorType: 'PROCESS_SKIP', rationale: 'Trial-and-error — slow and unreliable.' },
+        { text: 'Multiply both sides by 2', distractorType: 'TIME_PRESSURE_GUESS', rationale: 'No reason to multiply at this stage.' },
+      ]},
+      { stepIndex: 2, stepType: 'PROCESS', prompt: 'After transposing all x-terms to the left and constants to the right:', choices: [
+        { text: '2x − 5x = 9 + 3', isCorrect: true },
+        { text: '2x + 5x = 9 + 3', distractorType: 'CALC_ERROR', rationale: 'Sign error when moving 5x.' },
+        { text: '2x − 5x = 9 − 3', distractorType: 'CALC_ERROR', rationale: 'Sign error when moving −3.' },
+        { text: '2x − 5x = −9 − 3', distractorType: 'CALC_ERROR', rationale: 'Both signs flipped wrongly.' },
+        { text: '2x − 3 + 5x + 9 = 0', distractorType: 'PROCESS_SKIP', rationale: 'Did not combine like terms.' },
+      ]},
+      { stepIndex: 3, stepType: 'ANSWER', prompt: 'Combine and divide:', choices: [
+        { text: 'x = -4', isCorrect: true },
+        { text: 'x = 4', distractorType: 'CALC_ERROR', rationale: 'Sign of result wrong; division by −3 not handled.' },
+        { text: 'x = -12', distractorType: 'PROCESS_SKIP', rationale: 'Forgot to divide by the coefficient.' },
+        { text: 'x = 12', distractorType: 'CALC_ERROR', rationale: 'Multiplied instead of divided.' },
+        { text: 'x = -3', distractorType: 'TIME_PRESSURE_GUESS', rationale: 'Random guess.' },
+      ]},
+    ],
+  },
+  {
+    source: 'Class 8 · Graphs · Q1',
+    steps: [
+      { stepIndex: 1, stepType: 'CONCEPT', prompt: 'Slope of a line between two points?', choices: [
+        { text: 'm = (y₂ − y₁) / (x₂ − x₁)', isCorrect: true },
+        { text: 'm = (x₂ − x₁) / (y₂ − y₁)', distractorType: 'CONCEPT_CONFUSION', rationale: 'Numerator and denominator swapped.' },
+        { text: 'm = y₂ + y₁ / x₂ + x₁', distractorType: 'CONCEPT_CONFUSION', rationale: 'Used sum instead of difference.' },
+        { text: 'm = y₂ · x₁', distractorType: 'CONCEPT_CONFUSION', rationale: 'Product is unrelated to slope.' },
+        { text: 'Slope is always 1', distractorType: 'TIME_PRESSURE_GUESS', rationale: 'Default guess.' },
+      ]},
+      { stepIndex: 2, stepType: 'PROCESS', prompt: 'Plug in (0, 2) and (3, 8):', choices: [
+        { text: 'm = (8 − 2) / (3 − 0)', isCorrect: true },
+        { text: 'm = (3 − 0) / (8 − 2)', distractorType: 'CONCEPT_CONFUSION', rationale: 'Swapped numerator and denominator.' },
+        { text: 'm = (8 + 2) / (3 + 0)', distractorType: 'CALC_ERROR', rationale: 'Used sums.' },
+        { text: 'm = (8 − 2) · (3 − 0)', distractorType: 'CONCEPT_CONFUSION', rationale: 'Multiplied instead of divided.' },
+        { text: 'm = 8 / 3', distractorType: 'PROCESS_SKIP', rationale: 'Took the second point only.' },
+      ]},
+      { stepIndex: 3, stepType: 'ANSWER', prompt: 'Compute:', choices: [
+        { text: '2', isCorrect: true },
+        { text: '6/3', distractorType: 'PROCESS_SKIP', rationale: 'Did not simplify.' },
+        { text: '1/2', distractorType: 'CONCEPT_CONFUSION', rationale: 'Used reciprocal slope.' },
+        { text: '6', distractorType: 'PROCESS_SKIP', rationale: 'Forgot to divide by 3.' },
+        { text: '3', distractorType: 'CALC_ERROR', rationale: 'Computation error.' },
+      ]},
+    ],
+  },
+
+  // ---- Class 9 ----
+  {
+    source: 'Class 9 · Number Systems · Q1',
+    steps: [
+      { stepIndex: 1, stepType: 'CONCEPT', prompt: 'How do you simplify √50?', choices: [
+        { text: 'Factor 50 = 25·2 = 5²·2 ⇒ √50 = 5√2', isCorrect: true },
+        { text: 'Round to 7.07 and treat as decimal', distractorType: 'PROCESS_SKIP', rationale: 'Loses surd form needed to combine.' },
+        { text: '√50 = √25 + √2 = 5 + √2', distractorType: 'CONCEPT_CONFUSION', rationale: 'False: √(a·b) ≠ √a + √b.' },
+        { text: '√50 cannot be simplified', distractorType: 'TIME_PRESSURE_GUESS', rationale: '50 has a square factor (25).' },
+        { text: '√50 = 50^(1/2) = 25', distractorType: 'CALC_ERROR', rationale: 'Confused exponent rules.' },
+      ]},
+      { stepIndex: 2, stepType: 'PROCESS', prompt: 'Now √8 = ?', choices: [
+        { text: '√8 = √(4·2) = 2√2', isCorrect: true },
+        { text: '√8 = 2√4', distractorType: 'CONCEPT_CONFUSION', rationale: 'Wrong factoring (4·2 should leave 2 inside, not 4).' },
+        { text: '√8 = 8√2', distractorType: 'CALC_ERROR', rationale: 'Misapplied factoring.' },
+        { text: '√8 = √2', distractorType: 'PROCESS_SKIP', rationale: 'Dropped the coefficient.' },
+        { text: '√8 = 4√2', distractorType: 'CALC_ERROR', rationale: 'Took √4 wrong.' },
+      ]},
+      { stepIndex: 3, stepType: 'ANSWER', prompt: 'Add 5√2 + 2√2:', choices: [
+        { text: '7√2', isCorrect: true },
+        { text: '7√4', distractorType: 'CONCEPT_CONFUSION', rationale: 'Added under the radical too.' },
+        { text: '√58', distractorType: 'CONCEPT_CONFUSION', rationale: 'Tried to combine inside the radical.' },
+        { text: '10', distractorType: 'CALC_ERROR', rationale: 'Treated √2 as 1.' },
+        { text: '5√2 + 2√2', distractorType: 'PROCESS_SKIP', rationale: 'Did not actually add the like surds.' },
+      ]},
+    ],
+  },
+  {
+    source: 'Class 9 · Polynomials · Q1',
+    steps: [
+      { stepIndex: 1, stepType: 'CONCEPT', prompt: 'To factorise x² + 7x + 12, what do you look for?', choices: [
+        { text: 'Two numbers that add to 7 and multiply to 12', isCorrect: true },
+        { text: 'Two numbers that subtract to 7 and divide to 12', distractorType: 'CONCEPT_CONFUSION', rationale: 'Wrong relationship between coefficients.' },
+        { text: 'Use the quadratic formula immediately', distractorType: 'PROCESS_SKIP', rationale: 'Possible but unnecessary when factorisation works.' },
+        { text: 'Two numbers that add to 12 and multiply to 7', distractorType: 'CONCEPT_CONFUSION', rationale: 'Sum and product confused.' },
+        { text: 'Factor out an x first', distractorType: 'PROCESS_SKIP', rationale: 'No common factor — leads nowhere.' },
+      ]},
+      { stepIndex: 2, stepType: 'PROCESS', prompt: 'Which pair (p, q) satisfies p + q = 7 and pq = 12?', choices: [
+        { text: 'p = 3, q = 4', isCorrect: true },
+        { text: 'p = 6, q = 2', distractorType: 'CALC_ERROR', rationale: '6 + 2 = 8, not 7.' },
+        { text: 'p = 5, q = 2', distractorType: 'CALC_ERROR', rationale: '5·2 = 10, not 12.' },
+        { text: 'p = 12, q = 1', distractorType: 'PROCESS_SKIP', rationale: 'Sum 13, not 7.' },
+        { text: 'p = -3, q = -4', distractorType: 'CALC_ERROR', rationale: 'Product is +12 but sum is −7.' },
+      ]},
+      { stepIndex: 3, stepType: 'ANSWER', prompt: 'Factorisation:', choices: [
+        { text: '(x + 3)(x + 4)', isCorrect: true },
+        { text: '(x − 3)(x − 4)', distractorType: 'CALC_ERROR', rationale: 'Negative roots — product OK but signs wrong.' },
+        { text: '(x + 3)(x − 4)', distractorType: 'CALC_ERROR', rationale: 'Mixed signs give product = −12.' },
+        { text: '(x + 6)(x + 2)', distractorType: 'CALC_ERROR', rationale: 'Sum = 8, not 7.' },
+        { text: '(x + 7)(x + 12)', distractorType: 'CONCEPT_CONFUSION', rationale: 'Used coefficients themselves as roots.' },
+      ]},
+    ],
+  },
+  {
+    source: 'Class 9 · Coordinate Geometry · Q1',
+    steps: [
+      { stepIndex: 1, stepType: 'CONCEPT', prompt: 'Distance between two points (x₁, y₁) and (x₂, y₂)?', choices: [
+        { text: 'd = √[(x₂ − x₁)² + (y₂ − y₁)²]', isCorrect: true },
+        { text: 'd = (x₂ − x₁) + (y₂ − y₁)', distractorType: 'CONCEPT_CONFUSION', rationale: 'Linear sum, not Pythagorean.' },
+        { text: 'd = |x₂ − x₁| · |y₂ − y₁|', distractorType: 'CONCEPT_CONFUSION', rationale: 'Product, not sum of squares.' },
+        { text: 'd = √(x₂² + y₂²)', distractorType: 'PROCESS_SKIP', rationale: 'Used only the second point.' },
+        { text: 'd = (x₂ − x₁)² + (y₂ − y₁)²', distractorType: 'PROCESS_SKIP', rationale: 'Forgot the square root.' },
+      ]},
+      { stepIndex: 2, stepType: 'PROCESS', prompt: 'Plug A(2, 3), B(5, 7):', choices: [
+        { text: '√[(5−2)² + (7−3)²] = √(9 + 16)', isCorrect: true },
+        { text: '√[(5+2)² + (7+3)²] = √(49 + 100)', distractorType: 'CALC_ERROR', rationale: 'Used sums instead of differences.' },
+        { text: '(5 − 2) + (7 − 3) = 7', distractorType: 'CONCEPT_CONFUSION', rationale: 'Linear sum.' },
+        { text: '√[(5−2) + (7−3)] = √7', distractorType: 'PROCESS_SKIP', rationale: 'Skipped the squaring.' },
+        { text: '(5 − 2) · (7 − 3) = 12', distractorType: 'CONCEPT_CONFUSION', rationale: 'Product of legs, not hypotenuse.' },
+      ]},
+      { stepIndex: 3, stepType: 'ANSWER', prompt: 'Compute:', choices: [
+        { text: '5', isCorrect: true },
+        { text: '√25 = 5 (yes that\'s right)', distractorType: undefined, rationale: undefined as any },
+        { text: '7', distractorType: 'CONCEPT_CONFUSION', rationale: 'Linear sum result.' },
+        { text: '√25', distractorType: 'PROCESS_SKIP', rationale: 'Did not finish — √25 = 5.' },
+        { text: '25', distractorType: 'PROCESS_SKIP', rationale: 'Forgot the square root.' },
+      ]},
+    ],
+  },
+  {
+    source: 'Class 9 · Polynomials · Q2',
+    steps: [
+      { stepIndex: 1, stepType: 'CONCEPT', prompt: 'How do you compute p(2) for p(x) = 2x² − 3x − 2?', choices: [
+        { text: 'Substitute x = 2 and simplify each term', isCorrect: true },
+        { text: 'Divide p(x) by (x − 2)', distractorType: 'CONCEPT_CONFUSION', rationale: 'That gives the quotient, not p(2).' },
+        { text: 'Take the coefficient of x²', distractorType: 'PROCESS_SKIP', rationale: 'Ignores other terms.' },
+        { text: 'Set p(x) = 0 and solve', distractorType: 'CONCEPT_CONFUSION', rationale: 'Solving — different operation.' },
+        { text: 'Multiply all coefficients by 2', distractorType: 'TIME_PRESSURE_GUESS', rationale: 'Random guess.' },
+      ]},
+      { stepIndex: 2, stepType: 'PROCESS', prompt: 'After substituting x = 2:', choices: [
+        { text: '2(2)² − 3(2) − 2 = 8 − 6 − 2', isCorrect: true },
+        { text: '2(2) − 3(2) − 2 = 4 − 6 − 2', distractorType: 'CALC_ERROR', rationale: 'Did not square the 2.' },
+        { text: '2(2)² − 3(2) − 2 = 8 + 6 − 2', distractorType: 'CALC_ERROR', rationale: 'Sign error on −3·2.' },
+        { text: '2(4) − 3(2) − 2 = 6 − 2', distractorType: 'CALC_ERROR', rationale: 'Combined two subtractions wrong.' },
+        { text: '2(2)² − 3(2) − 2 = 8 − 6', distractorType: 'PROCESS_SKIP', rationale: 'Forgot the −2 constant.' },
+      ]},
+      { stepIndex: 3, stepType: 'ANSWER', prompt: 'Therefore p(2) =', choices: [
+        { text: '0', isCorrect: true },
+        { text: '4', distractorType: 'CALC_ERROR', rationale: 'Subtraction error.' },
+        { text: '-4', distractorType: 'CALC_ERROR', rationale: 'Sign error.' },
+        { text: '12', distractorType: 'CALC_ERROR', rationale: 'Sum instead of mixed signs.' },
+        { text: '6', distractorType: 'PROCESS_SKIP', rationale: 'Did not subtract last term.' },
+      ]},
+    ],
+  },
+
+  // ---- Class 10 ----
+  {
+    source: 'Class 10 · Polynomials · Q1',
+    steps: [
+      { stepIndex: 1, stepType: 'CONCEPT', prompt: 'Remainder Theorem says:', choices: [
+        { text: 'When p(x) is divided by (x − c), the remainder equals p(c)', isCorrect: true },
+        { text: 'When p(x) is divided by (x − c), the remainder equals 0', distractorType: 'CONCEPT_CONFUSION', rationale: 'That is the Factor Theorem (a special case).' },
+        { text: 'p(x) divided by x = c', distractorType: 'CONCEPT_CONFUSION', rationale: 'Phrasing confused.' },
+        { text: 'Use long division — no shortcut exists', distractorType: 'PROCESS_SKIP', rationale: 'The Remainder Theorem IS the shortcut.' },
+        { text: 'Plug x = 0', distractorType: 'CONCEPT_CONFUSION', rationale: 'That gives p(0), not the remainder by (x − c).' },
+      ]},
+      { stepIndex: 2, stepType: 'PROCESS', prompt: 'For p(x) = x³ − 3x² + 4 divided by (x − 2), compute p(2):', choices: [
+        { text: '(2)³ − 3(2)² + 4 = 8 − 12 + 4', isCorrect: true },
+        { text: '(2)³ − 3(2)² + 4 = 8 − 6 + 4', distractorType: 'CALC_ERROR', rationale: '3·(2)² should be 12, not 6.' },
+        { text: '(2)³ − 3(2) + 4 = 8 − 6 + 4', distractorType: 'CALC_ERROR', rationale: 'Did not square the 2.' },
+        { text: '(2)² − 3(2)² + 4', distractorType: 'CALC_ERROR', rationale: 'Wrong exponent on first term.' },
+        { text: 'Plugged x = -2 by mistake', distractorType: 'CALC_ERROR', rationale: 'Sign of c flipped.' },
+      ]},
+      { stepIndex: 3, stepType: 'ANSWER', prompt: 'Therefore the remainder is:', choices: [
+        { text: '0', isCorrect: true },
+        { text: '4', distractorType: 'CALC_ERROR', rationale: 'Did not finish 8 − 12 + 4.' },
+        { text: '8', distractorType: 'PROCESS_SKIP', rationale: 'Took only the first term.' },
+        { text: '12', distractorType: 'CALC_ERROR', rationale: 'Sign or arithmetic error.' },
+        { text: '-4', distractorType: 'CALC_ERROR', rationale: 'Wrong sign — 8 − 12 + 4 = 0.' },
+      ]},
+    ],
+  },
+  {
+    source: 'Class 10 · Quadratic Equations · Q1',
+    steps: [
+      { stepIndex: 1, stepType: 'CONCEPT', prompt: 'To factorise x² − 4x − 5, look for two numbers that:', choices: [
+        { text: 'Multiply to −5 and add to −4', isCorrect: true },
+        { text: 'Multiply to −4 and add to −5', distractorType: 'CONCEPT_CONFUSION', rationale: 'Sum and product confused.' },
+        { text: 'Multiply to 5 and add to −4', distractorType: 'CALC_ERROR', rationale: 'Sign of constant wrong.' },
+        { text: 'Multiply to −5 and add to 4', distractorType: 'CALC_ERROR', rationale: 'Sign of linear coefficient wrong.' },
+        { text: 'Use only the quadratic formula', distractorType: 'PROCESS_SKIP', rationale: 'Possible but factorisation works here cleanly.' },
+      ]},
+      { stepIndex: 2, stepType: 'PROCESS', prompt: 'Find p, q with pq = −5 and p + q = −4:', choices: [
+        { text: 'p = -5, q = 1', isCorrect: true },
+        { text: 'p = 5, q = -1', distractorType: 'CALC_ERROR', rationale: 'Sum is +4, not −4.' },
+        { text: 'p = -5, q = -1', distractorType: 'CALC_ERROR', rationale: 'Product is +5, not −5.' },
+        { text: 'p = -2, q = 2', distractorType: 'CALC_ERROR', rationale: 'Product is −4 and sum is 0.' },
+        { text: 'p = 5, q = 1', distractorType: 'CALC_ERROR', rationale: 'Sum is 6, product +5.' },
+      ]},
+      { stepIndex: 3, stepType: 'ANSWER', prompt: 'So the solutions are:', choices: [
+        { text: 'x = 5 or x = -1', isCorrect: true },
+        { text: 'x = -5 or x = 1', distractorType: 'CALC_ERROR', rationale: 'Signs flipped — must use opposite of p, q.' },
+        { text: 'x = 5 or x = 1', distractorType: 'CALC_ERROR', rationale: 'Sign error on second root.' },
+        { text: 'x = -5 or x = -1', distractorType: 'CALC_ERROR', rationale: 'Both signs wrong.' },
+        { text: 'x = ±√5', distractorType: 'CONCEPT_CONFUSION', rationale: 'Confused with x² = 5 case.' },
+      ]},
+    ],
+  },
+  {
+    source: 'Class 10 · Coordinate Geometry · Q1',
+    steps: [
+      { stepIndex: 1, stepType: 'CONCEPT', prompt: 'Midpoint formula:', choices: [
+        { text: 'M = ((x₁ + x₂)/2, (y₁ + y₂)/2)', isCorrect: true },
+        { text: 'M = (x₂ − x₁, y₂ − y₁)', distractorType: 'CONCEPT_CONFUSION', rationale: 'That is the displacement, not midpoint.' },
+        { text: 'M = ((x₁ − x₂)/2, (y₁ − y₂)/2)', distractorType: 'CALC_ERROR', rationale: 'Used differences instead of sums.' },
+        { text: 'M = (x₁ · x₂, y₁ · y₂)', distractorType: 'CONCEPT_CONFUSION', rationale: 'Products are unrelated to midpoints.' },
+        { text: 'Midpoint is always the origin', distractorType: 'TIME_PRESSURE_GUESS', rationale: 'Default guess.' },
+      ]},
+      { stepIndex: 2, stepType: 'PROCESS', prompt: 'Plug A(-2, 4), B(6, -2):', choices: [
+        { text: 'M = ((-2 + 6)/2, (4 + (-2))/2)', isCorrect: true },
+        { text: 'M = ((-2 − 6)/2, (4 − 2)/2)', distractorType: 'CALC_ERROR', rationale: 'Used differences.' },
+        { text: 'M = ((-2 · 6)/2, (4 · -2)/2)', distractorType: 'CONCEPT_CONFUSION', rationale: 'Multiplied instead of added.' },
+        { text: 'M = ((-2 + 6), (4 + -2))', distractorType: 'PROCESS_SKIP', rationale: 'Forgot to divide by 2.' },
+        { text: 'M = (4, 2)', distractorType: 'CALC_ERROR', rationale: 'Got numerator OK but skipped division.' },
+      ]},
+      { stepIndex: 3, stepType: 'ANSWER', prompt: 'Compute:', choices: [
+        { text: '(2, 1)', isCorrect: true },
+        { text: '(4, 2)', distractorType: 'PROCESS_SKIP', rationale: 'Did not divide by 2.' },
+        { text: '(-4, 6)', distractorType: 'CALC_ERROR', rationale: 'Used differences.' },
+        { text: '(2, -1)', distractorType: 'CALC_ERROR', rationale: 'Sign error in y-coordinate.' },
+        { text: '(8, 2)', distractorType: 'CALC_ERROR', rationale: 'Used wrong arithmetic.' },
+      ]},
+    ],
+  },
+  {
+    source: 'Class 10 · Trigonometry · Q1',
+    steps: [
+      { stepIndex: 1, stepType: 'CONCEPT', prompt: 'Pythagorean identity:', choices: [
+        { text: 'sin²θ + cos²θ = 1', isCorrect: true },
+        { text: 'sin θ + cos θ = 1', distractorType: 'CONCEPT_CONFUSION', rationale: 'Forgot the squares.' },
+        { text: 'sin²θ − cos²θ = 1', distractorType: 'CONCEPT_CONFUSION', rationale: 'Wrong sign — that is double-angle related.' },
+        { text: 'sin²θ · cos²θ = 1', distractorType: 'CONCEPT_CONFUSION', rationale: 'Product instead of sum.' },
+        { text: 'tan²θ = 1', distractorType: 'CONCEPT_CONFUSION', rationale: 'Different identity (tan²θ + 1 = sec²θ).' },
+      ]},
+      { stepIndex: 2, stepType: 'PROCESS', prompt: 'Given sin θ = 3/5, find cos²θ:', choices: [
+        { text: 'cos²θ = 1 − (3/5)² = 1 − 9/25 = 16/25', isCorrect: true },
+        { text: 'cos²θ = (3/5)² = 9/25', distractorType: 'CONCEPT_CONFUSION', rationale: 'Used sin²θ value as cos²θ.' },
+        { text: 'cos²θ = 1 − 3/5 = 2/5', distractorType: 'PROCESS_SKIP', rationale: 'Did not square the sin value.' },
+        { text: 'cos²θ = 1 + 9/25 = 34/25', distractorType: 'CALC_ERROR', rationale: 'Sign error — should subtract.' },
+        { text: 'cos²θ = 25/9', distractorType: 'CALC_ERROR', rationale: 'Took reciprocal.' },
+      ]},
+      { stepIndex: 3, stepType: 'ANSWER', prompt: 'Take positive square root (acute angle):', choices: [
+        { text: '4/5', isCorrect: true },
+        { text: '√(16/25) = ±4/5 (no info to choose)', distractorType: 'PROCESS_SKIP', rationale: 'For an acute angle, cos θ > 0.' },
+        { text: '16/25', distractorType: 'PROCESS_SKIP', rationale: 'Did not take square root.' },
+        { text: '3/5', distractorType: 'CONCEPT_CONFUSION', rationale: 'That is sin θ, not cos θ.' },
+        { text: '5/4', distractorType: 'CALC_ERROR', rationale: 'Took reciprocal of 4/5.' },
+      ]},
+    ],
+  },
+];
+
 export async function seedSteps(prisma: PrismaClient, problemIdsBySource: Record<string, string>) {
-  const ALL_SPEC = [...SPEC, ...SPEC_M1];
+  const ALL_SPEC = [...SPEC, ...SPEC_M1, ...SPEC_NCERT];
 
   // 기존 단계/선택지 삭제 (재시드 시 깨끗하게)
   for (const spec of ALL_SPEC) {
