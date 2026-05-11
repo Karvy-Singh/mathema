@@ -13,46 +13,136 @@
  *   - DASHBOARD_TAG_EN, RECOMMENDATION_EN: 추천 카드 라벨
  */
 
-// 영어판은 인도 NCERT/CBSE 학년 정합 기준 (Class 7~12).
-// 학년 재배치는 unit.enum.ts 의 GRADE_TO_UNITS 에서 관리. 여기는 NCERT 챕터명 매핑만.
+// NCERT 7~12 챕터 한국어명 → 영어명 매핑 (79 챕터, 1:1).
+// 1차 출시 표준은 EN. KO 는 개발자 보조용 번역본.
+// 키는 unit.enum.ts GRADE_TO_UNITS 의 단원명과 정확히 일치한다.
+//
+// + Legacy 한국 교육과정 단원명 (옛 시드 DB 호환). seed 재실행 전이거나
+//   기존 사용자가 옛 mastery snapshot 을 들고 있을 때 fallback 으로 한국어가
+//   영어 UI 에 노출되는 것을 방지.
 export const UNIT_NAME_EN: Record<string, string> = {
-  // legacy 고3
-  '수와 식':   'Numbers & Expressions',
-  '함수':       'Relations and Functions',
-  // Class 7 NCERT
-  '정수와 유리수':       'Integers',                            // NCERT 7 · Ch 1
-  '문자와 식':           'Algebraic Expressions',               // NCERT 7 · Ch 10
-  '일차방정식':          'Simple Equations',                    // NCERT 7 · Ch 4
-  // Class 8 NCERT
-  '유리수와 순환소수':   'Rational Numbers',                    // NCERT 8 · Ch 1
-  '식의 계산':           'Algebraic Expressions and Identities',// NCERT 8 · Ch 8
-  '일차함수':            'Introduction to Graphs',              // NCERT 8 · Ch 13
-  // Class 9 NCERT
-  '제곱근과 실수':       'Number Systems',                      // NCERT 9 · Ch 1
-  '인수분해':            'Polynomials (Factorisation)',         // NCERT 9 · Ch 2
-  '좌표평면과 그래프':   'Cartesian Plane',                     // NCERT 9 · Ch 3 (재배치)
-  '이차함수':            'Polynomials (Quadratic)',             // NCERT 9 · Ch 2 / 10 · Ch 2
-  // Class 10 NCERT
-  '다항식':              'Polynomials',                         // NCERT 10 · Ch 2
-  '방정식과 부등식':     'Pair of Linear Equations',            // NCERT 10 · Ch 3
-  '도형의 방정식':       'Coordinate Geometry',                 // NCERT 10 · Ch 7
-  '이차방정식':          'Quadratic Equations',                 // NCERT 10 · Ch 4 (재배치)
-  // Class 11 NCERT
-  '삼각함수':            'Trigonometric Functions',             // NCERT 11 · Ch 3
-  '수열':                'Sequences and Series',                // NCERT 11 · Ch 8
-  '함수의 극한':         'Limits and Derivatives',              // NCERT 11 · Ch 12
-  '함수와 그래프':       'Relations and Functions',             // NCERT 11 · Ch 2 (재배치)
-  '일차부등식':          'Linear Inequalities',                 // NCERT 11 · Ch 5 (재배치)
-  '지수와 로그':         'Exponential & Logarithmic Functions', // NCERT 11 (Functions/Sequences) + 12 (Differentiability) — 단독 챕터 X
-  // Class 12 NCERT
-  '미적분 I':            'Continuity and Differentiability',    // NCERT 12 · Ch 5
-  '미적분 II':           'Integrals',                           // NCERT 12 · Ch 7-8
-  '확률·통계':           'Probability',                         // NCERT 12 · Ch 13 (Statistics는 Class 11 Ch 13)
-  '기하·벡터':           'Vector Algebra & Three-Dimensional Geometry', // NCERT 12 · Ch 10-11
+  // ----- Legacy (옛 한국 교육과정 단원명) -----
+  '수와 식':             'Numbers & Expressions',
+  '함수':                'Relations and Functions',
+  '정수와 유리수':       'Integers & Rationals',
+  '문자와 식':           'Algebraic Expressions',
+  '일차방정식':          'Simple Equations',
+  '유리수와 순환소수':   'Rational Numbers',
+  '좌표평면과 그래프':   'Coordinate Plane',
+  '식의 계산':           'Algebraic Identities',
+  '일차함수':            'Linear Functions',
+  '제곱근과 실수':       'Real Numbers (Surds)',
+  '인수분해':            'Factorisation',
+  '이차함수':            'Quadratic Functions',
+  '방정식과 부등식':     'Equations & Inequalities',
+  '도형의 방정식':       'Equations of Figures',
+  '함수와 그래프':       'Functions & Graphs',
+  '미적분 I':            'Calculus I',
+  '미적분 II':           'Calculus II',
+  '확률·통계':           'Probability & Statistics',
+  '기하·벡터':           'Geometry & Vectors',
+  '지수와 로그':         'Exponential & Logarithmic',
+  '삼각함수':            'Trigonometric Functions (Legacy)',
+  '수열':                'Sequences',
+  '함수의 극한':         'Limits of Functions',
+  // (참고: '일차부등식', '다항식', '이차방정식' 등은 NCERT 단원명과 동일하므로 아래 NCERT 블록에서 처리)
+
+  // ----- NCERT Class 7 -----
+  // Class 7
+  '정수':                     'Integers',
+  '분수와 소수':              'Fractions and Decimals',
+  '자료의 정리':              'Data Handling',
+  '간단한 방정식':            'Simple Equations',
+  '직선과 각':                'Lines and Angles',
+  '삼각형의 성질':            'The Triangle and its Properties',
+  '비교하기 (비·백분율)':     'Comparing Quantities',
+  '유리수':                   'Rational Numbers',
+  '둘레와 넓이':              'Perimeter and Area',
+  '대수식':                   'Algebraic Expressions',
+  '지수와 거듭제곱':          'Exponents and Powers',
+  '대칭':                     'Symmetry',
+  '입체도형의 시각화':        'Visualising Solid Shapes',
+  // Class 8
+  '유리수의 성질':                  'Rational Numbers',
+  '일변수 일차방정식':              'Linear Equations in One Variable',
+  '사각형의 이해':                  'Understanding Quadrilaterals',
+  '자료의 정리 II':                 'Data Handling',
+  '제곱과 제곱근':                  'Squares and Square Roots',
+  '세제곱과 세제곱근':              'Cubes and Cube Roots',
+  '비교하기 II (이자·할인)':        'Comparing Quantities',
+  '대수식과 항등식':                'Algebraic Expressions and Identities',
+  '도형의 양 (둘레·넓이·부피)':     'Mensuration',
+  '지수의 확장':                    'Exponents and Powers',
+  '정비례·반비례':                  'Direct and Inverse Proportions',
+  '인수분해 (입문)':                'Factorisation',
+  '그래프 입문':                    'Introduction to Graphs',
+  // Class 9
+  '수의 체계 (실수)':               'Number Systems',
+  '다항식':                         'Polynomials',
+  '좌표기하 입문':                  'Coordinate Geometry',
+  '두 변수 일차방정식':             'Linear Equations in Two Variables',
+  '유클리드 기하의 공준':           "Introduction to Euclid's Geometry",
+  '직선과 각 II':                   'Lines and Angles',
+  '삼각형 (합동)':                  'Triangles',
+  '사각형 (성질·증명)':             'Quadrilaterals',
+  '원':                             'Circles',
+  '헤론의 공식':                    "Heron's Formula",
+  '겉넓이와 부피':                  'Surface Areas and Volumes',
+  '통계 입문':                      'Statistics',
+  // Class 10
+  '실수 II (산술의 기본정리)':      'Real Numbers',
+  '다항식 II (영점·계수 관계)':     'Polynomials',
+  '두 변수 일차연립방정식':         'Pair of Linear Equations in Two Variables',
+  '이차방정식':                     'Quadratic Equations',
+  '등차수열 (A.P.)':                'Arithmetic Progressions',
+  '삼각형의 닮음':                  'Triangles (Similarity)',
+  '좌표기하 II (분점·넓이)':        'Coordinate Geometry',
+  '삼각비 입문':                    'Introduction to Trigonometry',
+  '삼각비의 활용':                  'Some Applications of Trigonometry',
+  '원 II (접선)':                   'Circles',
+  '원과 관련된 넓이':               'Areas Related to Circles',
+  '겉넓이·부피 (합성도형)':         'Surface Areas and Volumes',
+  '통계 II (평균·중앙값·최빈값)':   'Statistics',
+  '확률 입문':                      'Probability',
+  // Class 11
+  '집합':                           'Sets',
+  '관계와 함수':                    'Relations and Functions',
+  '삼각함수 (일반각)':              'Trigonometric Functions',
+  '복소수와 이차방정식':            'Complex Numbers and Quadratic Equations',
+  '일차부등식':                     'Linear Inequalities',
+  '순열과 조합':                    'Permutations and Combinations',
+  '이항정리':                       'Binomial Theorem',
+  '수열과 급수':                    'Sequences and Series',
+  '직선의 방정식':                  'Straight Lines',
+  '원뿔곡선':                       'Conic Sections',
+  '공간기하 입문':                  'Introduction to Three Dimensional Geometry',
+  '극한과 미분 입문':               'Limits and Derivatives',
+  '통계 III (분산·표준편차)':       'Statistics',
+  '확률 II (사건의 대수)':          'Probability',
+  // Class 12
+  '관계와 함수 II':                 'Relations and Functions',
+  '역삼각함수':                     'Inverse Trigonometric Functions',
+  '행렬':                           'Matrices',
+  '행렬식':                         'Determinants',
+  '연속과 미분가능성':              'Continuity and Differentiability',
+  '미분의 활용':                    'Application of Derivatives',
+  '적분':                           'Integrals',
+  '적분의 활용':                    'Application of Integrals',
+  '미분방정식':                     'Differential Equations',
+  '벡터대수':                       'Vector Algebra',
+  '공간기하 II':                    'Three Dimensional Geometry',
+  '선형계획법':                     'Linear Programming',
+  '확률 III (조건부·베이즈)':       'Probability',
 };
 
 // 서브유닛도 NCERT 표현으로 통일 (A.P., G.P., Vieta's, surd, mensuration, identities, etc.)
 export const SUB_UNIT_NAME_EN: Record<string, string> = {
+  // 옛 sub-unit 호환 (legacy 시드 DB)
+  '실수와 식':           'Real Numbers & Expressions',
+  '복소수':              'Complex Numbers',
+  '다항식':              'Polynomials',
+  '삼각함수':            'Trigonometric Functions',
+  '함수의 극한과 연속':  'Limits and Continuity of Functions',
   // Class 12 legacy
   '정적분의 활용':       'Applications of Integrals',
   '부분적분':            'Integration by Parts',
@@ -143,11 +233,13 @@ export const SUB_UNIT_NAME_EN: Record<string, string> = {
   '공간좌표':            '3D Coordinate System',
 };
 
+// 난이도 EN 라벨 — 한국 수능 "킬러" 표현을 NCERT/JEE 컨텍스트에 맞춘 일반 라벨로 통일.
+// (enum 값 자체는 DB 호환을 위해 SEMI_KILLER/KILLER 유지)
 export const DIFFICULTY_EN: Record<string, string> = {
-  MIDDLE:       'Med',
-  UPPER_MIDDLE: 'Med-Hi',
+  MIDDLE:       'Easy',
+  UPPER_MIDDLE: 'Medium',
   SEMI_KILLER:  'Hard',
-  KILLER:       'Killer',
+  KILLER:       'Challenging',
 };
 
 export const ERROR_TYPE_EN: Record<string, string> = {
@@ -255,6 +347,19 @@ export const FORMULA_EN: Record<string, string> = {
   '중1 · 좌표와 그래프 2': '(x, y) → x-axis: (x, −y), y-axis: (−x, y), origin: (−x, −y)',
   '중1 · 좌표와 그래프 3': 'y = ax (direct proportion) ⇒ a = y/x',
   '중1 · 좌표와 그래프 4': 'y = ax (a ≠ 0) passes the origin; a > 0: I·III, a < 0: II·IV',
+  // Class 8/9/10 NCERT seed (formulas in EN — KO seed text had Korean fragments)
+  'Class 8 · Rational Numbers · Q1':     'x = 0.\\overline{abc…n}  ⇒  10ⁿx − x = (integer part)  ⇒  x = (integer part) / (10ⁿ − 1)',
+  'Class 8 · Algebraic Identities · Q1': '(a + b)² = a² + 2ab + b²',
+  'Class 8 · Linear Equations · Q1':     'ax + b = cx + d  ⇒  (a − c)x = d − b  ⇒  x = (d − b)/(a − c)',
+  'Class 8 · Graphs · Q1':               'slope m = (y₂ − y₁)/(x₂ − x₁)',
+  'Class 9 · Number Systems · Q1':       '√(a²·b) = a√b ;  √m + √n can be combined only if they share the same surd',
+  'Class 9 · Polynomials · Q1':          'x² + (p+q)x + pq = (x + p)(x + q)',
+  'Class 9 · Coordinate Geometry · Q1':  'd = √[(x₂ − x₁)² + (y₂ − y₁)²]',
+  'Class 9 · Polynomials · Q2':          'p(c) = substitute c for the variable in p(x) (function evaluation)',
+  'Class 10 · Polynomials · Q1':         'remainder when divided by (x − c) equals p(c) (Remainder Theorem)',
+  'Class 10 · Quadratic Equations · Q1': 'x² − (sum)x + (product) = 0  ⇒  factor as (x − r₁)(x − r₂) = 0',
+  'Class 10 · Coordinate Geometry · Q1': 'midpoint M = ((x₁ + x₂)/2, (y₁ + y₂)/2)',
+  'Class 10 · Trigonometry · Q1':        'sin²θ + cos²θ = 1  ⇒  cos θ = √(1 − sin²θ) (acute angle)',
 };
 
 /** Problem.concept EN — 핵심 개념 영문 매핑 (학습 피드백·오답노트 상세) */

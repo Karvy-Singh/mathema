@@ -22,6 +22,7 @@ import { MailModule } from './infrastructure/mail/mail.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { CurriculumModule } from './modules/curriculum/curriculum.module';
+import { ConceptLessonsModule } from './modules/concept-lessons/concept-lessons.module';
 import { ProblemsModule } from './modules/problems/problems.module';
 import { WrongNotesModule } from './modules/wrong-notes/wrong-notes.module';
 import { AttemptsModule } from './modules/attempts/attempts.module';
@@ -58,6 +59,7 @@ import { PushModule } from './modules/push/push.module';
     AuthModule,
     UsersModule,
     CurriculumModule,
+    ConceptLessonsModule,
     ProblemsModule,
     AttemptsModule,
     WrongNotesModule,

@@ -28,19 +28,36 @@ export class CurriculumService {
     return units.map((u: any) => this.shape(u, lang));
   }
 
+  /** lang='en' 시 한국어 음절이 결과 문자열에 남아있으면 한국어 누출. 마지막 안전망. */
+  private safeEn(name: string): string {
+    if (/[가-힣]/.test(name)) {
+      // 매핑이 누락된 케이스 — 표시는 빈 라벨로 막고 로그.
+      // eslint-disable-next-line no-console
+      console.warn(`[curriculum] UNIT/SUB_UNIT EN mapping missing for: ${name}`);
+      return '';
+    }
+    return name;
+  }
+
   private shape(u: any, lang: Lang) {
+    const rawUnit = lang === 'en' ? (UNIT_NAME_EN[u.name] ?? u.name) : u.name;
+    const unitName = lang === 'en' ? this.safeEn(rawUnit) : rawUnit;
     return {
       id: u.id,
-      name: u.name,
-      displayName: lang === 'en' ? (UNIT_NAME_EN[u.name] ?? u.name) : u.name,
+      name: unitName,
+      displayName: unitName,
       order: u.order,
       gradeLevels: u.gradeLevels ?? [],
-      subUnits: (u.subUnits ?? []).map((s: any) => ({
-        id: s.id,
-        name: s.name,
-        displayName: lang === 'en' ? (SUB_UNIT_NAME_EN[s.name] ?? s.name) : s.name,
-        order: s.order,
-      })),
+      subUnits: (u.subUnits ?? []).map((s: any) => {
+        const rawSub = lang === 'en' ? (SUB_UNIT_NAME_EN[s.name] ?? s.name) : s.name;
+        const subName = lang === 'en' ? this.safeEn(rawSub) : rawSub;
+        return {
+          id: s.id,
+          name: subName,
+          displayName: subName,
+          order: s.order,
+        };
+      }),
     };
   }
 

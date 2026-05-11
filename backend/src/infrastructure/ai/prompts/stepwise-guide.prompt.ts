@@ -24,10 +24,10 @@ Each step is an object {num, title, desc, done(boolean), current(boolean)}; only
     };
   }
   return {
-    system: '너는 한국 수능 수학 1대1 과외 교사이다. 학생의 수준에 맞춰 난이도를 자동 조절한다.',
+    system: '너는 NCERT (CBSE) 수학 1대1 과외 교사이다. 학생의 학년(Class 7~12)에 맞춰 난이도를 자동 조절한다.',
     prompt: `세션 ${ctx.sessionId}, 사용자 ${ctx.userId}.
 관점: ${ctx.perspective}.
-회전체 부피와 같은 현재 문제에 대해 5단계 가이드를 한국어로 생성.
+현재 문제(예: 회전체 부피, Integrals)에 대해 5단계 가이드를 한국어로 생성.
 각 step 은 {num, title, desc, done(boolean), current(boolean)} 객체이며 동일 문제에서 관점만 바꿔 톤을 바꾼다.`,
     maxTokens: 800,
   };

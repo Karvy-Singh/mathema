@@ -154,3 +154,60 @@ export const fetchCurriculum = (grade?: string) =>
   get<Unit[]>('/curriculum', grade ? { grade } : undefined);
 export const fetchUnitsForUser = (grade?: string) =>
   get<Unit[]>('/curriculum/units', grade ? { grade } : undefined);
+
+// ===== Concept Lessons (사전 개념학습) =====
+export type ConceptStepKind =
+  | 'HOOK' | 'CONCRETE' | 'PICTORIAL' | 'ABSTRACT'
+  | 'WORKED_EXAMPLE' | 'GUIDED_PRACTICE'
+  | 'RETRIEVAL' | 'MISCONCEPTION' | 'REFLECT';
+
+export type NcertClass = 'CLASS_7' | 'CLASS_8' | 'CLASS_9' | 'CLASS_10' | 'CLASS_11' | 'CLASS_12';
+
+export type ConceptLessonSummary = {
+  id: string;
+  chapterCode: string;
+  ncertClass: NcertClass;
+  chapterNumber: number;
+  title: string;
+  bigIdea: string;
+  estimatedMin: number;
+  cognitiveLoad: number;
+  prerequisiteCodes: string[];
+  unit: { id: string; name: string } | null;
+  mastered: boolean;
+  currentStep: number | null;
+  retrievalScore: number | null;
+};
+
+export type ConceptStep = {
+  id: string;
+  stepIndex: number;
+  kind: ConceptStepKind;
+  title: string;
+  body: string;
+  visualType: string | null;
+  visualUrl: string | null;
+  misconception: { wrongKo: string; whyKo: string; correctKo: string; wrongEn: string; whyEn: string; correctEn: string } | null;
+  workedSteps: Array<{ math: string; narrationKo: string; narrationEn: string }> | null;
+  retrievalCheck: { prompt: string; hint: string | null } | null;
+  reflectPrompts: { promptsKo: string[]; promptsEn: string[] } | null;
+};
+
+export type ConceptLessonDetail = ConceptLessonSummary & {
+  steps: ConceptStep[];
+  progress: {
+    currentStep: number;
+    completedSteps: number[];
+    masteredAt: string | null;
+    retrievalScore: number | null;
+  } | null;
+};
+
+export const fetchConceptLessons = (ncertClass?: NcertClass) =>
+  get<ConceptLessonSummary[]>('/concept-lessons', ncertClass ? { ncertClass } : undefined);
+
+export const fetchConceptLessonsForUnit = (unitId: string) =>
+  get<ConceptLessonSummary[]>(`/concept-lessons/by-unit/${unitId}`);
+
+export const fetchConceptLesson = (chapterCode: string) =>
+  get<ConceptLessonDetail>(`/concept-lessons/${chapterCode}`);

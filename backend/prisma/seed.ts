@@ -2,6 +2,7 @@ import { PrismaClient, Difficulty, ErrorType, NoteStatus, SessionContext, MockEx
 import * as bcrypt from 'bcrypt';
 import { GRADE_TO_UNITS, UNIT_NAMES, UNIT_TO_GRADES, SUB_UNIT_MAP } from '../src/common/enums/unit.enum';
 import { seedSteps } from './seed-steps';
+import { seedConceptLessons } from './seed-concepts';
 
 const prisma = new PrismaClient();
 
@@ -35,21 +36,22 @@ async function main() {
     units[name] = { id: unit.id, subs };
   }
 
-  // ===== Demo user — India launch (Class 7 NCERT, building foundation) =====
-  // Phase 1 출시: Class 7 (G_MIDDLE_1) NCERT — 시드 문제 20개가 모두 이 학년에 매핑되어 데모가 풍부.
-  // Phase 2: Class 11 (JEE prep) 콘텐츠 확보 후 페르소나 추가 예정.
+  // ===== Demo user — PoC persona: Class 11 (JEE prep) =====
+  // 시드 사용자는 11학년 학생 (G_HIGH_2 = NCERT Class 11). JEE Main 1차 (1월) 또는 2차 (4월) 준비.
+  // examDate ≈ 150일 후 (JEE Main April session 근사). targetGrade=1 은 "Top rank band" 의미.
+  // mastery·wrongNote·mockExam 모두 Class 11 단원 컨텍스트로 일관 시드.
   const examDate = new Date();
-  examDate.setDate(examDate.getDate() + 287);
+  examDate.setDate(examDate.getDate() + 150);
   const user = await prisma.user.upsert({
     where: { email: 'polopot123@gmail.com' },
-    update: { gradeLevel: 'G_MIDDLE_1', country: 'IN', name: 'Arjun Sharma' } as any,
+    update: { gradeLevel: 'G_HIGH_2', country: 'IN', name: 'Arjun Sharma' } as any,
     create: {
       email: 'polopot123@gmail.com',
       passwordHash: await bcrypt.hash('password1234', 10),
       name: 'Arjun Sharma',
       examDate,
       targetGrade: 1,
-      gradeLevel: 'G_MIDDLE_1',
+      gradeLevel: 'G_HIGH_2',
       country: 'IN' as any,
     },
   });
@@ -81,58 +83,43 @@ async function main() {
       body: 'log_2 (x²-x-6) ≥ 0 을 만족하는 x의 범위.', answer: 'x ≤ -2 또는 x ≥ 4' },
   ];
 
-  // 신규 — 중1 과정 (정수·유리수, 문자와 식, 일차방정식, 좌표평면) — 모든 문제는 3단계 객관식.
-  // step 정의는 seed-steps.ts SPEC_M1 에서 source 매칭으로 부여된다.
+  // Class 11 NCERT (JEE Main 11학년 과정) — PoC 데모 사용자 페르소나에 맞춘 핵심 단원.
+  // 모든 source 는 영어 표기 (DB key) — content-en.ts 의 추가 매핑 없이도 영어 사용자에게 자연스럽다.
   const general: ProblemSpec[] = [
-    // 정수와 유리수 (5)
-    { source: '중1 · 정수와 유리수 1', unit: '정수와 유리수', sub: '정수의 사칙연산', difficulty: 'MIDDLE',
-      body: '다음을 계산하시오: (-3) + 7', answer: '4' },
-    { source: '중1 · 정수와 유리수 2', unit: '정수와 유리수', sub: '정수의 사칙연산', difficulty: 'MIDDLE',
-      body: '다음을 계산하시오: (-5) - (-8)', answer: '3' },
-    { source: '중1 · 정수와 유리수 3', unit: '정수와 유리수', sub: '정수의 사칙연산', difficulty: 'MIDDLE',
-      body: '다음을 계산하시오: (-2) × (+3) × (-4)', answer: '24' },
-    { source: '중1 · 정수와 유리수 4', unit: '정수와 유리수', sub: '유리수와 절댓값', difficulty: 'MIDDLE',
-      body: '|−7| + |+5| 의 값을 구하시오.', answer: '12' },
-    { source: '중1 · 정수와 유리수 5', unit: '정수와 유리수', sub: '소수와 분수의 변환', difficulty: 'MIDDLE',
-      body: '0.4 를 기약분수로 나타내시오.', answer: '2/5' },
+    // Sets (집합)
+    { source: 'Class 11 · Sets · Q1', unit: '집합', difficulty: 'MIDDLE',
+      body: 'If |A|=30, |B|=20, |A∩B|=10, find |A∪B|.', answer: '40' },
+    { source: 'Class 11 · Sets · Q2', unit: '집합', difficulty: 'UPPER_MIDDLE',
+      body: 'In a class of 60 students, 38 like Math and 27 like Physics, with 18 liking both. How many like neither?', answer: '13' },
+    // Relations and Functions
+    { source: 'Class 11 · Functions · Q1', unit: '관계와 함수', difficulty: 'MIDDLE',
+      body: 'For f(x) = 2x + 1, evaluate f(3).', answer: '7' },
+    { source: 'Class 11 · Functions · Q2', unit: '관계와 함수', difficulty: 'UPPER_MIDDLE',
+      body: 'State the range of f: ℝ → ℝ, f(x) = x² + 1.', answer: '[1, ∞)' },
+    // Trigonometric Functions
+    { source: 'Class 11 · Trig · Q1', unit: '삼각함수 (일반각)', difficulty: 'UPPER_MIDDLE',
+      body: 'Evaluate sin(120°).', answer: '√3/2' },
+    { source: 'Class 11 · Trig · Q2', unit: '삼각함수 (일반각)', difficulty: 'SEMI_KILLER',
+      body: 'Solve for x in [0, 2π): 2 sin x = 1.', answer: 'π/6, 5π/6' },
+    // Complex Numbers
+    { source: 'Class 11 · Complex · Q1', unit: '복소수와 이차방정식', difficulty: 'UPPER_MIDDLE',
+      body: 'Compute (2 + 3i)(1 − i).', answer: '5 + i' },
+    // Linear Inequalities
+    { source: 'Class 11 · Inequalities · Q1', unit: '일차부등식', difficulty: 'MIDDLE',
+      body: 'Solve: −2x + 5 < 11.', answer: 'x > −3' },
+    // Permutations & Combinations
+    { source: 'Class 11 · Permutations · Q1', unit: '순열과 조합', difficulty: 'UPPER_MIDDLE',
+      body: 'How many ways can 5 books be arranged on a shelf?', answer: '120' },
+    { source: 'Class 11 · Combinations · Q1', unit: '순열과 조합', difficulty: 'UPPER_MIDDLE',
+      body: 'Evaluate ⁶C₂.', answer: '15' },
+    // Sequences and Series
+    { source: 'Class 11 · Sequences · Q1', unit: '수열과 급수', difficulty: 'UPPER_MIDDLE',
+      body: 'Sum the A.P. 3, 7, 11, … up to the 10th term.', answer: '210' },
+    // Limits and Derivatives
+    { source: 'Class 11 · Limits · Q1', unit: '극한과 미분 입문', difficulty: 'SEMI_KILLER',
+      body: 'Find d/dx of x³.', answer: '3x²' },
 
-    // 문자와 식 (4)
-    { source: '중1 · 문자와 식 1', unit: '문자와 식', sub: '문자식 표현', difficulty: 'MIDDLE',
-      body: 'x 의 5배에 3을 더한 식을 쓰시오.', answer: '5x + 3' },
-    { source: '중1 · 문자와 식 2', unit: '문자와 식', sub: '동류항 정리', difficulty: 'MIDDLE',
-      body: '3a + 2b - a + 5b 를 정리하시오.', answer: '2a + 7b' },
-    { source: '중1 · 문자와 식 3', unit: '문자와 식', sub: '식의 값 계산', difficulty: 'UPPER_MIDDLE',
-      body: 'x = -2 일 때, 3x² - 5 의 값을 구하시오.', answer: '7' },
-    { source: '중1 · 문자와 식 4', unit: '문자와 식', sub: '동류항 정리', difficulty: 'MIDDLE',
-      body: '-2(3x - 5) + 4x 를 정리하시오.', answer: '-2x + 10' },
-
-    // 일차방정식 (7)
-    { source: '중1 · 일차방정식 1', unit: '일차방정식', sub: '일차방정식 풀이', difficulty: 'MIDDLE',
-      body: '다음 일차방정식을 푸시오: 3x − 7 = 11', answer: 'x = 6' },
-    { source: '중1 · 일차방정식 2', unit: '일차방정식', sub: '일차방정식 풀이', difficulty: 'UPPER_MIDDLE',
-      body: '다음 일차방정식을 푸시오: 2(x + 4) = 5x − 1', answer: 'x = 3' },
-    { source: '중1 · 일차방정식 3', unit: '일차방정식', sub: '일차방정식 풀이', difficulty: 'MIDDLE',
-      body: '다음 일차방정식을 푸시오: -3x + 5 = 14', answer: 'x = -3' },
-    { source: '중1 · 일차방정식 4', unit: '일차방정식', sub: '일차방정식 풀이', difficulty: 'MIDDLE',
-      body: '다음 일차방정식을 푸시오: x/2 + 3 = 7', answer: 'x = 8' },
-    { source: '중1 · 일차방정식 5', unit: '일차방정식', sub: '일차방정식의 활용', difficulty: 'UPPER_MIDDLE',
-      body: '한 변의 길이가 x 인 정사각형의 둘레가 24cm 일 때, x 의 값은?', answer: '6' },
-    { source: '중1 · 일차방정식 6', unit: '일차방정식', sub: '일차방정식의 활용', difficulty: 'UPPER_MIDDLE',
-      body: '연속된 세 자연수의 합이 39 일 때, 가장 작은 수는?', answer: '12' },
-    { source: '중1 · 일차방정식 7', unit: '일차방정식', sub: '비례식과 활용', difficulty: 'MIDDLE',
-      body: '비례식 3 : 5 = x : 20 에서 x 의 값은?', answer: '12' },
-
-    // 좌표평면과 그래프 (4)
-    { source: '중1 · 좌표와 그래프 1', unit: '좌표평면과 그래프', sub: '순서쌍과 좌표', difficulty: 'MIDDLE',
-      body: '점 (-3, 2) 는 어느 사분면 위에 있는가?', answer: '제2사분면' },
-    { source: '중1 · 좌표와 그래프 2', unit: '좌표평면과 그래프', sub: '순서쌍과 좌표', difficulty: 'MIDDLE',
-      body: '점 (4, -1) 을 x축에 대하여 대칭이동한 점의 좌표는?', answer: '(4, 1)' },
-    { source: '중1 · 좌표와 그래프 3', unit: '좌표평면과 그래프', sub: '정비례·반비례', difficulty: 'UPPER_MIDDLE',
-      body: 'y 가 x 에 정비례하고, x = 4 일 때 y = 12 이다. y 를 x 의 식으로 나타내시오.', answer: 'y = 3x' },
-    { source: '중1 · 좌표와 그래프 4', unit: '좌표평면과 그래프', sub: '정비례·반비례', difficulty: 'UPPER_MIDDLE',
-      body: '함수 y = -2x 의 그래프가 지나는 사분면을 모두 고르시오.', answer: '제2사분면, 제4사분면' },
-
-    // ============ Class 8 NCERT (4) ============
+    // ============ Class 8 NCERT (4) — 선수 학습 ============
     { source: 'Class 8 · Rational Numbers · Q1', unit: '유리수와 순환소수', sub: '순환소수와 분수', difficulty: 'MIDDLE',
       body: 'Express 0.\\overline{3} (0.3 repeating) as a fraction in lowest terms.', answer: '1/3' },
     { source: 'Class 8 · Algebraic Identities · Q1', unit: '식의 계산', sub: '곱셈공식', difficulty: 'UPPER_MIDDLE',
@@ -274,10 +261,41 @@ async function main() {
 
   // (NCERT 신규 문제는 본문/공식이 이미 영문/수식 표기 — content-en.ts 에 별도 EN 사전 불필요)
 
+  // Legacy 한국 단원명 → NCERT 챕터 한국어명 매핑.
+  // 시드 ProblemSpec 의 unit 필드가 옛 한국 교육과정 단원명을 사용 중인 동안의 호환층.
+  // 새 시드는 NCERT 단원명을 직접 사용하면 된다.
+  const LEGACY_UNIT_ALIAS: Record<string, string> = {
+    '정수와 유리수':       '정수',
+    '문자와 식':           '대수식',
+    '일차방정식':          '간단한 방정식',
+    '좌표평면과 그래프':   '좌표기하 입문',
+    '유리수와 순환소수':   '유리수의 성질',
+    '식의 계산':           '대수식과 항등식',
+    '일차함수':            '그래프 입문',
+    '제곱근과 실수':       '수의 체계 (실수)',
+    '인수분해':            '다항식',
+    '이차함수':            '다항식',
+    '도형의 방정식':       '좌표기하 II (분점·넓이)',
+    '방정식과 부등식':     '두 변수 일차연립방정식',
+    '미적분 I':            '연속과 미분가능성',
+    '미적분 II':           '적분',
+    '확률·통계':           '확률 III (조건부·베이즈)',
+    '기하·벡터':           '벡터대수',
+    '함수와 그래프':       '관계와 함수',
+    '지수와 로그':         '관계와 함수',
+    '삼각함수':            '삼각함수 (일반각)',
+    '수열':                '수열과 급수',
+    '함수의 극한':         '극한과 미분 입문',
+    '일차부등식':          '일차부등식',
+    '다항식':              '다항식 II (영점·계수 관계)',
+    '이차방정식':          '이차방정식',
+  };
+
   const problems: Record<string, string> = {};
   for (const p of problemsSpec) {
-    const u = units[p.unit];
-    if (!u) { console.warn(`Unit not found: ${p.unit} (skipping ${p.source})`); continue; }
+    const unitName = LEGACY_UNIT_ALIAS[p.unit] ?? p.unit;
+    const u = units[unitName];
+    if (!u) { console.warn(`Unit not found: ${p.unit} → ${unitName} (skipping ${p.source})`); continue; }
     const subUnitId = p.sub ? u.subs[p.sub] : null;
     const created = await prisma.problem.create({
       data: {
@@ -285,7 +303,7 @@ async function main() {
         difficulty: p.difficulty, body: p.body, answer: p.answer,
         concept: CONCEPT_KO[p.source] ?? null,
         formula: FORMULA_KO[p.source] ?? null,
-        hint: '단계별 가이드는 학습 페이지의 AI 가이드 패널에서 확인하세요.',
+        hint: 'Open the AI Guide panel on the study page for step-by-step coaching.',
       },
     });
     problems[p.source] = created.id;
@@ -295,14 +313,18 @@ async function main() {
   console.log('🪜 Seeding problem steps + choices for featured problems...');
   await seedSteps(prisma, problems);
 
+  // ===== Concept Lessons — NCERT 7~12 학년별·단원별 사전 개념학습 =====
+  console.log('📚 Seeding NCERT concept lessons (Class 7~12)...');
+  await seedConceptLessons(prisma, units);
+
   // ===== WrongNotes (SM-2 분포 포함) — 중1 데모 =====
   const wrongNotesSpec: Array<{ source: string; errorType: ErrorType; insight: string; status: NoteStatus; similarCount: number; daysAgo: number; rep: number; ef: number; intervalDays: number; dueOffset: number | null; lapseCount: number; }> = [
-    { source: '중1 · 일차방정식 2',  errorType: 'CALCULATION_MISTAKE',           insight: '괄호를 풀고 동류항 정리 후 이항 단계를 자주 빠뜨림',           status: 'ANALYZING', similarCount: 4, daysAgo: 5,  rep: 1, ef: 2.4, intervalDays: 1,  dueOffset: 0,  lapseCount: 1 },
-    { source: '중1 · 정수와 유리수 3', errorType: 'CALCULATION_MISTAKE',           insight: '음수 곱셈 부호 결정 시 음수 개수 카운팅 실수 반복',              status: 'ANALYZING', similarCount: 3, daysAgo: 7,  rep: 2, ef: 2.5, intervalDays: 6,  dueOffset: -1, lapseCount: 0 },
-    { source: '중1 · 좌표와 그래프 1', errorType: 'CONCEPT_MISUNDERSTANDING',     insight: '사분면 번호와 좌표 부호의 대응을 혼동',                          status: 'MASTERED',  similarCount: 3, daysAgo: 14, rep: 4, ef: 2.7, intervalDays: 35, dueOffset: 21, lapseCount: 0 },
-    { source: '중1 · 일차방정식 5',  errorType: 'CONCEPT_MISUNDERSTANDING',     insight: '도형 둘레식 세우기 단계에서 변의 개수 혼동',                    status: 'MASTERED',  similarCount: 4, daysAgo: 21, rep: 5, ef: 2.8, intervalDays: 60, dueOffset: 39, lapseCount: 0 },
-    { source: '중1 · 문자와 식 3',   errorType: 'TIME_SHORTAGE',               insight: '식의 값 계산 시 음수 제곱의 부호 처리에서 시간 소모',           status: 'PENDING',   similarCount: 3, daysAgo: 5,  rep: 0, ef: 2.5, intervalDays: 0,  dueOffset: null, lapseCount: 0 },
-    { source: '중1 · 일차방정식 4',  errorType: 'CALCULATION_MISTAKE',           insight: '분수 계수 방정식에서 양변에 분모를 곱하는 단계 누락',           status: 'ANALYZING', similarCount: 2, daysAgo: 7,  rep: 1, ef: 2.3, intervalDays: 1,  dueOffset: 3,  lapseCount: 2 },
+    { source: 'Class 11 · Trig · Q2',       errorType: 'CONCEPT_MISUNDERSTANDING', insight: 'Drops solutions in [π, 2π) — only finds the reference angle, forgets quadrant rules.',            status: 'ANALYZING', similarCount: 4, daysAgo: 5,  rep: 1, ef: 2.4, intervalDays: 1,  dueOffset: 0,  lapseCount: 1 },
+    { source: 'Class 11 · Complex · Q1',    errorType: 'CALCULATION_MISTAKE',     insight: 'Sign error on i² = −1: distributes (a + bi)(c + di) but treats i² as +1.',                          status: 'ANALYZING', similarCount: 3, daysAgo: 7,  rep: 2, ef: 2.5, intervalDays: 6,  dueOffset: -1, lapseCount: 0 },
+    { source: 'Class 11 · Sets · Q2',       errorType: 'CONCEPT_MISUNDERSTANDING', insight: 'Skips the "neither" set — forgets that Universe − (A ∪ B) is what the question asks.',           status: 'MASTERED',  similarCount: 3, daysAgo: 14, rep: 4, ef: 2.7, intervalDays: 35, dueOffset: 21, lapseCount: 0 },
+    { source: 'Class 11 · Inequalities · Q1', errorType: 'CONCEPT_MISUNDERSTANDING', insight: 'Forgets to flip the inequality when dividing by a negative coefficient.',                        status: 'MASTERED',  similarCount: 4, daysAgo: 21, rep: 5, ef: 2.8, intervalDays: 60, dueOffset: 39, lapseCount: 0 },
+    { source: 'Class 11 · Limits · Q1',     errorType: 'TIME_SHORTAGE',           insight: 'Spends too long deriving from first principles instead of applying the power rule directly.',     status: 'PENDING',   similarCount: 3, daysAgo: 5,  rep: 0, ef: 2.5, intervalDays: 0,  dueOffset: null, lapseCount: 0 },
+    { source: 'Class 11 · Combinations · Q1', errorType: 'CONCEPT_MISUNDERSTANDING', insight: 'Uses ⁿPᵣ when the question is about unordered selection (ⁿCᵣ).',                                  status: 'ANALYZING', similarCount: 2, daysAgo: 7,  rep: 1, ef: 2.3, intervalDays: 1,  dueOffset: 3,  lapseCount: 2 },
   ];
 
   const startOfDay = (offset: number) => {
@@ -365,11 +387,12 @@ async function main() {
   // ===== MasterySnapshot — 데모는 중1 단원만 (mastery 가 있는 단원만 AI compose 가 사용) =====
   await prisma.masterySnapshot.deleteMany({ where: { userId: user.id } });
   const masteryByUnitName: Record<string, number> = {
-    // 약점 → 강점 스펙트럼
-    '일차방정식':         52,  // 약점 — 추천 우선순위 ↑
-    '정수와 유리수':      78,  // 안정
-    '문자와 식':          65,  // 약점 보강 필요
-    '좌표평면과 그래프':  72,  // 안정
+    // 약점 → 강점 스펙트럼 (NCERT Class 11 챕터, JEE 핵심)
+    '극한과 미분 입문':   45,  // 가장 약함 — JEE 핵심, 추천 1순위
+    '삼각함수 (일반각)':  52,  // 약점 — quadrant rule 자주 놓침
+    '관계와 함수':        65,  // 보강 필요
+    '복소수와 이차방정식': 71, // 안정 (sign error만 가끔)
+    '집합':              82,  // 강점
   };
   for (const [unitName, score] of Object.entries(masteryByUnitName)) {
     const unit = units[unitName];
@@ -380,13 +403,16 @@ async function main() {
   }
 
   // ===== MockExam + Result =====
+  // 시드는 인도 CBSE 컨텍스트의 단원 평가(Unit Test) · 학기 평가(Term Test) · 모의고사(Mock).
+  // MockExamType enum 값은 DB 후방호환을 위해 그대로 사용 (HAKPYEONG/MOPYEONG → UnitTest/TermTest 의미).
+  // Class 11 JEE 준비 — Mock test 누적 (CBSE Class 11 Unit Test + JEE Foundation Mock)
   const mockSpec: Array<{ name: string; type: MockExamType; score: number; grade: number; percentile: number; daysAgo: number; minutes: number }> = [
-    { name: '2024 3월 학력평가',   type: 'HAKPYEONG', score: 62, grade: 4, percentile: 55, daysAgo: 240, minutes: 99 },
-    { name: '2024 4월 학력평가',   type: 'HAKPYEONG', score: 68, grade: 3, percentile: 62, daysAgo: 200, minutes: 100 },
-    { name: '2024 6월 모의평가',   type: 'MOPYEONG',  score: 71, grade: 3, percentile: 71, daysAgo: 150, minutes: 100 },
-    { name: '2024 7월 학력평가',   type: 'HAKPYEONG', score: 76, grade: 2, percentile: 78, daysAgo: 110, minutes: 95 },
-    { name: '2024 9월 모의평가',   type: 'MOPYEONG',  score: 79, grade: 2, percentile: 82, daysAgo: 60,  minutes: 100 },
-    { name: '2024 10월 학력평가',  type: 'HAKPYEONG', score: 84, grade: 2, percentile: 88, daysAgo: 25,  minutes: 98 },
+    { name: 'Unit Test · April',         type: 'HAKPYEONG', score: 62, grade: 4, percentile: 55, daysAgo: 240, minutes: 99 },
+    { name: 'Unit Test · May',           type: 'HAKPYEONG', score: 68, grade: 3, percentile: 62, daysAgo: 200, minutes: 100 },
+    { name: 'JEE Foundation Mock · Jun', type: 'MOPYEONG',  score: 71, grade: 3, percentile: 71, daysAgo: 150, minutes: 100 },
+    { name: 'Unit Test · August',        type: 'HAKPYEONG', score: 76, grade: 2, percentile: 78, daysAgo: 110, minutes: 95 },
+    { name: 'JEE Main Mock · September', type: 'MOPYEONG',  score: 79, grade: 2, percentile: 82, daysAgo: 60,  minutes: 100 },
+    { name: 'Full Mock · October',       type: 'HAKPYEONG', score: 84, grade: 2, percentile: 88, daysAgo: 25,  minutes: 98 },
   ];
 
   await prisma.mockExamResult.deleteMany({ where: { userId: user.id } });
@@ -431,8 +457,8 @@ async function main() {
         aiScore: 6 + i * 0.3,
         mentorMessage:
           i === reportSpec.length - 1
-            ? '지난주보다 학습시간을 18% 늘렸고 정답률도 4%p 올랐어요. 특히 미적분 II에서 보였던 치환적분 약점이 65% → 78%로 회복되고 있습니다. 이 페이스를 유지하면 12월 모의고사에서 1등급권 진입이 충분히 가능해요.'
-            : '꾸준한 학습 패턴을 유지하고 있어요.',
+            ? "Study time is up 18% over last week and accuracy lifted 4 pp. The Trigonometric Functions weakness around quadrant rules has moved from 45% → 52%. Hold this pace and JEE Main mock should land you in the top percentile."
+            : 'Consistent study habit holding steady.',
       },
     });
   }

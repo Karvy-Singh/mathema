@@ -710,13 +710,14 @@ function WrongNotesPage({ onStartStudy }: { onStartStudy: (sessionId: string, fo
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <Filter size={14} color="#8B95AB" />
           {(() => {
-            const ko = ['전체', '미적분 II', '확률·통계', '함수', '기하·벡터'];
+            // NCERT Class 11 핵심 단원 필터 (PoC 페르소나 = Class 11 JEE 준비).
+            const ko = ['전체', '삼각함수 (일반각)', '관계와 함수', '극한과 미분 입문', '복소수와 이차방정식'];
             const enMap: Record<string, string> = {
               '전체': 'All',
-              '미적분 II': 'Calculus II',
-              '확률·통계': 'Probability & Statistics',
-              '함수': 'Functions',
-              '기하·벡터': 'Geometry & Vectors',
+              '삼각함수 (일반각)': 'Trigonometric Functions',
+              '관계와 함수': 'Relations and Functions',
+              '극한과 미분 입문': 'Limits and Derivatives',
+              '복소수와 이차방정식': 'Complex Numbers',
             };
             const display = (f: string) => lang === 'en' ? (enMap[f] ?? f) : f;
             return ko.map(f => (
@@ -899,6 +900,7 @@ function StudyPage({ sessionId, focusProblemId, onClear, onStartStudy }: {
 
 function StudyPlaceholder({ onStartStudy }: { onStartStudy?: (id: string) => void }) {
   const { t } = useT();
+  const navigate = useNavigate();
   const [recGrade, setRecGrade] = useState<string>('__mine__');
   const startSessionMut = useMutation({
     mutationFn: (unitId: string) => M.startStudySession({ unitId }),
@@ -908,6 +910,29 @@ function StudyPlaceholder({ onStartStudy }: { onStartStudy?: (id: string) => voi
     },
     onError: () => toast(t('toast.session.startFailed'), 'error'),
   });
+
+  /**
+   * 단원 학습 진입 게이팅:
+   * 추천 단원 카드 클릭 시 — 해당 unit 에 매핑된 NCERT ConceptLesson 중 mastered=false 가
+   * 하나라도 있으면 그 첫 챕터의 개념학습으로 먼저 이동.
+   * 모두 mastered 거나 단원에 매핑된 ConceptLesson 이 없으면 곧바로 학습 세션 시작.
+   *
+   * 이 게이팅이 없으면 사용자가 개념 없이 문제풀이로 직행할 수 있어 "사전 개념학습" 흐름이 강제되지 않는다.
+   */
+  const enterUnit = async (unitId: string) => {
+    try {
+      const lessons = await Q.fetchConceptLessonsForUnit(unitId);
+      const unmastered = lessons.find((l) => !l.mastered);
+      if (unmastered) {
+        toast(t('study.gate.toConcept', { title: unmastered.title }), 'success');
+        navigate(`/learn/${unmastered.chapterCode}`);
+        return;
+      }
+    } catch {
+      // ConceptLesson API 실패해도 학습은 계속 가능하도록 fallthrough
+    }
+    startSessionMut.mutate(unitId);
+  };
   const recommended = useQuery({
     queryKey: ['study-recommended-units', recGrade],
     queryFn: () => get<Array<{
@@ -925,9 +950,32 @@ function StudyPlaceholder({ onStartStudy }: { onStartStudy?: (id: string) => voi
       <h2 className="serif" style={{ fontSize: '32px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0, marginBottom: '12px' }}>
         {t('study.placeholder.title')}
       </h2>
-      <div style={{ fontSize: '14px', color: '#5C6B85', lineHeight: 1.65, marginBottom: 28 }}>
+      <div style={{ fontSize: '14px', color: '#5C6B85', lineHeight: 1.65, marginBottom: 20 }}>
         {t('study.placeholder.desc')}
       </div>
+
+      {/* 사전 개념학습 진입 배너 — 문제풀기 전, 인지심리 6원칙으로 짧게 빅 아이디어를 잡는다 */}
+      <button
+        onClick={() => { trackClick('open_concept_hub'); navigate('/learn'); }}
+        className="hover-lift"
+        style={{
+          display: 'block', width: '100%', textAlign: 'left',
+          padding: '18px 20px', marginBottom: 28,
+          background: 'linear-gradient(135deg, #142850 0%, #1FB8C4 100%)',
+          color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer',
+          fontFamily: 'inherit',
+        }}
+      >
+        <div style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 6 }}>
+          {t('study.concept.banner.label')}
+        </div>
+        <div className="serif" style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>
+          {t('study.concept.banner.title')}
+        </div>
+        <div style={{ fontSize: 13, lineHeight: 1.55, opacity: 0.85 }}>
+          {t('study.concept.banner.desc')}
+        </div>
+      </button>
 
       {/* 가중치 기반 추천 단원 카드 */}
       <div style={{ marginBottom: 28 }}>
@@ -962,7 +1010,7 @@ function StudyPlaceholder({ onStartStudy }: { onStartStudy?: (id: string) => voi
               disabled={startSessionMut.isPending}
               onClick={() => {
                 trackClick('start_study_from_recommend', { unitId: r.unitId, weight: r.weight });
-                startSessionMut.mutate(r.unitId);
+                enterUnit(r.unitId);
               }}
               style={{
                 padding: 16, textAlign: 'left',

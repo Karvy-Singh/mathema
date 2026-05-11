@@ -13,6 +13,8 @@ const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const MathLearningApp = lazy(() => import('./pages/MathLearningApp'));
+const ConceptHubPage = lazy(() => import('./pages/ConceptHubPage'));
+const ConceptLessonPage = lazy(() => import('./pages/ConceptLessonPage'));
 
 function PageViewTracker() {
   const location = useLocation();
@@ -48,6 +50,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/learn"
+            element={
+              <ProtectedRoute>
+                <ConceptHubPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/learn/:code"
+            element={
+              <ProtectedRoute>
+                <ConceptLessonPage />
               </ProtectedRoute>
             }
           />

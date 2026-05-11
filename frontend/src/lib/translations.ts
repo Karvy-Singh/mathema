@@ -40,7 +40,7 @@ const ko = {
   'nav.study': '학습',
   'nav.mockExam': '모의고사',
   'nav.report': '리포트',
-  'nav.dDayPrefix': '수능까지',
+  'nav.dDayPrefix': '시험까지',
   'nav.dDay': 'D-{days}',
   'nav.logout': '로그아웃',
 
@@ -51,8 +51,8 @@ const ko = {
   'auth.password': '비밀번호',
   'auth.passwordHint': '비밀번호 (8자 이상)',
   'auth.name': '이름',
-  'auth.examDate': '수능 날짜',
-  'auth.targetGrade': '목표 등급 (1~9)',
+  'auth.examDate': '시험 날짜 (Board exam)',
+  'auth.targetGrade': '목표 등급 (1=최상위)',
   'auth.login.submit': '로그인',
   'auth.register.submit': '계정 만들기',
   'auth.login.busy': '진행 중...',
@@ -279,10 +279,10 @@ const ko = {
   'mock.trajectory.label': 'Mock Exam Trajectory',
   'mock.headline.up': '7개월간',
   'mock.headline.gain': '22점 상승',
-  'mock.headline.expected': '예상 수능 등급',
+  'mock.headline.expected': '예상 등급',
   'mock.headline.gradeStable': '{grade}등급 안정권',
   'mock.stat.lastScore': '최근 점수',
-  'mock.stat.expectedGrade': '예상 수능 등급',
+  'mock.stat.expectedGrade': '예상 등급',
   'mock.stat.toTarget': '목표까지',
   'mock.stat.peerPercentile': '동급 백분위',
   'mock.stat.recent': '최근 시험',
@@ -408,6 +408,13 @@ const ko = {
   'verify.success': '이메일이 확인되었습니다.',
   'verify.failed': '검증 실패 — 링크가 만료되었거나 유효하지 않습니다.',
   'verify.goHome': '홈으로 이동',
+
+  // ===== Concept Learning banner (study tab) =====
+  'study.concept.banner.label': 'New · 개념 학습',
+  'study.concept.banner.title': '문제 풀기 전, 단원의 빅 아이디어부터 →',
+  'study.concept.banner.desc':
+    'NCERT 7–12 교육과정 79개 챕터 · 챕터당 10–25분 · 인지심리 6원칙으로 설계 (CPA · Cognitive Load · Worked Example · Retrieval · Variation · Misconception).',
+  'study.gate.toConcept': '먼저 개념 학습: {title}',
 };
 
 const en: typeof ko = {
@@ -445,7 +452,7 @@ const en: typeof ko = {
   'nav.study': 'Study',
   'nav.mockExam': 'Mock Exam',
   'nav.report': 'Report',
-  'nav.dDayPrefix': 'Until SAT',
+  'nav.dDayPrefix': 'Until exam',
   'nav.dDay': 'D-{days}',
   'nav.logout': 'Log out',
 
@@ -456,8 +463,8 @@ const en: typeof ko = {
   'auth.password': 'Password',
   'auth.passwordHint': 'Password (min. 8 chars)',
   'auth.name': 'Name',
-  'auth.examDate': 'Exam date',
-  'auth.targetGrade': 'Target grade (1–9)',
+  'auth.examDate': 'Board exam date',
+  'auth.targetGrade': 'Target rank band (1 = top)',
   'auth.login.submit': 'Sign in',
   'auth.register.submit': 'Create account',
   'auth.login.busy': 'Working…',
@@ -683,10 +690,10 @@ const en: typeof ko = {
   'mock.trajectory.label': 'Mock Exam Trajectory',
   'mock.headline.up': 'Last 7 months:',
   'mock.headline.gain': '+22 points',
-  'mock.headline.expected': 'Expected SAT grade',
-  'mock.headline.gradeStable': 'safely at grade {grade}',
+  'mock.headline.expected': 'Expected exam band',
+  'mock.headline.gradeStable': 'safely at band {grade}',
   'mock.stat.lastScore': 'Last score',
-  'mock.stat.expectedGrade': 'Expected grade',
+  'mock.stat.expectedGrade': 'Expected band',
   'mock.stat.toTarget': 'To next grade',
   'mock.stat.peerPercentile': 'Peer percentile',
   'mock.stat.recent': 'Latest exam',
@@ -812,6 +819,13 @@ const en: typeof ko = {
   'verify.success': 'Your email has been verified.',
   'verify.failed': 'Verification failed — link expired or invalid.',
   'verify.goHome': 'Go home',
+
+  // Concept Learning banner (study tab)
+  'study.concept.banner.label': 'New · Concept Learning',
+  'study.concept.banner.title': 'Start with the big idea before solving problems →',
+  'study.concept.banner.desc':
+    'NCERT 7–12 syllabus · 79 chapters · 10–25 min each · grounded in six learning-science principles (CPA · Cognitive Load · Worked Example · Retrieval · Variation · Misconception).',
+  'study.gate.toConcept': 'Concept first: {title}',
 };
 
 export const translations = { ko, en };

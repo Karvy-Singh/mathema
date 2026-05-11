@@ -77,6 +77,39 @@ enum GradeLevel {
   G_HIGH_3     // Class 12 (한국 고3)
 }
 
+/// NCERT 학년 — 개념학습(ConceptLesson) 분류 차원.
+/// GradeLevel 과는 별도: NCERT 챕터 트리는 인도 학년 체계가 1차 기준.
+enum NcertClass {
+  CLASS_7
+  CLASS_8
+  CLASS_9
+  CLASS_10
+  CLASS_11
+  CLASS_12
+}
+
+/// 개념학습 1차시 내 단계 종류 — 인지심리 6원칙을 단계로 변환.
+///   HOOK            관심·사전지식 활성화 (Ausubel advance organizer)
+///   CONCRETE        구체물·조작 (Bruner CPA — Concrete)
+///   PICTORIAL       시각화 표현 (Bruner CPA — Pictorial, Dual Coding)
+///   ABSTRACT        기호·정의 (Bruner CPA — Abstract, Variation Theory)
+///   WORKED_EXAMPLE  해결 과정 시연 (Sweller worked-example effect, CLT)
+///   GUIDED_PRACTICE 스캐폴드 연습 (Fading guidance)
+///   RETRIEVAL       회상 시험 (Karpicke testing effect)
+///   MISCONCEPTION   흔한 오개념 노출·정정 (Conceptual change)
+///   REFLECT         메타인지 요약 (self-explanation)
+enum ConceptStepKind {
+  HOOK
+  CONCRETE
+  PICTORIAL
+  ABSTRACT
+  WORKED_EXAMPLE
+  GUIDED_PRACTICE
+  RETRIEVAL
+  MISCONCEPTION
+  REFLECT
+}
+
 /// 사용자 국가 — 커리큘럼·로케일·통화 매핑의 기준.
 /// 1차 출시: IN(인도). 향후 KR, US, UK, AU 등 순차 추가.
 enum CountryCode {
@@ -116,6 +149,7 @@ model User {
   weeklyReports   WeeklyReport[]
   analyticsEvents AnalyticsEvent[]
   deviceTokens    DeviceToken[]
+  conceptProgress ConceptProgress[]
 
   @@index([examDate])
   @@index([deletedAt])
@@ -133,6 +167,7 @@ model Unit {
   problems  Problem[]
   studySessions StudySession[]
   masteries MasterySnapshot[]
+  conceptLessons ConceptLesson[]
 }
 
 model SubUnit {
@@ -143,6 +178,7 @@ model SubUnit {
 
   unit     Unit      @relation(fields: [unitId], references: [id])
   problems Problem[]
+  conceptLessons ConceptLesson[]
 
   @@unique([unitId, name])
 }
@@ -440,6 +476,109 @@ model AdminAccessLog {
 
   @@index([adminEmail, createdAt])
   @@index([path, createdAt])
+}
+
+// ---------- CONCEPT LEARNING (문제 풀기 전 개념학습) ----------
+//
+// 인지심리학 6원칙을 단계화한 사전 학습 모듈:
+//   1. Bruner — Concrete → Pictorial → Abstract (CPA) 표상 변환
+//   2. Sweller — Cognitive Load Theory: worked example, low intrinsic-load 진입
+//   3. Marton — Variation Theory: 핵심 차원 1개씩 변주
+//   4. Ausubel — Advance Organizer (HOOK)
+//   5. Karpicke — Retrieval Practice (자가 점검)
+//   6. Misconception Cycle — 흔한 오개념 노출·정정 (conceptual change)
+//
+// 한 ConceptLesson = NCERT 1챕터. 5~8 ConceptStep 의 시퀀스로 구성.
+// 사용자가 문제풀이/모의고사로 진입하기 전, 해당 단원의 RETRIEVAL 단계까지 통과해야 unlock.
+
+model ConceptLesson {
+  id              String       @id @default(uuid())
+  /// NCERT 학년 (1차 출시 인도). 한국 학년은 unitId 의 Unit.gradeLevels 로 보조 매핑.
+  ncertClass      NcertClass
+  /// NCERT 챕터 번호 (해당 학년 안에서 1~N)
+  chapterNumber   Int
+  /// 안정 식별자 (예: C7-CH01-INTEGERS). seed/migration 동일성 보장용.
+  chapterCode     String       @unique
+  titleKo         String       // "정수"
+  titleEn         String       // "Integers"
+  /// 빅 아이디어 — 학습자가 이번 차시에서 가져가야 할 핵심 통찰 (1~2 문장).
+  bigIdeaKo       String       @db.Text
+  bigIdeaEn       String       @db.Text
+  /// 예상 학습 시간 (분). 기본 15.
+  estimatedMin    Int          @default(15)
+  /// 학습 강도 0~3 (인지부하 추정). 0=가벼움, 3=킬러 챕터.
+  cognitiveLoad   Int          @default(1)
+  /// 선수 학습 chapterCode 리스트 (DAG 의존 그래프). 빈 배열이면 진입 가능.
+  prerequisiteCodes String[]   @default([])
+  /// 한국 단원과의 매핑 (선택). 문제풀이/오답노트와 연결되는 다리.
+  unitId          String?
+  subUnitId       String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  steps           ConceptStep[]
+  unit            Unit?        @relation(fields: [unitId], references: [id])
+  subUnit         SubUnit?     @relation(fields: [subUnitId], references: [id])
+  progress        ConceptProgress[]
+
+  @@index([ncertClass, chapterNumber])
+  @@index([unitId])
+}
+
+model ConceptStep {
+  id              String           @id @default(uuid())
+  lessonId        String
+  /// 1부터 시작. 단계 순서.
+  stepIndex       Int
+  kind            ConceptStepKind
+  titleKo         String
+  titleEn         String
+  /// 본문 (Markdown + LaTeX 허용)
+  bodyKo          String           @db.Text
+  bodyEn          String           @db.Text
+  /// 시각 자료 — Pictorial/Concrete 단계용. URL 또는 SVG 데이터.
+  visualType      String?          // 'figure' | 'video' | 'manipulative' | 'graph' | 'svg'
+  visualUrl       String?
+  /// MISCONCEPTION 단계 페이로드:
+  ///   { wrong: "흔한 오답", why: "왜 헷갈리는지", correct: "올바른 사고" }
+  misconception   Json?
+  /// WORKED_EXAMPLE 단계 페이로드:
+  ///   [{ step: 1, math: "...", narration: "..." }, ...]
+  workedSteps     Json?
+  /// RETRIEVAL / GUIDED_PRACTICE 단계 페이로드:
+  ///   { prompt: "...", accept: ["정답1", "정답2"], hint?: "...", explainKo?, explainEn? }
+  retrievalCheck  Json?
+  /// REFLECT 단계 페이로드: { prompts: ["...", "..."] } — 자기설명/요약 유도 질문
+  reflectPrompts  Json?
+
+  lesson          ConceptLesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, stepIndex])
+  @@index([lessonId])
+}
+
+model ConceptProgress {
+  id              String   @id @default(uuid())
+  userId          String
+  lessonId        String
+  /// 현재 진행 단계 인덱스 (1부터).
+  currentStep     Int      @default(1)
+  /// 완료한 단계 인덱스 배열.
+  completedSteps  Int[]    @default([])
+  /// 마지막 RETRIEVAL 통과 시각. 한 번 이상 통과해야 unit 의 문제풀이 unlock.
+  masteredAt      DateTime?
+  /// 최근 RETRIEVAL 점수 (0~100).
+  retrievalScore  Float?
+  /// 학습 누적 초.
+  durationSec     Int      @default(0)
+  startedAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User           @relation(fields: [userId], references: [id])
+  lesson          ConceptLesson  @relation(fields: [lessonId], references: [id])
+
+  @@unique([userId, lessonId])
+  @@index([userId, masteredAt])
 }
 
 // ---------- WEEKLY REPORT ----------

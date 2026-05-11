@@ -1,4 +1,28 @@
 import { PrismaClient } from '@prisma/client';
+import { createHash } from 'crypto';
+
+/**
+ * Deterministic shuffle — 시드 데이터에서 정답이 항상 보기 1번 위치로 들어가
+ * 단순 "1번 찍기" 전략으로 평가가 무력화되는 문제를 막는다.
+ *
+ *   key = source + ":" + stepIndex
+ *
+ * 매 시드 실행마다 같은 결과를 보장 (Math.random 미사용) — 같은 학생이 같은 문제를
+ * 다시 풀어도 보기 순서가 동일해 학습/오답노트/통계 일관성을 유지.
+ *
+ * choiceIndex 는 셔플 후 배열 인덱스 + 1 로 재할당된다.
+ */
+function deterministicShuffle<T>(arr: T[], key: string): T[] {
+  const h = createHash('sha256').update(key).digest();
+  let s = h.readUInt32BE(0) || 1;
+  const result = [...arr];
+  for (let i = result.length - 1; i > 0; i--) {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    const j = s % (i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
 
 /**
  * 7문제 × 3단계(개념·풀이·정답) × 5지선다 시드.
@@ -1168,7 +1192,9 @@ const SPEC_NCERT: ProblemStepsSpec[] = [
 ];
 
 export async function seedSteps(prisma: PrismaClient, problemIdsBySource: Record<string, string>) {
-  const ALL_SPEC = [...SPEC, ...SPEC_M1, ...SPEC_NCERT];
+  // SPEC_M1 (중1 한국 시드) 는 PoC 페르소나(Class 11)에 맞지 않아 제외.
+  // 정의 자체는 보존 — 추후 Class 7 페르소나 데모 시 재활성화 가능.
+  const ALL_SPEC = [...SPEC, ...SPEC_NCERT];
 
   // 기존 단계/선택지 삭제 (재시드 시 깨끗하게)
   for (const spec of ALL_SPEC) {
@@ -1194,8 +1220,12 @@ export async function seedSteps(prisma: PrismaClient, problemIdsBySource: Record
       });
       stepCount++;
       // 5지선다 보장: 부족한 보기는 안전한 더미로 패딩 (드물게 발생)
-      const chs = s.choices.slice(0, 5);
-      while (chs.length < 5) chs.push({ text: '—', distractorType: 'TIME_PRESSURE_GUESS', rationale: '— (자리 채움)' });
+      const rawChs = s.choices.slice(0, 5);
+      while (rawChs.length < 5) rawChs.push({ text: '—', distractorType: 'TIME_PRESSURE_GUESS', rationale: '— (자리 채움)' });
+      // 정답 위치를 source + stepIndex 기반으로 deterministic shuffle.
+      // 시드 데이터의 정답이 모두 1번에 작성되어 있어, 셔플 없이 저장하면
+      // "항상 1번 찍기" 전략으로 평가가 무력화됨.
+      const chs = deterministicShuffle(rawChs, `${spec.source}::${s.stepIndex}`);
       for (let i = 0; i < chs.length; i++) {
         const c = chs[i];
         await prisma.problemChoice.create({

@@ -100,6 +100,24 @@ export const startRecommendedExam = () =>
 export const startTypedExam = (kind: 'mini' | 'wrong-redo' | 'real') =>
   post<ExamPackage>(`/mock-exams/types/${kind}/start`);
 
+// ===== Concept Lessons (사전 개념학습) =====
+export const startConceptLesson = (code: string) =>
+  post<{ id: string; currentStep: number }>(`/concept-lessons/${code}/start`);
+
+export const completeConceptStep = (code: string, stepIndex: number, durationSec = 0) =>
+  post<{ id: string; currentStep: number; completedSteps: number[] }>(
+    `/concept-lessons/${code}/step`,
+    { stepIndex, durationSec },
+  );
+
+export const checkConceptRetrieval = (code: string, stepIndex: number, answer: string) =>
+  post<{
+    passed: boolean;
+    score: number | null;
+    explain: { ko: string; en: string } | null;
+    hint: { ko: string; en: string } | null;
+  }>(`/concept-lessons/${code}/check`, { stepIndex, answer });
+
 export const submitExamResult = (
   resultId: string,
   body: {

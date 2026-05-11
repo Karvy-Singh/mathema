@@ -1,4 +1,4 @@
-/** D-day 계산 (수능까지) */
+/** D-day 계산 (Board exam / 시험까지) */
 export function daysUntil(target: Date, from = new Date()): number {
   const ms = target.getTime() - from.getTime();
   return Math.ceil(ms / (1000 * 60 * 60 * 24));

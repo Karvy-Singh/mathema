@@ -19,7 +19,7 @@ export function recommendedDifficulties(score: number): Difficulty[] {
 }
 
 /**
- * 모의고사 30문제 난이도 분포 비율 (수능 실전 분포 근사):
+ * 모의고사 30문제 난이도 분포 비율 (CBSE Pre-Board / JEE Mock 실전 분포 근사):
  *   중 50% / 중상 30% / 준킬러 13% / 킬러 7%
  *   약점 단원에서는 중·중상 비율을 더 높여 구성한다.
  */
