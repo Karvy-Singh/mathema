@@ -1,0 +1,157 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: mathema
+          POSTGRES_PASSWORD: mathema
+          POSTGRES_DB: mathema
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://mathema:mathema@localhost:5432/mathema?schema=public
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      JWT_ACCESS_SECRET: test-access-secret-32-chars-minimum-OK
+      JWT_REFRESH_SECRET: test-refresh-secret-32-chars-minimum-OK
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm', cache-dependency-path: backend/package-lock.json }
+      - name: Install deps
+        working-directory: backend
+        run: npm ci
+      - name: Prisma generate
+        working-directory: backend
+        run: npx prisma generate
+      - name: Prisma migrate deploy
+        working-directory: backend
+        run: npx prisma migrate deploy
+      - name: TypeScript check
+        working-directory: backend
+        run: npx tsc --noEmit -p tsconfig.json
+      - name: Nest build
+        working-directory: backend
+        run: npm run build
+      - name: Unit tests (when added)
+        working-directory: backend
+        run: npm test --if-present
+      - name: Boot smoke — /health/ready
+        working-directory: backend
+        run: |
+          node dist/src/main.js &
+          SERVER_PID=$!
+          for i in {1..20}; do
+            STATUS=$(curl -fsS -o /dev/null -w "%{http_code}" http://localhost:4000/api/v1/health/ready || echo "fail")
+            if [ "$STATUS" = "200" ]; then echo "OK"; kill $SERVER_PID; exit 0; fi
+            sleep 2
+          done
+          kill $SERVER_PID
+          echo "❌ /health/ready not 200"
+          exit 1
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm', cache-dependency-path: frontend/package-lock.json }
+      - name: Install deps
+        working-directory: frontend
+        run: npm ci
+      - name: TypeScript check
+        working-directory: frontend
+        run: npx tsc --noEmit -p tsconfig.json
+      - name: Vite build
+        working-directory: frontend
+        env:
+          VITE_API_BASE: http://localhost:4000/api/v1
+        run: npm run build
+
+  # E2E 는 backend + frontend 모두 부팅되어야 하므로 별도 job (선택 — 시간 절약 위해 PR 시 skip 가능).
+  e2e:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    needs: [backend, frontend]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: mathema, POSTGRES_PASSWORD: mathema, POSTGRES_DB: mathema }
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://mathema:mathema@localhost:5432/mathema?schema=public
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      JWT_ACCESS_SECRET: test-access-secret-32-chars-minimum-OK
+      JWT_REFRESH_SECRET: test-refresh-secret-32-chars-minimum-OK
+      AI_LLM_PROVIDER: openai
+      AI_LLM_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      AI_LLM_MODEL: gpt-4o-mini
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+
+      - name: Install backend
+        working-directory: backend
+        run: |
+          npm ci
+          npx prisma generate
+          npx prisma migrate deploy
+          npm run build
+
+      - name: Boot backend
+        working-directory: backend
+        run: |
+          node dist/src/main.js > /tmp/backend.log 2>&1 &
+          for i in {1..30}; do
+            STATUS=$(curl -fsS -o /dev/null -w "%{http_code}" http://localhost:4000/api/v1/health/ready || echo "fail")
+            if [ "$STATUS" = "200" ]; then echo "backend ready"; break; fi
+            sleep 2
+          done
+
+      - name: Install frontend + Playwright
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Run Playwright
+        working-directory: frontend
+        env:
+          E2E_API_BASE: http://localhost:4000/api/v1
+        run: npx playwright test --project=chromium --reporter=list
+
+      - name: Backend log tail (on failure)
+        if: failure()
+        run: tail -100 /tmp/backend.log || true

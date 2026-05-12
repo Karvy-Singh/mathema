@@ -72,7 +72,8 @@ export class AdaptiveNextProblemService {
     const activeConceptIds = new Set(activePatterns.map((p) => p.conceptId));
 
     // 3) prerequisite 약점 확인 — 약한 concept 의 prerequisite 가 더 약하면 그쪽 우선.
-    const candidateConcepts = await this.expandWithPrerequisites(trajectories);
+    // 명시적으로 userId 전달 (사용자 격리 — cross-user 누출 방지).
+    const candidateConcepts = await this.expandWithPrerequisites(userId, trajectories);
 
     // 4~7) 각 candidate concept 에 대해 적절한 Problem 찾기.
     for (const cand of candidateConcepts) {
@@ -154,10 +155,15 @@ export class AdaptiveNextProblemService {
 
   /**
    * 약한 concept 의 prerequisite 가 더 약하면 그것을 우선 후보로.
+   *
+   * 사용자 격리 — userId 를 명시적 파라미터로 받아 prerequisite mastery 조회 시
+   * where 절에 항상 동일 userId 를 강제. cross-user mastery 누출 방지.
    */
   private async expandWithPrerequisites(
+    userId: string,
     trajectories: Array<{ conceptId: string; masteryScore: number; evidenceCount: number }>,
   ): Promise<Array<{ conceptId: string; masteryScore: number; reason: 'weak' | 'prerequisite' }>> {
+    if (!userId) throw new Error('expandWithPrerequisites: userId is required');
     const result: Array<{ conceptId: string; masteryScore: number; reason: 'weak' | 'prerequisite' }> = [];
     for (const t of trajectories) {
       const concept = await this.prisma.concept.findUnique({
@@ -166,10 +172,10 @@ export class AdaptiveNextProblemService {
       });
       if (!concept) continue;
 
-      // prerequisite 의 mastery 가 더 낮으면 그쪽 우선.
+      // prerequisite 의 mastery 가 더 낮으면 그쪽 우선. userId 필터 고정.
       if (concept.prerequisiteConceptIds.length > 0) {
         const preTrajectories = await this.prisma.masteryTrajectory.findMany({
-          where: { userId: trajectories[0] && 'userId' in trajectories[0] ? (trajectories[0] as any).userId : undefined, conceptId: { in: concept.prerequisiteConceptIds } },
+          where: { userId, conceptId: { in: concept.prerequisiteConceptIds } },
         });
         for (const pre of preTrajectories) {
           if (pre.masteryScore < t.masteryScore - 10) {

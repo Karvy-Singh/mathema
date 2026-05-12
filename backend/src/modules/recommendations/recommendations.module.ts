@@ -8,6 +8,7 @@ import { StudyBalanceService } from './services/study-balance.service';
 import { AdaptiveNextProblemService } from './services/adaptive-next-problem.service';
 import { SimilarProblemService } from './services/similar-problem.service';
 import { ReviewScheduleService } from './services/review-schedule.service';
+import { RecommendationMetricsService } from './services/recommendation-metrics.service';
 
 @Module({
   controllers: [RecommendationsController],
@@ -20,6 +21,7 @@ import { ReviewScheduleService } from './services/review-schedule.service';
     AdaptiveNextProblemService,
     SimilarProblemService,
     ReviewScheduleService,
+    RecommendationMetricsService,
   ],
   exports: [
     RecommendationsService,
@@ -27,6 +29,7 @@ import { ReviewScheduleService } from './services/review-schedule.service';
     AdaptiveNextProblemService,
     SimilarProblemService,
     ReviewScheduleService,
+    RecommendationMetricsService,
   ],
 })
 export class RecommendationsModule {}

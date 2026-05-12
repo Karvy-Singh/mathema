@@ -6,6 +6,7 @@ import { CurrentLang, Lang } from '../../common/i18n/current-lang.decorator';
 import { AdaptiveNextProblemService } from './services/adaptive-next-problem.service';
 import { SimilarProblemService } from './services/similar-problem.service';
 import { ReviewScheduleService } from './services/review-schedule.service';
+import { RecommendationMetricsService } from './services/recommendation-metrics.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('recommendations')
@@ -15,7 +16,15 @@ export class RecommendationsController {
     private readonly nextProblem: AdaptiveNextProblemService,
     private readonly similar: SimilarProblemService,
     private readonly review: ReviewScheduleService,
+    private readonly metrics: RecommendationMetricsService,
   ) {}
+
+  /** 추천 품질 KPI — 1000명 PoC 모니터링용 (acceptRate / solveRate / correctRate / 등). */
+  @Get('metrics')
+  metricsForMe(@CurrentUser('id') userId: string, @Query('days') days?: string) {
+    const d = days ? Math.max(1, Math.min(90, parseInt(days, 10))) : 7;
+    return this.metrics.forUser(userId, d);
+  }
 
   /** 명세서 §4 Flow 6 — SM-2 forgettingRisk 기반 복습 후보. */
   @Get('review-schedule')
