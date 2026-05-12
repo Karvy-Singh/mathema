@@ -1,342 +1,287 @@
-# matheo · adaptive math learning (India-first)
+# Mathēma — AI 학습 처방 시스템 (India-first, NCERT Class 7-12)
 
-A full-stack adaptive math learning app, **launching India-first** with NCERT/CBSE curriculum (Class 7~12), then expanding country by country. Built around three-step distractor analysis, SM-2 spaced repetition, weighted unit recommendations, and bilingual content delivery (EN default, KO available).
+> **"학생이 무엇을 틀렸는지"가 아니라, "왜 틀렸고, 다음에 무엇을 풀어야 하는지"를 알려주는 AI 학습 처방 시스템.**
 
-> **Project stage**: **late-stage technical PoC, India Phase 1**.
-> Architecture and data model are production-grade; content (~27 problems, mostly Class 7) and AI integrations (LLM/Vision keys are stubs) are demo-only. See [Status](#status) and [`COUNTRY_ROADMAP.md`](./COUNTRY_ROADMAP.md) for honest scope.
+학습 데이터(풀이 시간 · 자신감 · 힌트 사용 · 단계별 풀이 입력)를 받아 LLM 으로 분석하고,
+개념 간 graph 위에서 mastery / error-pattern / forgetting-risk 를 추적하며,
+실제 데이터에 근거한 다음 문제를 추천합니다.
 
-[![Stack](https://img.shields.io/badge/stack-NestJS%2010%20%2B%20Vite%2FReact%2018-142850)](https://github.com/prior89/mathema)
-[![Lang](https://img.shields.io/badge/i18n-KO%2FEN-1FB8C4)](#bilingual)
-[![License](https://img.shields.io/badge/license-private%20demo-5C6B85)](#)
-
----
-
-## What it does
-
-| Module | Description |
-|---|---|
-| **Dashboard** | Live AI diagnosis headline · 4-stat header (today minutes, streak, weekly accuracy, expected grade) · radar mastery map · weighted recommendations · 12-week heatmap · Error-DNA distribution · recent wrong-note cards |
-| **Wrong notes** | Problem body + answer + **core concept + formula** + AI insight + similar problems (clickable preview) · SM-2 review (AGAIN / HARD / GOOD / EASY) with auto-mastery rule · permanent master toggle |
-| **Study** | **Weighted unit recommendations** (mastery × wrong count × undertime score) · grade selector for advance learning · 3-step multiple choice (CONCEPT → PROCESS → ANSWER) · per-step distractor metadata · concept + formula reveal on completion or first wrong attempt · sequential step lock prevents answer leaks |
-| **Mock exam** | 20 problems, 60 min · AI-tailored composition by mastery weakness · sequential step reveal · choice order shuffled per request · home button + browser back support |
-| **Reports** | Weekly stats (hours/problems/accuracy/AI-score) · time-vs-accuracy chart · achievements · AI mentor message · meta-cognitive calibration (Brier score) |
-
-### Bilingual
-
-Every backend response goes through a request-scoped `@CurrentLang` decorator. The frontend axios interceptor sends `Accept-Language` based on the user's KO/EN toggle. **700+ translation entries** cover UI labels, problem bodies, step prompts, choice texts (with rationales), insights, formulas, concepts, AI-coach messaging, recommendation reasons, and exam names. Switching language reloads the page and React Query refetches every server-rendered string in the new language.
+* **인도 1차 출시**: NCERT 79 챕터 (Class 7~12), KO/EN/HI 3 언어.
+* **단계**: late-stage technical PoC. MVP 검수 체크리스트 14 절 통과 (커밋 `1037620`).
+* GitHub: <https://github.com/prior89/mathema>
 
 ---
 
-## Architecture
+## 1. 시스템 아키텍처
+
+```
+                              ┌─────────────────────────────────────┐
+                              │   Frontend (Vite + React + RQ)      │
+                              │   /student   /parent   /teacher     │
+                              │   /app (legacy)   /learn  /weakness │
+                              └──────────────────┬──────────────────┘
+                                                 │  REST + JWT
+                                                 ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                       Backend (NestJS, Prisma)                       │
+│ ┌──────────────┐  ┌──────────────────┐  ┌──────────────────────┐   │
+│ │ Attempts     │→ │ MasteryTrajectory│  │ LLMAnalysisService    │   │
+│ │ (Grading)    │→ │ + MasteryEvent   │  │  + Zod + Concept 매칭 │   │
+│ │              │→ │ ErrorPatternProf.│←│  + commonErrorCodes   │   │
+│ └──────┬───────┘  └────────┬─────────┘  └──────────┬───────────┘   │
+│        │ event              │                       │ setImmediate  │
+│        ▼                    ▼                       ▼              │
+│ ┌──────────────┐  ┌──────────────────┐  ┌──────────────────────┐   │
+│ │ Recommendation│  │ ReviewSchedule  │  │ WeeklyReport (3종)   │   │
+│ │ (Adaptive +   │  │ (Ebbinghaus     │  │ student/parent/      │   │
+│ │  Similar +    │  │  forgettingRisk)│  │ teacher summary      │   │
+│ │  Log)         │  └──────────────────┘  └──────────────────────┘   │
+│ └──────────────┘                                                    │
+│  ↕  Feedback (rater × target) · TeacherOverride (감사)              │
+└────────────┬────────────────────────────────────────────────────────┘
+             │
+   ┌─────────┴──────────┐
+   ▼                     ▼
+┌────────┐         ┌─────────┐
+│Postgres│         │  Redis  │
+│   16   │         │  cache  │
+└────────┘         └─────────┘
+```
+
+### 도메인 모델 (Prisma)
+* `User` (role: STUDENT | PARENT | TEACHER | ADMIN, tenantId)
+* `Tenant` — 학원/기관 (multi-tenant)
+* `Concept` — 개념 graph (`parentConceptId`, `prerequisiteConceptIds`, `relatedConceptIds`)
+* `Problem` + `ProblemConcept` (N:M) — `commonErrorCodes`, `expectedSolutionSteps`, `requiredSkills`
+* `Attempt` — `stepByStepInput`, `errorCodes`, `selfConfidenceScore`, `hintCount`, `timeOfDay`, `deviceType`
+* `StudySession` — `focusScore`, `fatigueSignal`, `timeOfDay`, `context`
+* `MasteryTrajectory` — 현재 mastery (`evidenceCount`, `trend`, `confidenceGap`)
+* `MasteryEvent` — 시계열 이력 (heatmap/그래프)
+* `ErrorPatternProfile` — (`conceptId`, `errorCode`) 누적 + `ACTIVE`/`IMPROVING`/`RESOLVED`
+* `LLMAnalysisLog` — `promptVersion`, `inputHash`, `rawOutput`, `parsedOutput`, `validationStatus`
+* `RecommendationLog` — `recommendationType`, `reason`, `accepted`, `solved`, `result`
+* `TeacherOverride` — `beforeValue` / `afterValue` 감사 추적
+* `Feedback` — `raterType × targetType × rating(1-5)`
+* `Consent` — DPDP/GDPR append-only 동의 이력
+
+### 기술 스택
+* **Backend**: NestJS 10, Prisma 5, PostgreSQL 16, Redis 7
+* **Frontend**: Vite + React 18 + TypeScript + React Query + Recharts + KaTeX
+* **Mobile**: Capacitor 8 (Android)
+* **LLM**: OpenAI (gpt-4o) — `LLM_PROVIDER` 로 Anthropic / Azure OpenAI 전환 가능
+* **LangChain v1** — `@langchain/core`, `@langchain/openai`, `@langchain/anthropic`
+* **Auth**: JWT HS256 (access 15m / refresh 14d, Redis 기반 revocation)
+* **Monitoring**: Sentry + Application Insights + Prometheus (`/metrics`)
+* **CI/CD**: GitHub Actions (OIDC) → Azure Container Apps + Static Web Apps
+* **IaC**: Bicep (`infra/bicep/main.bicep`) — Central India 권장
+
+---
+
+## 2. 9개 핵심 데이터 흐름 (명세서 §4)
+
+| Flow | 동작 | 검증 |
+|---|---|---|
+| 1 | `POST /sessions/start` → session row + **nextProblem 자동 추천** 함께 반환 | live |
+| 2 | `POST /attempts` → rule-based `errorCodes` 즉시 + `basicFeedback` + `nextAction` | live |
+| 3 | `setImmediate` LLM 분석 → `LLMAnalysisLog`(promptVersion/inputHash/validationStatus) → VALIDATED 만 `Attempt.errorCodes` 덮어쓰기 | live (gpt-4o ~15s) |
+| 4 | Mastery 공식: `+5/-6`(정답) `-2`(힌트) `-1`(시간초과) `+2`(고난도 정답) `-2`(active 패턴) → `MasteryTrajectory` + `MasteryEvent` | live |
+| 5 | ErrorPattern 상태 자동 전환 — 최근 5회 3+ → ACTIVE / 빈도 감소 → IMPROVING / 5회 미발생 → RESOLVED | live |
+| 6 | SM-2 forgettingRisk = `1 - exp(-t / max(1, mastery/10))` | live |
+| 7 | Adaptive next-problem — weak concept + active error + prerequisite + flow state difficulty + 중복 회피 | live |
+| 8 | Similar 5개 — ProblemConcept 매칭 + commonErrorCodes 교집합 + `shortfallReason` | live |
+| 9 | WeeklyReport 3종 — student / parent / teacher 별 분리 summary | live |
+
+### LLM 검증 게이트 (§3-4)
+* Zod 스키마로 응답 파싱 (errorCodes / conceptWeakness / reasoningSummary / recommendedAction / confidenceScore)
+* `errorCodes` ∈ `Problem.commonErrorCodes ∪ ErrorCode enum`이 아니면 **REJECTED**
+* `conceptWeakness` 가 `Problem.concepts.code` 와 매칭 안 되면 **NEEDS_REVIEW**
+* `confidence >= 0.75` → **VALIDATED** (자동 반영) / `0.5~0.75` → **NEEDS_REVIEW** / `<0.5` → **REJECTED**
+* VALIDATED 만 `Attempt.errorCodes` / `ErrorPatternProfile` / `MasteryTrajectory.updatedBy=HYBRID` 에 반영
+
+---
+
+## 3. API 표면 (명세서 §5)
+
+### Sessions
+* `POST /api/v1/sessions/start` ↔ `/api/v1/study-sessions/start` (별칭)
+* `POST /api/v1/sessions/:id/end`
+* `GET /api/v1/students/:id/sessions`
+
+### Attempts
+* `POST /api/v1/attempts` → `{ attemptId, isCorrect, errorCodes, conceptTags, difficultyLevel, basicFeedback, nextAction }`
+* `GET /api/v1/attempts/:id` (cross-user 차단)
+* `GET /api/v1/students/:id/attempts`
+* `GET /api/v1/attempts/:id/similar-problems`
+
+### Mastery & ErrorPattern
+* `GET /api/v1/students/:id/mastery` (concept 단위)
+* `GET /api/v1/students/:id/mastery/:conceptId/history`
+* `GET /api/v1/students/:id/error-patterns(/active)`
+
+### Recommendation
+* `GET /api/v1/students/:id/next-problem`
+* `GET /api/v1/recommendations/review-schedule`
+* `POST /api/v1/recommendations/:id/result` `{accepted, solved, result}`
+
+### Reports & Feedback
+* `GET /api/v1/students/:id/weekly-reports`
+* `GET /api/v1/weekly-reports/:id`
+* `POST /api/v1/weekly-reports/generate`
+* `POST /api/v1/feedback`
+* `POST /api/v1/teacher-overrides` + `GET /api/v1/students/:id/teacher-overrides`
+
+### Teacher (tenant-scoped)
+* `GET /api/v1/students/teacher/list` — 같은 `tenantId` 의 STUDENT 목록
+
+### Auth + Privacy + Misc
+* `POST /api/v1/auth/{register,login,refresh,logout}` (JWT)
+* `GET /api/v1/privacy/policy` + `/consents` (DPDP/GDPR)
+* `GET /api/v1/health/{live,ready}`
+* `GET /metrics` (Prometheus)
+
+---
+
+## 4. Frontend 화면 (명세서 §6)
+
+| 화면 | 경로 | 컴포넌트 |
+|---|---|---|
+| **Student** (학생) | `/student` | 다음 문제 → AI mentor → Mastery 상태 카드 (evidenceCount 가드) → 개선된 개념 → 반복 실수 패턴 → 유사문제 5개 → 주간 요약 |
+| **Parent** (학부모) | `/parent` | 진척 판정 (improving/mixed/stable/attention) → parentSummary → 4 stat → 좋아진 개념 → 학습 습관 신호 → 다음 주 관리 포인트 |
+| **Teacher** (강사) | `/teacher` | 담당 학생 chip → Mastery Heatmap → 선택 concept 시계열 → 진단 메트릭 표 (Mastery/RecentAcc/ResponseTime/Hint%/ConfGap/Trend) → 오답 원인 비율 → ErrorPattern 테이블 + Override modal → teacherSummary → 주간 리포트 |
+| Legacy | `/app` | 기존 통합 화면 (대시보드/오답/개념/학습/약점분석/모의/리포트 7탭) |
+| Concept Learning | `/learn` + `/learn/:code` | NCERT 79 챕터 사전 개념학습 (HOOK→CONCRETE→PICTORIAL→ABSTRACT→WORKED→MISCONCEPTION→RETRIEVAL 7단계) |
+
+`/` 진입 시 `RoleRedirect` 가 `User.role` 보고 자동 분기.
+
+---
+
+## 5. 빠른 시작 (로컬)
+
+```powershell
+# 0) 의존성
+docker compose up -d                     # Postgres 16 + Redis 7
+
+# 1) Backend
+cd backend
+cp .env.example .env                     # OPENAI_API_KEY 등 채움
+npm install
+npm run start:dev                        # predev 훅이 generate + migrate deploy 자동
+
+# 2) Frontend
+cd ../frontend
+npm install
+npm run dev                              # http://localhost:5173
+
+# 3) (선택) E2E
+npm run e2e:install
+npm run e2e                              # AI 처방 전 흐름 자동 검증
+```
+
+### 시드 사용자 (dev 빠른 로그인용)
+* email: `polopot123@gmail.com` / pw: `password1234`
+* 가짜 누적 데이터는 자동 청소됨 (`LegacySeedCleanupBootstrap`, dev 한정).
+
+### 환경 변수 핵심 (`backend/.env`)
+```
+NODE_ENV=development
+DATABASE_URL=postgresql://...
+REDIS_HOST=localhost  REDIS_PORT=6379
+JWT_ACCESS_SECRET=...  JWT_REFRESH_SECRET=...
+
+AI_LLM_PROVIDER=openai             # anthropic | openai | azure-openai
+AI_LLM_API_KEY=sk-...
+AI_LLM_MODEL=gpt-4o
+
+LLM_PROVIDER=openai                # LangChain용 별도
+OPENAI_API_KEY=sk-...
+```
+
+> Azure 배포 시 모든 시크릿은 **Azure Key Vault → Container App secrets** 로 주입.
+
+---
+
+## 6. 검수 통과 — MVP 체크리스트 (14절)
+
+* §1 Session(8) + Attempt(14) — DB 저장 + tenantId · timeOfDay · stepByStepInput 모두 ✅
+* §2 Problem 메타데이터(11) + Concept Graph(5) — prerequisite 추천 동작 ✅
+* §3 LLM 환각 방지 — Zod + commonErrorCodes 범위 + Concept 매칭 + 임계값 0.75/0.5 ✅
+* §4 MasteryTrajectory — 공식 정확 + `evidenceCount < 3` 단정 금지 가드 ✅
+* §5 ErrorPattern — ACTIVE/IMPROVING/RESOLVED 자동 + 학생 UI 코칭 톤 ✅
+* §6 Recommendation reason — 합격 예시 그대로 (수치 포함) ✅
+* §7 Similar 5개 — `items` + `shortfallReason` ✅
+* §8 WeeklyReport — 실 DB 만 사용, 3종 분리 ✅
+* §9 UI 진실성 — Heatmap evidenceCount 흐림, mock data 0 ✅
+* §10 API — 모든 endpoint 200, error message, 권한 차단 ✅
+* §11 시나리오 A/B/C/D/E — Playwright E2E `1 passed (15.2s)` ✅
+* §12 tenantId · JWT · role 4종 + LLM/추천/Override 로그 ✅
+* §13 schema + API + seed + README + .env.example + promptVersion + 로직 주석 ✅
+* §14 절대 합격 X 12 항목 — 모두 통과 ✅
+
+### 검증된 라이브 흐름
+* `/health/ready` 200 (`db: ok`, `redis: ok`)
+* `POST /attempts` → rule-based `errorCodes` 즉시, 15s 후 `LLMAnalysisLog` VALIDATED + `MasteryTrajectory.delta=-8`
+* `GET /next-problem` → `reason: "최근 5회 중 SIGN 오류가 3회 발생했고, 현재 masteryScore가 62점이므로 난이도 3/5 문제를 추천합니다."`
+* `POST /weekly-reports/generate` → studentSummary/parentSummary/teacherSummary 3종 길이 79/68/166 분리
+* `POST /teacher-overrides` → `TeacherOverride` row + beforeValue/afterValue JSON
+
+---
+
+## 7. 배포 — Azure Container Apps (Central India)
+
+* `infra/bicep/main.bicep` — Log Analytics + App Insights + ACR + Container Apps + PostgreSQL Flexible 16 + Cache for Redis + Key Vault + Azure OpenAI + Static Web App
+* `.github/workflows/backend-deploy.yml` — OIDC → ACR build/push → Container App revision → `/health/ready` 검증
+* `.github/workflows/frontend-deploy.yml` — Vite build → SWA
+* `backend/Dockerfile` — multi-stage, non-root, tini PID1, `prisma migrate deploy && node dist/src/main.js`
+* 비용 추산: Container Apps + PG B1ms + Redis Basic + AOAI GPT-4o + App Insights = **~$96/월** (Azure $10k 크레딧 ≈ 100 개월)
+
+자세한 배포 절차: `infra/README.md`.
+
+---
+
+## 8. 디렉토리 구조
 
 ```
 교육앱/
-├── backend/                  # NestJS modular monolith
+├── backend/                  NestJS + Prisma
 │   ├── prisma/
-│   │   ├── schema.prisma     # 16 models (User, Unit, Problem, ProblemStep, ProblemChoice,
-│   │   │                     #   Attempt, WrongNote, StudySession, MockExam, MockExamResult,
-│   │   │                     #   DailyActivity, MasterySnapshot, AnalyticsEvent, WeeklyReport, …)
-│   │   ├── migrations/       # 7 migrations (init → spaced-repetition → multi-step choices →
-│   │   │                     #   analytics & soft-delete → grade-level curriculum → problem.concept)
-│   │   ├── seed.ts           # 24 units, 27 problems, demo user, 250 attempts, 6 wrong notes,
-│   │   │                     #   84-day heatmap, 6 mock results, 8-week reports
-│   │   └── seed-steps.ts     # 27 problems × 3 steps × 5 choices with distractor metadata
+│   │   ├── schema.prisma     단일 진실 원천
+│   │   ├── seed.ts           시스템 콘텐츠만 (사용자 누적 데이터 미시드)
+│   │   └── migrations/       11 개 migration
 │   ├── src/
-│   │   ├── common/i18n/      # @CurrentLang decorator + content-en.ts (CONCEPT_EN / FORMULA_EN /
-│   │   │                     #   STEP_PROMPT_EN / CHOICE_EN / SOURCE_EN / UNIT_NAME_EN / …)
-│   │   ├── infrastructure/   # Prisma, Redis, AI provider (LLM/Vision/Embedding stubs)
-│   │   └── modules/
-│   │       ├── auth/         # JWT access/refresh
-│   │       ├── users/
-│   │       ├── curriculum/   # /units, /units?grade=…
-│   │       ├── problems/     # sanitize, choice shuffle, EN translation
-│   │       ├── study-sessions/   # /recommended-units (weighted), /start, /:id/answer, /:id/guide
-│   │       ├── attempts/     # event-driven mastery & wrong-note auto-creation
-│   │       ├── wrong-notes/  # SM-2 review, problemBody/Answer/Concept/Formula response
-│   │       ├── mock-exams/   # AI compose (target=20), sanitize per request
-│   │       ├── recommendations/  # 3 strategies (focus / weakness / strength)
-│   │       ├── ai-coach/     # diagnosis, error-dna, patterns, mentor-message
-│   │       ├── reports/      # weekly + meta-cognitive calibration
-│   │       ├── activity/     # heatmap, streak
-│   │       ├── mastery/      # event listeners → snapshot updates
-│   │       └── analytics/    # AnalyticsEvent capture
-│   └── docker-compose.yml    # postgres 16 + redis 7
-└── frontend/                 # Vite + React 18 + TypeScript
-    ├── public/
-    │   └── matheo-logo.png   # brand mark (mix-blend-mode: multiply)
-    └── src/
-        ├── pages/MathLearningApp.tsx   # 5 internal pages, hash-based history sync
-        ├── components/
-        │   ├── ExamTakingScreen.tsx    # exam overlay, sequential reveal, home button
-        │   ├── WrongNoteDetailModal.tsx
-        │   ├── UnitPicker.tsx          # grade + unit dropdown for advance learning
-        │   ├── ConfidenceSlider.tsx    # meta-cognitive 0~100 slider
-        │   └── …
-        ├── lib/
-        │   ├── api.ts        # axios + Accept-Language + auto refresh
-        │   ├── queries.ts    # all read queries
-        │   ├── mutations.ts  # all writes
-        │   └── translations.ts  # KO/EN UI dictionary
-        └── context/AuthContext.tsx    # demo auto-login with seed account
+│   │   ├── infrastructure/   prisma · redis · ai (providers · langchain · prompts)
+│   │   └── modules/          attempts · mastery · llm-analysis · recommendations ·
+│   │                         reports · students · feedback · privacy · concept-lessons …
+│   └── Dockerfile
+├── frontend/                 Vite + React
+│   ├── src/pages/            StudentDashboardPage · ParentDashboardPage · TeacherDashboardPage · …
+│   ├── src/components/       TopNav · GraphRenderer · …
+│   └── e2e/                  Playwright (smoke + ai-prescription)
+├── admin-frontend/           운영 어드민
+├── infra/
+│   ├── bicep/                Azure IaC
+│   └── README.md             배포 가이드
+├── scripts/
+│   └── extract-ncert-excerpts.py
+├── .github/workflows/        backend-deploy.yml · frontend-deploy.yml
+├── COUNTRY_ROADMAP.md
+├── OFFLINE_ROADMAP.md
+├── POC.md
+├── SETUP.md
+└── README.md                 (이 문서)
 ```
-
-### Pedagogical model: 3-step problem with distractor metadata
-
-Every featured problem has 3 steps:
-
-```
-CONCEPT  →  Which formula / approach / definition applies here?
-PROCESS  →  After substituting / applying, what does the form look like?
-ANSWER   →  What is the final value?
-```
-
-Each step has 5 choices: 1 correct + 4 distractors classified as
-`CONCEPT_CONFUSION` / `CALC_ERROR` / `PROCESS_SKIP` / `TIME_PRESSURE_GUESS` with a `rationale` string explaining why a learner might pick it. Wrong-attempt analytics aggregate by distractor type to drive the AI coach's pattern detection.
-
-**Sequential reveal in mock exam**: step 2's choices are hidden until step 1 is answered, preventing reverse-engineering the previous step's answer from the next step's content.
-
-**Choice shuffle**: Fisher-Yates shuffle on every request — the correct option is at a random position. The frontend renders display indices `1..5` from array order so the learner sees clean numbering regardless.
-
-### Weighted unit recommendation
-
-```
-weight = 0.45 × (100 − mastery)     // mastery gap
-       + 0.35 × min(60, 12 × wrongCount)   // wrong-note pressure
-       + 0.20 × round(40 × (1 − timeSec / maxTime))  // undertime score
-```
-
-Returned with reason strings (`"숙련도 52% · 오답 2건 · 학습 180분"` / `"Mastery 52% · 2 wrong notes · 180 min studied"`) so the learner sees *why* a unit is recommended.
-
-### Color system (psychology + design)
-
-| Role | Hex | Rationale |
-|---|---|---|
-| Primary text/border | `#142850` | Logo navy — trust, focus |
-| Brand accent (highlight) | `#1FB8C4` | Logo teal — energy, "discover" |
-| Success (correct, mastered) | `#5A8A45` | Brighter sage — growth, achievement |
-| Warning (wrong, weak unit) | `#C25E2E` | Warm red-orange — attention without aggression (lower cortisol response than deep red) |
-| Streak / progress | `#C7791F` | Amber — motivation without alarm |
-| Body secondary | `#5C6B85` | Cool navy gray — color-temperature harmony with primary |
-| Body tertiary / captions | `#8B95AB` | Light navy gray |
-| Background page | `#EFEBDF` | Cream with slight cool shift — paper-like, navy-harmonious |
-| Background card | `#F8F4E9` | Lighter cream — elevated layer |
-
-385 color references swapped from the original warm-dark palette to this system in one consistent pass.
 
 ---
 
-## Tech stack
+## 9. 알려진 한계 (정직)
 
-| Layer | Choice |
-|---|---|
-| Runtime | Node.js 20 LTS |
-| Backend | NestJS 10 + TypeScript 5 + Prisma 5 + PostgreSQL 16 + Redis 7 |
-| Auth | JWT access + refresh |
-| Validation | class-validator + class-transformer DTOs |
-| Frontend | Vite + React 18 + TypeScript + React Query 5 + Recharts 2 |
-| Icons | lucide-react |
-| AI | LLM / Vision / Embedding provider interfaces — stubs return localized fallback text when API keys are unset |
+* **Similar 5개** — 시드 Problem 수가 적어 1/5 만 반환될 수 있음 (`shortfallReason` 표시). pgvector + Embedding 도입 시 자연 해소.
+* **LLM worker** — 현재 `setImmediate` (명세서 "BullMQ 또는 간단한 worker" 허용). production 전환 시 BullMQ 마이그레이션 권장.
+* **NCERT 79 챕터 hi 본문** — 인프라 완비, NCERT 힌디 PDF 추출 대기 (`scripts/extract-ncert-excerpts.py --lang hi`).
+* **Concept seed** — NCERT 챕터 단위 1:1 매핑 (Phase 1). Concept 그래프 LLM 기반 자동 보강은 후속.
 
 ---
 
-## Local setup (3 steps)
+## 10. 라이선스 / 기여
 
-### 1. PostgreSQL + Redis
-
-```bash
-cd backend
-docker compose up -d
-```
-
-### 2. Backend
-
-```bash
-cd backend
-cp .env.example .env          # AI_*_API_KEY can stay as `api입력칸` (placeholder) — falls back to canned responses
-npm install
-npx prisma migrate deploy
-npx prisma generate
-npm run db:seed
-npm run start:dev             # http://localhost:4000  (API mounted at /api/v1)
-```
-
-### 3. Frontend (new terminal)
-
-```bash
-cd frontend
-npm install
-npm run dev                   # http://localhost:5173
-```
-
-Open `http://localhost:5173` — the demo automatically logs in as the seed user (login screen is skipped in demo mode). To enable a real login flow, see `frontend/src/context/AuthContext.tsx`.
-
-### Demo account
-
-```
-email:    polopot123@gmail.com
-password: password1234
-gradeLevel: G_MIDDLE_1   (Korean middle-school grade 1)
-```
-
-Seeded data:
-- **24 units** across 6 grades (중1 정수와 유리수 / 일차방정식 / … → 고3 미적분 II / 확률·통계 / 기하·벡터)
-- **27 problems** with full 3-step distractor structure (20 중1 + 7 고3 featured)
-- **81 problem steps**, **405 choices** with rationales
-- 6 wrong notes spanning the SM-2 lifecycle (PENDING / ANALYZING / MASTERED, with `nextReviewAt` past/today/future)
-- 250 attempts spread over 90 days
-- 84-day heatmap with a 23-day current streak
-- 6 mock exam results (3월~10월 모의고사) showing a 62→84 progression
-- 8 weekly reports with mentor messages
-
-## Mobile build (Android — Capacitor)
-
-The frontend wraps as an Android app via **Capacitor**. Web build → Capacitor sync → Gradle build.
-
-### Prerequisites
-- Java 17+ + Android Studio (https://developer.android.com/studio) — for `./gradlew assembleRelease`
-- A signing keystore (don't commit) — Play Console requires app signing
-
-### Build steps
-```bash
-cd frontend
-echo "VITE_API_BASE_URL=https://your-backend.example.com/api/v1" > .env.production
-npm run build               # → dist/
-npx cap sync android        # copies dist/ into android/app/src/main/assets/public/
-npx cap open android        # opens Android Studio for Gradle build
-# OR command-line:
-cd android && ./gradlew assembleRelease
-```
-
-The `android/` directory is a real Android project (Gradle, AndroidManifest, Java sources). Open it in Android Studio for icon/splash customization, then upload the AAB to Play Console.
-
-### Capacitor scripts
-```bash
-npm run cap:sync           # rebuild dist + sync to android
-npm run cap:open           # open in Android Studio
-```
-
-App identifiers (in `frontend/capacitor.config.ts`):
-- `appId`: `ai.matheo.app` (change before Play submission)
-- `appName`: `matheo`
-- `webDir`: `dist`
-
-## Google Sign-In (Web + Android)
-
-OAuth setup in **Google Cloud Console**:
-
-1. https://console.cloud.google.com/apis/credentials → Create OAuth 2.0 Client
-2. **Web** application:
-   - Authorized JavaScript origins: `http://localhost:5173`, `https://your-domain.example.com`
-   - Authorized redirect URIs: not used (we use One Tap / GIS button flow)
-3. **Android** application (for Capacitor build):
-   - Package name: `ai.matheo.app` (matches `capacitor.config.ts`)
-   - SHA-1 fingerprint: from your signing keystore (`keytool -list -v -keystore ...`)
-
-### Frontend env
-```bash
-# frontend/.env.local (web dev)
-VITE_GOOGLE_CLIENT_ID=YOUR_WEB_CLIENT_ID.apps.googleusercontent.com
-
-# frontend/.env.production (Capacitor build)
-VITE_API_BASE_URL=https://your-backend.example.com/api/v1
-VITE_GOOGLE_CLIENT_ID=YOUR_WEB_CLIENT_ID.apps.googleusercontent.com
-```
-
-### Backend env
-```bash
-# backend/.env
-GOOGLE_CLIENT_ID=YOUR_WEB_CLIENT_ID.apps.googleusercontent.com   # used to verify ID tokens
-```
-
-The backend `POST /auth/google/id-token` accepts a Google ID token, verifies it via `google-auth-library`, and either logs in or creates a new user (default `country: IN`, `gradeLevel: G_HIGH_2`). Without `GOOGLE_CLIENT_ID` set, the endpoint returns 401 and only seed-account login works.
-
-For mobile native sign-in, install `@codetrix-studio/capacitor-google-auth` and call `GoogleAuth.signIn()` on the login screen, then post `idToken` to the same backend endpoint.
-
-### Environment variables
-
-`backend/.env.example` — key entries:
-- `DATABASE_URL` — Postgres connection string
-- `GOOGLE_CLIENT_ID` — Google OAuth web client ID (for ID token verification)
-- `REDIS_HOST` / `REDIS_PORT`
-- `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` — replace with random strings in production
-- `AI_LLM_API_KEY` / `AI_VISION_API_KEY` / `AI_EMBEDDING_API_KEY` — `api입력칸` placeholder; fill to enable real LLM/Vision calls
-
-`frontend/.env.example`:
-- `VITE_API_BASE_URL=/api/v1` — Vite dev proxy forwards to the backend on `:4000`
-
----
-
-## API surface
-
-5 internal pages map to about 45 endpoints. Highlights:
-
-| Endpoint | Returns |
-|---|---|
-| `GET /dashboard/summary` | today minutes, streak, weekly accuracy delta, expected grade |
-| `GET /mastery` | radar dataset (subject, value, unitId) |
-| `GET /recommendations/today` | 3 cards (focus-on-mistakes / reinforce-weakness / maintain-strength) |
-| `GET /curriculum/units?grade=…` | units filtered by grade for the user (advance-learning support) |
-| `GET /study-sessions/recommended-units?count=3&grade=…` | weighted recommendations with reason strings |
-| `POST /study-sessions/start` | start a study session for a unit |
-| `POST /study-sessions/:id/answer` | submit an attempt; response includes choice text, distractor type, rationale |
-| `GET /problems/recommended?unitId=…` | ZPD-matched problems with shuffled choices and EN translation |
-| `GET /wrong-notes` / `/recent` / `/due` / `/:id` / `:id/review` / `:id/status` | wrong-note CRUD + SM-2 |
-| `POST /mock-exams/types/:kind/start` | start a mock exam (mini / wrong-redo / real, target 20 problems) |
-| `POST /mock-exams/results/:id/submit` | grade and persist a result |
-| `GET /ai-coach/diagnosis` / `/error-dna` / `/patterns` / `/mentor-message` | AI-coach surfaces |
-| `GET /reports/weekly/current` / `/time-vs-accuracy` / `/next-focus` / `/achievements` / `/calibration` | report charts |
-| `GET /activity/heatmap?weeks=12` / `/streak` / `/stats` | activity panels |
-
-All authenticated routes carry `Authorization: Bearer <jwt>` and respect `Accept-Language: ko|en`.
-
----
-
-## Status
-
-**Honest stage assessment** — late-stage technical PoC.
-
-| Area | State | Notes |
-|---|---|---|
-| Schema & data model | Production-grade | 16 models, indexes, soft-delete, FK consistency, event-driven mastery |
-| Backend architecture | Production-grade | NestJS modular monolith, validated DTOs, request-scoped i18n |
-| Type safety | Production-grade | `tsc --noEmit` clean on both projects |
-| Pedagogical model | Differentiated | 3-step distractor + SM-2 + weighted recommendation is non-trivial |
-| Bilingual coverage | Production-grade | 700+ entries, request-scoped lang detection |
-| Color & visual system | Coherent | 385-ref color-psychology palette, single-mark logo |
-| Content volume | **Demo-only** | 27 problems. Real product needs thousands per grade. |
-| AI integration | **Stubbed** | LLM/Vision/Embedding return canned fallback when keys unset |
-| Auth | **Demo-only** | Seed-account auto-login. No Google OAuth, no email verification |
-| Authoring tooling | **None** | Adding problems = editing `seed.ts` |
-| Tests | **Minimal** | No spec/test files |
-| CI / deployment | **None** | localhost only |
-
-**To reach an alpha**: ① fill `AI_*_API_KEY` (1–2 days) · ② 200+ problems for one grade (2–4 weeks) · ③ Google OAuth (1 week) · ④ tests + CI (1 week) · ⑤ deployment (3–5 days). ~6–8 weeks total + content authoring effort.
-
----
-
-## Roadmap (selected)
-
-- [ ] Wire `AI_*_API_KEY` to real Anthropic / OpenAI for `ai-coach` mentor / step-wise guide / OCR
-- [ ] Google OAuth (single flow handling sign-up + sign-in)
-- [ ] CMS or CSV import for problem authoring
-- [ ] Domain unit tests + e2e for critical flows (attempt → mastery → wrong-note creation)
-- [ ] CI build + deploy (Render / Fly / Vercel)
-- [ ] Admin dashboards for cohort / funnel / retention from `AnalyticsEvent`
-
-The full backend design document lives at `backend/README.md` (Korean). UI design tokens and component map are inline in `frontend/src/`.
-
----
-
-## Architectural notes worth knowing
-
-- **No request-time AI cost**: every AI surface (`ai-coach.service.ts`) ships a deterministic Korean/English fallback. Real LLM calls are only made when the keys are non-placeholder. Cache TTL is 7 days in Redis (`AiService.cacheKey`).
-- **Choice integrity**: backend keeps `choiceIndex` (1~5) as the stable identifier for translation lookup, while shuffling array order per request. The frontend renders array-position bubbles so the learner sees clean numbering.
-- **History semantics**: in-app navigation pushes hash entries (`#/dashboard`, `#/mock-exam/exam`), so the browser back button moves within the app rather than leaving it. Mock exam exits cleanly on `popstate`.
-- **Auto-master rule**: a wrong note is auto-marked `MASTERED` after ≥3 consecutive `EASY` reviews and ≥30 days since creation (see `wrong-notes/services/spaced-repetition.service.ts`).
-- **Difficulty matching**: `recommendedDifficulties(masteryScore)` and `examDifficultyDistribution(masteryScore)` produce a Vygotsky-style ZPD distribution for problem selection.
-
----
-
-## License
-
-Private demo. Not for redistribution.
+내부 PoC. 외부 공개 라이선스는 1차 출시 전 정의.
+이슈/PR: <https://github.com/prior89/mathema/issues>.
