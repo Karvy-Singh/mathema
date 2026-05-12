@@ -15,6 +15,9 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const MathLearningApp = lazy(() => import('./pages/MathLearningApp'));
 const ConceptHubPage = lazy(() => import('./pages/ConceptHubPage'));
 const ConceptLessonPage = lazy(() => import('./pages/ConceptLessonPage'));
+const StudentDashboardPage = lazy(() => import('./pages/StudentDashboardPage').then((m) => ({ default: m.StudentDashboardPage })));
+const ParentDashboardPage  = lazy(() => import('./pages/ParentDashboardPage').then((m) => ({ default: m.ParentDashboardPage })));
+const TeacherDashboardPage = lazy(() => import('./pages/TeacherDashboardPage').then((m) => ({ default: m.TeacherDashboardPage })));
 
 function PageViewTracker() {
   const location = useLocation();
@@ -66,6 +69,30 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ConceptLessonPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student"
+            element={
+              <ProtectedRoute>
+                <StudentDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/parent"
+            element={
+              <ProtectedRoute>
+                <ParentDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/teacher"
+            element={
+              <ProtectedRoute>
+                <TeacherDashboardPage />
               </ProtectedRoute>
             }
           />
