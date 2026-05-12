@@ -2,6 +2,7 @@ import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { StudentsService } from './students.service';
+import { AdaptiveNextProblemService } from '../recommendations/services/adaptive-next-problem.service';
 
 /**
  * 명세서 §5 — `/api/students/:studentId/...` path 표준.
@@ -12,7 +13,21 @@ import { StudentsService } from './students.service';
 @UseGuards(JwtAuthGuard)
 @Controller('students')
 export class StudentsController {
-  constructor(private readonly service: StudentsService) {}
+  constructor(
+    private readonly service: StudentsService,
+    private readonly adaptive: AdaptiveNextProblemService,
+  ) {}
+
+  /** 명세서 §5 — GET /api/students/:studentId/next-problem. 본인만 호출 가능 (다음 문제 추천). */
+  @Get(':studentId/next-problem')
+  async nextProblem(
+    @CurrentUser('id') userId: string,
+    @Param('studentId') sid: string,
+    @Query('sessionId') sessionId?: string,
+  ) {
+    await this.service.assertAccess(userId, sid);
+    return this.adaptive.getNext(sid, { sessionId });
+  }
 
   /** 명세서 §6 강사 UI — 담당 학생 리스트. */
   @Get('teacher/list')

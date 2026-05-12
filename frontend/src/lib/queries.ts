@@ -255,6 +255,17 @@ export const fetchSimilarForAttempt = (attemptId: string) =>
 export const fetchWeeklyList       = () => get<WeeklyReportListItem[]>('/reports/weekly');
 export const fetchWeeklyById       = (id: string) => get<WeeklyReportFull>(`/reports/weekly/by-id/${id}`);
 
+// ===== Students (Teacher / Parent 권한) =====
+export type StudentRow = {
+  id: string; name: string; email: string;
+  gradeLevel: string | null; schoolLevel: string | null;
+  createdAt: string;
+};
+export const fetchTeacherStudents = () => get<StudentRow[]>('/students/teacher/list');
+export const fetchStudentMastery  = (studentId: string) => get<ConceptMastery[]>(`/students/${studentId}/mastery`);
+export const fetchStudentPatterns = (studentId: string) => get<ErrorPatternRow[]>(`/students/${studentId}/error-patterns/active`);
+export const fetchStudentWeekly   = (studentId: string) => get<WeeklyReportListItem[]>(`/students/${studentId}/weekly-reports`);
+
 // ===== 단건 조회 =====
 export type WrongNoteDetail = WrongNoteCard & { similar: Array<{ id: string; source: string; difficulty: string }> };
 export type ProblemChoice = {

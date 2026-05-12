@@ -3,9 +3,10 @@ import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
 import { ReportsRepository } from './reports.repository';
 import { WeeklyReportService } from './weekly-report.service';
+import { WeeklyReportsAliasController } from './weekly-reports-alias.controller';
 
 @Module({
-  controllers: [ReportsController],
+  controllers: [ReportsController, WeeklyReportsAliasController],
   providers: [ReportsService, ReportsRepository, WeeklyReportService],
   exports: [ReportsService, WeeklyReportService],
 })

@@ -23,7 +23,8 @@ import { TopNav, NAV_TO_HASH, NavKey } from '../components/TopNav';
 import { post } from '../lib/api';
 import {
   fetchConceptMastery, fetchActivePatterns, fetchWeeklyList, fetchConceptHistory,
-  type ConceptMastery, type ErrorPatternRow, type MasteryEventRow,
+  fetchTeacherStudents, fetchStudentMastery, fetchStudentPatterns, fetchStudentWeekly,
+  type ConceptMastery, type ErrorPatternRow, type MasteryEventRow, type StudentRow,
 } from '../lib/queries';
 import { useT } from '../lib/i18n';
 
@@ -37,9 +38,28 @@ export function TeacherDashboardPage({ embedded = false }: { embedded?: boolean 
   const navigate = useNavigate();
   const qc = useQueryClient();
 
-  const mastery   = useQuery({ queryKey: ['teacher','mastery'],   queryFn: fetchConceptMastery });
-  const patterns  = useQuery({ queryKey: ['teacher','patterns'],  queryFn: fetchActivePatterns });
-  const weekly    = useQuery({ queryKey: ['teacher','weekly'],    queryFn: fetchWeeklyList });
+  // 명세서 §6 강사 UI 1번 — 담당 학생 리스트. (403 = TEACHER role 아님)
+  const students = useQuery({
+    queryKey: ['teacher','students'],
+    queryFn: fetchTeacherStudents,
+    retry: false,
+  });
+  const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
+
+  // 선택 학생 (없으면 본인) 의 데이터.
+  const useSelf = !selectedStudent;
+  const mastery   = useQuery({
+    queryKey: ['teacher','mastery', selectedStudent ?? 'self'],
+    queryFn: () => selectedStudent ? fetchStudentMastery(selectedStudent) : fetchConceptMastery(),
+  });
+  const patterns  = useQuery({
+    queryKey: ['teacher','patterns', selectedStudent ?? 'self'],
+    queryFn: () => selectedStudent ? fetchStudentPatterns(selectedStudent) : fetchActivePatterns(),
+  });
+  const weekly    = useQuery({
+    queryKey: ['teacher','weekly', selectedStudent ?? 'self'],
+    queryFn: () => selectedStudent ? fetchStudentWeekly(selectedStudent) : fetchWeeklyList(),
+  });
 
   const [selectedConcept, setSelectedConcept] = useState<string | null>(null);
   const [overrideTarget, setOverrideTarget] = useState<{ type: 'MASTERY'|'ERROR_PATTERN'|'RECOMMENDATION'; id: string; current: any } | null>(null);
@@ -59,15 +79,21 @@ export function TeacherDashboardPage({ embedded = false }: { embedded?: boolean 
           </h1>
         </header>
 
-        {/* (1) 학생 리스트 — PoC: 본인 단일. tenant-scoped API 후속. */}
+        {/* (1) 학생 리스트 — TEACHER role + tenant 의 학생 목록 */}
         <SectionTitle no="01" title={lang === 'ko' ? '담당 학생' : 'Students'} />
-        <Card>
-          <Sub>
-            {lang === 'ko'
-              ? 'PoC 단계: 본인 계정의 학습 데이터만 표시. 다중 학생 관리는 tenant-scoped API 추가 후 활성화됩니다.'
-              : 'PoC: showing the logged-in student only. Multi-student view activates after tenant-scoped API.'}
-          </Sub>
-        </Card>
+        <StudentList
+          students={students.data ?? []}
+          isError={students.isError}
+          selectedId={selectedStudent}
+          onSelect={(id) => setSelectedStudent(id)}
+          onSelf={() => setSelectedStudent(null)}
+          useSelf={useSelf}
+        />
+        {selectedStudent && (
+          <div style={{ marginTop: -8, marginBottom: 16, fontSize: 12, color: COLORS.sub }}>
+            선택된 학생 id: <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{selectedStudent.slice(0, 8)}…</span>
+          </div>
+        )}
 
         {/* (2) Concept × score heatmap */}
         <SectionTitle no="02" title={lang === 'ko' ? '개념별 숙련도 (Heatmap)' : 'Mastery heatmap'} />
@@ -116,6 +142,47 @@ export function TeacherDashboardPage({ embedded = false }: { embedded?: boolean 
       </main>
     </div>
   );
+}
+
+function StudentList({ students, isError, selectedId, onSelect, onSelf, useSelf }: {
+  students: StudentRow[]; isError: boolean;
+  selectedId: string | null; onSelect: (id: string) => void; onSelf: () => void; useSelf: boolean;
+}) {
+  if (isError) {
+    return (
+      <Card>
+        <Sub>TEACHER 권한이 없습니다. 본인 계정의 학습 데이터만 표시됩니다.</Sub>
+      </Card>
+    );
+  }
+  if (students.length === 0) {
+    return (
+      <Card>
+        <Sub>같은 학원/기관에 등록된 학생이 없습니다. (Tenant 등록 + 학생 가입 필요)</Sub>
+      </Card>
+    );
+  }
+  return (
+    <Card style={{ padding: 12 }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <button onClick={onSelf} style={chipStyle(useSelf)}>본인</button>
+        {students.map((s) => (
+          <button key={s.id} onClick={() => onSelect(s.id)} style={chipStyle(selectedId === s.id)}>
+            {s.name} · {s.email.split('@')[0]}
+          </button>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function chipStyle(active: boolean): React.CSSProperties {
+  return {
+    padding: '6px 12px', fontSize: 12, fontFamily: 'inherit',
+    backgroundColor: active ? COLORS.ink : 'transparent',
+    color: active ? COLORS.bg : COLORS.ink,
+    border: `1px solid ${COLORS.line}`, borderRadius: 4, cursor: 'pointer',
+  };
 }
 
 function HeatmapGrid({ rows, onSelect, selected }: {

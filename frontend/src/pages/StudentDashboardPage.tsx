@@ -23,9 +23,11 @@ import { Sparkles, Target, TrendingUp, AlertCircle, BookOpen, CheckCircle2, Arro
 import { TopNav, NAV_TO_HASH, NavKey } from '../components/TopNav';
 import {
   fetchConceptMastery, fetchActivePatterns, fetchNextProblem, fetchWeeklyList,
-  fetchMentorMessage,
+  fetchMentorMessage, fetchSimilarForAttempt,
   type ConceptMastery, type ErrorPatternRow, type NextProblemRec, type WeeklyReportListItem,
+  type SimilarProblemRec,
 } from '../lib/queries';
+import { get } from '../lib/api';
 import { useT } from '../lib/i18n';
 
 const COLORS = {
@@ -59,6 +61,21 @@ export function StudentDashboardPage({ embedded = false }: { embedded?: boolean 
   const nextProb  = useQuery({ queryKey: ['student','next'],      queryFn: () => fetchNextProblem(), staleTime: 60_000 });
   const weekly    = useQuery({ queryKey: ['student','weekly'],    queryFn: fetchWeeklyList });
   const mentor    = useQuery({ queryKey: ['student','mentor'],    queryFn: fetchMentorMessage });
+
+  // 명세서 §6 학생 UI 6번 — 유사문제 5개. 가장 최근 오답 attempt 기준.
+  const latestWrong = useQuery({
+    queryKey: ['student','latestWrong'],
+    queryFn: async () => {
+      const r = await get<Array<{ id: string; isCorrect: boolean }>>('/wrong-notes/recent', { limit: 1 });
+      return (r as any)?.[0]?.id ?? null;
+    },
+    staleTime: 60_000,
+  });
+  const similar = useQuery({
+    queryKey: ['student','similar', latestWrong.data],
+    queryFn: () => latestWrong.data ? fetchSimilarForAttempt(latestWrong.data) : Promise.resolve([] as SimilarProblemRec[]),
+    enabled: !!latestWrong.data,
+  });
 
   const handleNav = (k: NavKey) => navigate(`/#/${NAV_TO_HASH[k]}`);
 
@@ -105,10 +122,18 @@ export function StudentDashboardPage({ embedded = false }: { embedded?: boolean 
           </>
         )}
 
+        {/* (6) 유사문제 5개 — 가장 최근 오답 기준 */}
+        {(similar.data?.length ?? 0) > 0 && (
+          <>
+            <SectionTitle no="06" title={lang === 'ko' ? '유사문제 5개 — 보강 연습' : 'Similar problems'} />
+            <SimilarList rows={similar.data ?? []} />
+          </>
+        )}
+
         {/* (7) 주간 요약 */}
         {(weekly.data?.[0]) && (
           <>
-            <SectionTitle no="06" title={lang === 'ko' ? '이번 주 요약' : 'This week'} />
+            <SectionTitle no="07" title={lang === 'ko' ? '이번 주 요약' : 'This week'} />
             <WeeklyCard row={weekly.data[0]} />
           </>
         )}
@@ -227,6 +252,27 @@ function PatternList({ rows, lang }: { rows: ErrorPatternRow[]; lang: 'ko' | 'en
               {lang === 'ko' ? '같은 실수가 반복돼요. 다음 문제는 풀이 단계를 하나씩 확인하면서 풀어볼게요.' : 'Same mistake repeats — solve step-by-step next.'}
             </div>
           )}
+        </div>
+      ))}
+    </Card>
+  );
+}
+
+function SimilarList({ rows }: { rows: SimilarProblemRec[] }) {
+  return (
+    <Card>
+      {rows.slice(0, 5).map((s, i) => (
+        <div key={s.recommendationLogId} style={{ padding: '10px 0', borderBottom: `1px dashed ${COLORS.line}`, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: COLORS.sub, fontWeight: 600 }}>0{i + 1}</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, color: COLORS.ink, marginBottom: 4 }}>{s.reason}</div>
+            <button
+              onClick={() => { window.location.hash = `#/study?problemId=${s.problemId}`; }}
+              style={{ fontSize: 11, padding: '4px 10px', border: `1px solid ${COLORS.line}`, borderRadius: 3, background: 'transparent', cursor: 'pointer', color: COLORS.ink, fontFamily: 'inherit' }}
+            >
+              풀어보기 →
+            </button>
+          </div>
         </div>
       ))}
     </Card>
