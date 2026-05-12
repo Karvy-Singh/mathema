@@ -164,6 +164,22 @@ enum LLMValidationStatus {
   NEEDS_REVIEW
 }
 
+/// LLM 분석 큐 작업 상태 — BullMQ 큐와 동기화되는 DB 추적 상태.
+///   PENDING      : 큐에 enqueue 된 직후
+///   PROCESSING   : worker 가 시작 (active)
+///   COMPLETED    : 정상 완료 + LLMAnalysisLog 생성됨
+///   FAILED       : retry 한도 초과 (dead-letter 영구 보관)
+///   NEEDS_REVIEW : LLM 응답 신뢰도 낮아 수동 검수 대기
+///   RETRYING     : 일시 실패 후 백오프 재시도 중
+enum LLMJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  NEEDS_REVIEW
+  RETRYING
+}
+
 /// 추천 종류 — RecommendationLog.recommendationType.
 enum RecommendationType {
   ADAPTIVE_NEXT // 다음 문제 1개 (현 풀이 흐름)
@@ -1044,6 +1060,36 @@ model LLMAnalysisLog {
   @@index([userId, createdAt])
   @@index([attemptId])
   @@index([promptVersion, modelName])
+}
+
+/// BullMQ LLM 분석 작업의 DB 추적 — 큐 상태와 별개로 영구 기록.
+///   1 LLMAnalysisJob ↔ 0..1 LLMAnalysisLog (성공한 경우만 Log 가 생성됨)
+///   retryCount > maxRetries 면 FAILED, dead-letter 영구 보관 (관리자 재처리 대상).
+model LLMAnalysisJob {
+  id             String       @id @default(uuid())
+  attemptId      String       @unique           // 1:1 — 같은 attempt 중복 enqueue 방지.
+  userId         String
+  problemId      String
+  tenantId       String?
+  status         LLMJobStatus @default(PENDING)
+  retryCount     Int          @default(0)
+  maxRetries     Int          @default(3)
+  /// BullMQ 의 job id (queue.add 결과). 큐 상태 조회 시 사용.
+  bullJobId      String?
+  /// 마지막 실패 사유 (truncated).
+  lastError      String?      @db.Text
+  /// 마지막 워커 시작 시각 — stale 작업 감지.
+  startedAt      DateTime?
+  /// 마지막 상태 변경 시각.
+  lastChangedAt  DateTime     @default(now())
+  /// 성공 시 생성된 LLMAnalysisLog id.
+  resultLogId    String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([status, lastChangedAt])
+  @@index([userId, status])
+  @@index([tenantId, status])
 }
 
 /// AI 추천이 실제로 효과가 있었는지 추적.
