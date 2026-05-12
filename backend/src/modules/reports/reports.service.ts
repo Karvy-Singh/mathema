@@ -17,7 +17,8 @@ export class ReportsService {
     const prev = recent[1];
     if (!r) return {
       totalHours: 0, hoursDelta: 0, problemsSolved: 0, problemsPerDay: 0,
-      accuracyPct: 0, accuracyDelta: 0, aiScore: 0, topPercentile: 50,
+      accuracyPct: 0, accuracyDelta: 0, aiScore: 0,
+      topPercentile: null,   // 모의고사 응시 없으면 가짜 50 대신 null
     };
 
     // hours/accuracy delta — 지난주가 없으면 0
@@ -26,11 +27,11 @@ export class ReportsService {
       : 0;
     const accuracyDelta = prev ? Math.round(r.accuracyPct - prev.accuracyPct) : 0;
 
-    // topPercentile — 가장 최근 모의고사 백분위 기반 (상위 %)
+    // topPercentile — 가장 최근 모의고사 백분위 기반 (상위 %). 응시 X 면 null.
     const lastMock = await this.prisma.mockExamResult.findFirst({
       where: { userId }, orderBy: { takenAt: 'desc' },
     });
-    const topPercentile = lastMock ? Math.max(1, 100 - lastMock.percentile) : 50;
+    const topPercentile: number | null = lastMock ? Math.max(1, 100 - lastMock.percentile) : null;
 
     return {
       totalHours: r.totalHours,

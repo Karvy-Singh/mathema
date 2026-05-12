@@ -40,18 +40,32 @@ export type ErrorDna = {
   insight: string;
 };
 export type Pattern = { num: string; title: string; desc: string; count: number };
-export type Diagnosis = { headline: string; weakUnit: string | null; weakScore: number; version: string; updatedAgo: string };
+export type Diagnosis = {
+  headline: string;
+  weakUnit: string | null;
+  /** 데이터 없으면 null — UI 가 '—' 표시. */
+  weakScore: number | null;
+  version: string | null;
+  /** 데이터 없으면 null. */
+  updatedAgo: string | null;
+};
 export type MentorMessage = { week: string; generatedAt: string; message: string; strength: string; nextGoal: string };
 export type Heatmap = Array<{ day: number; intensity: number }>;
 export type ActivityStats = { avgMinutesPerDay: number; totalProblems: number; avgAccuracy: number };
 export type Trajectory = Array<{ name: string; score: number; grade: number; target: number }>;
 export type ExamResult = { id: string; name: string; date: string; score: number; grade: number; percentile: number; time: string };
-export type MockSummary = { lastScore: number; expectedGrade: number; reliability: number; pointsToNextGrade: number; percentile: number };
+export type MockSummary = {
+  lastScore: number | null; expectedGrade: number | null;
+  reliability: number | null; pointsToNextGrade: number | null;
+  percentile: number | null;
+};
 export type ReportCurrent = {
   totalHours: number; hoursDelta: number;
   problemsSolved: number; problemsPerDay: number;
   accuracyPct: number; accuracyDelta: number;
-  aiScore: number; topPercentile: number;
+  aiScore: number;
+  /** 모의고사 응시 없으면 null — UI 가 '—' 로 표시. */
+  topPercentile: number | null;
 };
 export type TimeVsAccuracy = Array<{ week: string; time: number; accuracy: number }>;
 export type FocusItem = { unit: string; area: string; priority: string; color: string; impact: string };

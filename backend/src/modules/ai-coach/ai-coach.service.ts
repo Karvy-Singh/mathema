@@ -62,9 +62,12 @@ export class AiCoachService {
     return {
       headline,
       weakUnit: weakUnitDisplay,
-      weakScore,
-      version: 'v2.4.1',
-      updatedAgo: weakest ? this.formatAgo(weakest.updatedAt, lang) : (lang === 'hi' ? 'अभी' : lang !== 'ko' ? 'just now' : '방금'),
+      // 데이터 없으면 가짜 0 점 대신 null
+      weakScore: weakest ? weakScore : null,
+      // 가짜 'v2.4.1' 버전 표기 제거
+      version: null as string | null,
+      // 데이터 없으면 '방금' 같은 가짜 시간 표시 안 함 — null 로
+      updatedAgo: weakest ? this.formatAgo(weakest.updatedAt, lang) : null,
     };
   }
 
@@ -298,17 +301,9 @@ export class AiCoachService {
       where: { userId }, orderBy: { weekStart: 'desc' },
     });
 
-    // EN 모드에선 DB의 KO 멘토 메시지를 사용하지 않고 항상 동적 EN 생성으로 우회
-    if (r?.mentorMessage && lang === 'ko') {
-      return {
-        week: r.isoWeek,
-        generatedAt: r.generatedAt,
-        message: r.mentorMessage,
-        strength: '꾸준한 학습 패턴과 오답 복기',
-        nextGoal: '준킬러 문제의 시간 단축 훈련',
-      };
-    }
-
+    // 이전에는 DB의 mentor 메시지가 있으면 그대로 반환했지만, strength/nextGoal 이
+    // 하드코딩이라 환각이었음. 이제 항상 실 사용자 데이터로 동적 생성한다.
+    // (DB에 mentor 메시지가 있어도 message 본문만 사용, strength/nextGoal 은 재계산)
     const since = new Date(); since.setDate(since.getDate() - 7);
     const [attempts, masteries, weakest, strongest] = await Promise.all([
       this.prisma.attempt.findMany({ where: { userId, createdAt: { gte: since } } }),
@@ -351,10 +346,12 @@ export class AiCoachService {
           : `${weakest.unit.name} 숙련도 ${Math.round(weakest.score)}% → ${Math.min(95, Math.round(weakest.score) + 10)}% 도달`)
       : (lang !== 'ko' ? mentorDict.mentor.nextGoalNoMastery(avgMastery) : `평균 숙련도 ${avgMastery}% 유지`);
 
+    // DB mentor 메시지가 있고 KO 모드면 그 본문을 사용; 그 외에는 동적 생성.
+    const useDbMessage = !!(r?.mentorMessage && lang === 'ko');
     return {
       week: r?.isoWeek ?? week,
       generatedAt: r?.generatedAt ?? new Date(),
-      message,
+      message: useDbMessage ? r!.mentorMessage : message,
       strength,
       nextGoal,
     };

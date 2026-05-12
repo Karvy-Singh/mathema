@@ -309,7 +309,7 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
             <div style={{ marginTop: '16px', padding: '16px', backgroundColor: '#14285008', borderRadius: '4px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
               <AlertCircle size={16} color="#C25E2E" style={{ marginTop: '2px', flexShrink: 0 }} />
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>{t('dashboard.weakUnit', { unit: diagnosis.data.weakUnit ?? '', score: diagnosis.data.weakScore })}</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>{t('dashboard.weakUnit', { unit: diagnosis.data.weakUnit ?? '', score: diagnosis.data.weakScore ?? 0 })}</div>
                 <div style={{ fontSize: '12px', color: '#5C6B85', lineHeight: 1.55 }}>{t('dashboard.weakUnit.desc')}</div>
               </div>
             </div>
@@ -495,7 +495,7 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
 
       <div style={{ marginTop: '64px', paddingTop: '32px', borderTop: '1px solid #14285015', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontSize: '11px', color: '#8B95AB', letterSpacing: '0.05em' }}>
-          {t('dashboard.lastUpdate', { ago: diagnosis.data?.updatedAgo ?? '—', version: diagnosis.data?.version ?? 'v2.4.1' })}
+          {diagnosis.data?.updatedAgo ? t('dashboard.lastUpdate', { ago: diagnosis.data.updatedAgo, version: diagnosis.data.version ?? '' }) : ''}
         </div>
         <div className="serif" style={{ fontSize: '13px', fontStyle: 'italic', color: '#5C6B85' }}>"Excellence is a habit not an act" — Aristotle</div>
       </div>
@@ -1508,19 +1508,31 @@ function MockExamPage({ onStartExam }: { onStartExam: (exam: M.ExamPackage) => v
           <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#5A8A45' }} className="pulse-warm" />
           <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B95AB', textTransform: 'uppercase' }}>Mock Exam Trajectory</span>
         </div>
-        <h1 className="serif" style={{ fontSize: '48px', lineHeight: 1.15, letterSpacing: '-0.025em', fontWeight: 400, margin: 0, maxWidth: '880px' }}>
-          {t('mock.headline.up')} <em style={{ color: '#5A8A45', fontStyle: 'italic', fontWeight: 500 }}>{t('mock.headline.gain')}</em><br />
-          <span style={{ color: '#5C6B85' }}>{t('mock.headline.expected')}</span> <em style={{ fontStyle: 'italic', fontWeight: 500 }}>{t('mock.headline.gradeStable', { grade: summary.data?.expectedGrade ?? '–' })}</em>
+        <h1 className="serif" style={{
+          fontSize: '48px', lineHeight: 1.15, letterSpacing: '-0.025em', fontWeight: 400, margin: 0, maxWidth: '880px',
+          color: summary.data?.lastScore != null ? '#142850' : '#8B95AB',
+        }}>
+          {summary.data?.lastScore != null ? (
+            <>
+              {t('mock.headline.score', { score: summary.data.lastScore })}<br />
+              <span style={{ color: '#5C6B85' }}>{t('mock.headline.expected')}</span>{' '}
+              <em style={{ fontStyle: 'italic', fontWeight: 500 }}>
+                {t('mock.headline.gradeStable', { grade: summary.data.expectedGrade ?? '–' })}
+              </em>
+            </>
+          ) : (
+            t('mock.headline.empty')
+          )}
         </h1>
 
         <div className="deco-line" style={{ height: '1px', marginTop: '32px', marginBottom: '24px' }} />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #14285015', borderBottom: '1px solid #14285015' }}>
           {[
-            { label: t('mock.stat.lastScore'), value: String(summary.data?.lastScore ?? 0), unit: t('common.score'), sub: t('mock.stat.recent'), accent: '#142850' },
-            { label: t('mock.stat.expectedGrade'), value: summary.data?.expectedGrade ? String(summary.data.expectedGrade) : '–', unit: t('common.grade'), sub: summary.data?.reliability != null ? t('mock.stat.reliability', { pct: summary.data.reliability }) : '—', accent: '#5A8A45' },
-            { label: t('mock.stat.toTarget'), value: String(summary.data?.pointsToNextGrade ?? 0), unit: t('common.score'), sub: t('mock.stat.targetGrade', { from: 2, to: 1 }), accent: '#C7791F' },
-            { label: t('mock.stat.peerPercentile'), value: String(summary.data?.percentile ?? 0), unit: 'p', sub: t('mock.stat.topPercent', { pct: 100 - (summary.data?.percentile ?? 0) }), accent: '#142850' },
+            { label: t('mock.stat.lastScore'), value: summary.data?.lastScore != null ? String(summary.data.lastScore) : '–', unit: t('common.score'), sub: summary.data?.lastScore != null ? t('mock.stat.recent') : '—', accent: '#142850' },
+            { label: t('mock.stat.expectedGrade'), value: summary.data?.expectedGrade != null ? String(summary.data.expectedGrade) : '–', unit: t('common.grade'), sub: summary.data?.reliability != null ? t('mock.stat.reliability', { pct: summary.data.reliability }) : '—', accent: '#5A8A45' },
+            { label: t('mock.stat.toTarget'), value: summary.data?.pointsToNextGrade != null ? String(summary.data.pointsToNextGrade) : '–', unit: t('common.score'), sub: summary.data?.pointsToNextGrade != null ? t('mock.stat.targetGrade', { from: 2, to: 1 }) : '—', accent: '#C7791F' },
+            { label: t('mock.stat.peerPercentile'), value: summary.data?.percentile != null ? String(summary.data.percentile) : '–', unit: 'p', sub: summary.data?.percentile != null ? t('mock.stat.topPercent', { pct: 100 - summary.data.percentile }) : '—', accent: '#142850' },
           ].map((stat, i) => (
             <div key={i} style={{ padding: '24px 28px', borderRight: i < 3 ? '1px solid #14285015' : 'none' }}>
               <div style={{ fontSize: '11px', letterSpacing: '0.18em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: '12px' }}>{stat.label}</div>
@@ -1692,7 +1704,7 @@ function ReportPage() {
             { label: t('report.stat.weeklyHours'), value: String(current.data?.totalHours ?? 0), unit: 'h', sub: t('report.stat.hoursDelta', { delta: current.data?.hoursDelta ?? 0 }), accent: '#142850' },
             { label: t('report.stat.weeklyProblems'), value: String(current.data?.problemsSolved ?? 0), unit: t('common.problem'), sub: t('report.stat.problemsPerDay', { n: current.data?.problemsPerDay ?? 0 }), accent: '#142850' },
             { label: t('report.stat.weeklyAccuracy'), value: String(current.data?.accuracyPct ?? 0), unit: t('common.percent'), sub: t('report.stat.accuracyDelta', { delta: current.data?.accuracyDelta ?? 0 }), accent: '#5A8A45' },
-            { label: t('report.stat.aiScore'), value: String(current.data?.aiScore ?? 0), unit: '/ 10', sub: t('report.stat.topPercent', { pct: current.data?.topPercentile ?? 14 }), accent: '#C7791F' },
+            { label: t('report.stat.aiScore'), value: String(current.data?.aiScore ?? 0), unit: '/ 10', sub: current.data?.topPercentile != null ? t('report.stat.topPercent', { pct: current.data.topPercentile }) : '—', accent: '#C7791F' },
           ].map((stat, i) => (
             <div key={i} style={{ padding: '24px 28px', borderRight: i < 3 ? '1px solid #14285015' : 'none' }}>
               <div style={{ fontSize: '11px', letterSpacing: '0.18em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: '12px' }}>{stat.label}</div>

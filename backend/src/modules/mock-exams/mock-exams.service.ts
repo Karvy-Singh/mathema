@@ -129,12 +129,13 @@ export class MockExamsService {
       reliability = Math.max(0, base - penalty);
     }
 
+    // 응시 0회 → 모두 null. frontend 는 null 이면 '—' 표시 (가짜 0 / 가짜 reliability 안 보임).
     return {
-      lastScore: last?.score ?? 0,
-      expectedGrade: last?.grade ?? 0,
-      reliability,
-      pointsToNextGrade: pointsToNextGrade(last?.score ?? 0),
-      percentile: last?.percentile ?? 0,
+      lastScore:         last?.score ?? null,
+      expectedGrade:     last?.grade ?? null,
+      reliability:       N > 0 ? reliability : null,
+      pointsToNextGrade: last ? pointsToNextGrade(last.score) : null,
+      percentile:        last?.percentile ?? null,
     };
   }
 

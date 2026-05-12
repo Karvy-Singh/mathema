@@ -323,153 +323,48 @@ async function main() {
   console.log('📚 Seeding NCERT concept lessons (Class 7~12)...');
   await seedConceptLessons(prisma, units);
 
-  // ===== WrongNotes (SM-2 분포 포함) — 중1 데모 =====
-  const wrongNotesSpec: Array<{ source: string; errorType: ErrorType; insight: string; status: NoteStatus; similarCount: number; daysAgo: number; rep: number; ef: number; intervalDays: number; dueOffset: number | null; lapseCount: number; }> = [
-    { source: 'Class 11 · Trig · Q2',       errorType: 'CONCEPT_MISUNDERSTANDING', insight: 'Drops solutions in [π, 2π) — only finds the reference angle, forgets quadrant rules.',            status: 'ANALYZING', similarCount: 4, daysAgo: 5,  rep: 1, ef: 2.4, intervalDays: 1,  dueOffset: 0,  lapseCount: 1 },
-    { source: 'Class 11 · Complex · Q1',    errorType: 'CALCULATION_MISTAKE',     insight: 'Sign error on i² = −1: distributes (a + bi)(c + di) but treats i² as +1.',                          status: 'ANALYZING', similarCount: 3, daysAgo: 7,  rep: 2, ef: 2.5, intervalDays: 6,  dueOffset: -1, lapseCount: 0 },
-    { source: 'Class 11 · Sets · Q2',       errorType: 'CONCEPT_MISUNDERSTANDING', insight: 'Skips the "neither" set — forgets that Universe − (A ∪ B) is what the question asks.',           status: 'MASTERED',  similarCount: 3, daysAgo: 14, rep: 4, ef: 2.7, intervalDays: 35, dueOffset: 21, lapseCount: 0 },
-    { source: 'Class 11 · Inequalities · Q1', errorType: 'CONCEPT_MISUNDERSTANDING', insight: 'Forgets to flip the inequality when dividing by a negative coefficient.',                        status: 'MASTERED',  similarCount: 4, daysAgo: 21, rep: 5, ef: 2.8, intervalDays: 60, dueOffset: 39, lapseCount: 0 },
-    { source: 'Class 11 · Limits · Q1',     errorType: 'TIME_SHORTAGE',           insight: 'Spends too long deriving from first principles instead of applying the power rule directly.',     status: 'PENDING',   similarCount: 3, daysAgo: 5,  rep: 0, ef: 2.5, intervalDays: 0,  dueOffset: null, lapseCount: 0 },
-    { source: 'Class 11 · Combinations · Q1', errorType: 'CONCEPT_MISUNDERSTANDING', insight: 'Uses ⁿPᵣ when the question is about unordered selection (ⁿCᵣ).',                                  status: 'ANALYZING', similarCount: 2, daysAgo: 7,  rep: 1, ef: 2.3, intervalDays: 1,  dueOffset: 3,  lapseCount: 2 },
-  ];
-
-  const startOfDay = (offset: number) => {
-    const d = new Date(); d.setDate(d.getDate() + offset); d.setHours(0, 0, 0, 0); return d;
-  };
-
-  for (const w of wrongNotesSpec) {
-    const problemId = problems[w.source]; if (!problemId) continue;
-    const created = new Date(); created.setDate(created.getDate() - w.daysAgo);
-    const lastReviewed = w.rep > 0 ? new Date(created.getTime() + 86400000 * Math.min(w.daysAgo - 1, 1)) : null;
-    await prisma.wrongNote.create({
-      data: {
-        userId: user.id, problemId,
-        errorType: w.errorType, insight: w.insight, status: w.status,
-        similarCount: w.similarCount, createdAt: created,
-        masteredAt: w.status === 'MASTERED' ? created : null,
-        easinessFactor: w.ef,
-        repetitionCount: w.rep,
-        intervalDays: w.intervalDays,
-        nextReviewAt: w.dueOffset === null ? null : startOfDay(w.dueOffset),
-        lastReviewedAt: lastReviewed,
-        lapseCount: w.lapseCount,
-      },
-    });
-  }
-
-  // ===== Attempts (250개 무작위 90일치, 모든 단원 분포) =====
-  const allProblemIds = Object.values(problems);
-  for (let i = 0; i < 250; i++) {
-    const daysAgo = Math.floor(Math.random() * 90);
-    const at = new Date(); at.setDate(at.getDate() - daysAgo);
-    await prisma.attempt.create({
-      data: {
-        userId: user.id, problemId: allProblemIds[i % allProblemIds.length],
-        context: SessionContext.STUDY, answer: 'sample',
-        isCorrect: Math.random() < 0.73,
-        durationSec: 60 + Math.floor(Math.random() * 240),
-        createdAt: at,
-      },
-    });
-  }
-
-  // ===== DailyActivity (84일 heatmap, 마지막 23일 연속) =====
+  // =============================================================
+  //  사용자별 누적 데이터는 시드하지 않는다.
+  //
+  //  과거에는 데모용 attempts / wrongNotes / dailyActivity / masterySnapshot /
+  //  mockExamResult / weeklyReport 를 미리 만들어 두어 빈 대시보드가 보이지
+  //  않게 했지만, 그 결과 시드 사용자가 자신이 한 적 없는 가짜 기록을 보게 되었음
+  //  ("정답률 73%", "예상 등급 2등급" 같은 환각 데이터).
+  //
+  //  실 서비스 정책:
+  //  - 모든 사용자 누적 데이터는 실제 사용으로만 쌓인다.
+  //  - 시드는 콘텐츠(Unit / SubUnit / Problem / ProblemChoice / MockExam /
+  //    ConceptLesson / ConceptStep) 만 만든다.
+  //  - 시드 사용자는 dev 빠른 로그인용으로만 존재하며 빈 계정으로 시작한다.
+  //
+  //  멱등성 — 시드 재실행 시 과거 가짜 데이터를 청소.
+  // =============================================================
+  await prisma.attempt.deleteMany({       where: { userId: user.id } });
+  await prisma.wrongNote.deleteMany({     where: { userId: user.id } });
   await prisma.dailyActivity.deleteMany({ where: { userId: user.id } });
-  for (let i = 0; i < 84; i++) {
-    const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0);
-    const intensity = i < 23 ? Math.floor(Math.random() * 3) + 1
-                              : Math.random() < 0.85 ? Math.floor(Math.random() * 4) : 0;
-    await prisma.dailyActivity.create({
-      data: {
-        userId: user.id, date: d,
-        durationMin: intensity === 0 ? 0 : 40 + intensity * 30 + Math.floor(Math.random() * 30),
-        problemsSolved: intensity * 12 + Math.floor(Math.random() * 5),
-        accuracyPct: 65 + Math.random() * 15,
-        intensity,
-      },
-    });
-  }
-
-  // ===== MasterySnapshot — 데모는 중1 단원만 (mastery 가 있는 단원만 AI compose 가 사용) =====
   await prisma.masterySnapshot.deleteMany({ where: { userId: user.id } });
-  const masteryByUnitName: Record<string, number> = {
-    // 약점 → 강점 스펙트럼 (NCERT Class 11 챕터, JEE 핵심)
-    '극한과 미분 입문':   45,  // 가장 약함 — JEE 핵심, 추천 1순위
-    '삼각함수 (일반각)':  52,  // 약점 — quadrant rule 자주 놓침
-    '관계와 함수':        65,  // 보강 필요
-    '복소수와 이차방정식': 71, // 안정 (sign error만 가끔)
-    '집합':              82,  // 강점
-  };
-  for (const [unitName, score] of Object.entries(masteryByUnitName)) {
-    const unit = units[unitName];
-    if (!unit) continue;
-    await prisma.masterySnapshot.create({
-      data: { userId: user.id, unitId: unit.id, score },
-    });
-  }
-
-  // ===== MockExam + Result =====
-  // 시드는 인도 CBSE 컨텍스트의 단원 평가(Unit Test) · 학기 평가(Term Test) · 모의고사(Mock).
-  // MockExamType enum 값은 DB 후방호환을 위해 그대로 사용 (HAKPYEONG/MOPYEONG → UnitTest/TermTest 의미).
-  // Class 11 JEE 준비 — Mock test 누적 (CBSE Class 11 Unit Test + JEE Foundation Mock)
-  const mockSpec: Array<{ name: string; type: MockExamType; score: number; grade: number; percentile: number; daysAgo: number; minutes: number }> = [
-    { name: 'Unit Test · April',         type: 'HAKPYEONG', score: 62, grade: 4, percentile: 55, daysAgo: 240, minutes: 99 },
-    { name: 'Unit Test · May',           type: 'HAKPYEONG', score: 68, grade: 3, percentile: 62, daysAgo: 200, minutes: 100 },
-    { name: 'JEE Foundation Mock · Jun', type: 'MOPYEONG',  score: 71, grade: 3, percentile: 71, daysAgo: 150, minutes: 100 },
-    { name: 'Unit Test · August',        type: 'HAKPYEONG', score: 76, grade: 2, percentile: 78, daysAgo: 110, minutes: 95 },
-    { name: 'JEE Main Mock · September', type: 'MOPYEONG',  score: 79, grade: 2, percentile: 82, daysAgo: 60,  minutes: 100 },
-    { name: 'Full Mock · October',       type: 'HAKPYEONG', score: 84, grade: 2, percentile: 88, daysAgo: 25,  minutes: 98 },
-  ];
-
   await prisma.mockExamResult.deleteMany({ where: { userId: user.id } });
-  for (const m of mockSpec) {
-    let exam = await prisma.mockExam.findFirst({ where: { name: m.name } });
-    if (!exam) {
-      exam = await prisma.mockExam.create({
-        data: { name: m.name, type: m.type, totalProblems: 30, totalMinutes: 100 },
-      });
-    }
-    const takenAt = new Date(); takenAt.setDate(takenAt.getDate() - m.daysAgo);
-    await prisma.mockExamResult.create({
-      data: {
-        userId: user.id, mockExamId: exam.id,
-        score: m.score, grade: m.grade, percentile: m.percentile,
-        durationMin: m.minutes, takenAt,
-      },
-    });
-  }
+  await prisma.weeklyReport.deleteMany({  where: { userId: user.id } });
+  await prisma.conceptProgress.deleteMany({ where: { userId: user.id } });
 
-  // ===== WeeklyReport =====
-  await prisma.weeklyReport.deleteMany({ where: { userId: user.id } });
-  const reportSpec = [
-    { time: 12,   accuracy: 65 }, { time: 14, accuracy: 68 },
-    { time: 11,   accuracy: 64 }, { time: 16, accuracy: 71 },
-    { time: 18,   accuracy: 73 }, { time: 17, accuracy: 75 },
-    { time: 19,   accuracy: 76 }, { time: 21.4, accuracy: 76 },
+  // ===== MockExam (시스템 콘텐츠) — 실제로 응시 가능한 모의고사 목록만 등록 =====
+  // 사용자 결과(MockExamResult)는 절대 시드하지 않음 — 응시해야만 생긴다.
+  const systemMockExams: Array<{ name: string; type: MockExamType; totalProblems: number; totalMinutes: number }> = [
+    { name: 'Unit Test · Term I',        type: 'HAKPYEONG', totalProblems: 30, totalMinutes: 100 },
+    { name: 'Unit Test · Term II',       type: 'HAKPYEONG', totalProblems: 30, totalMinutes: 100 },
+    { name: 'JEE Foundation Mock',       type: 'MOPYEONG',  totalProblems: 30, totalMinutes: 100 },
+    { name: 'JEE Main Mock',             type: 'MOPYEONG',  totalProblems: 30, totalMinutes: 100 },
+    { name: 'Full Mock',                 type: 'HAKPYEONG', totalProblems: 30, totalMinutes: 100 },
   ];
-  for (let i = 0; i < reportSpec.length; i++) {
-    const r = reportSpec[i];
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - (reportSpec.length - 1 - i) * 7);
-    weekStart.setHours(0, 0, 0, 0);
-    await prisma.weeklyReport.create({
-      data: {
-        userId: user.id,
-        isoWeek: `${weekStart.getFullYear()}-W${String(40 + i).padStart(2, '0')}`,
-        weekStart,
-        totalHours: r.time,
-        problemsSolved: 200 + i * 20,
-        accuracyPct: r.accuracy,
-        aiScore: 6 + i * 0.3,
-        mentorMessage:
-          i === reportSpec.length - 1
-            ? "Study time is up 18% over last week and accuracy lifted 4 pp. The Trigonometric Functions weakness around quadrant rules has moved from 45% → 52%. Hold this pace and JEE Main mock should land you in the top percentile."
-            : 'Consistent study habit holding steady.',
-      },
-    });
+  for (const m of systemMockExams) {
+    const exists = await prisma.mockExam.findFirst({ where: { name: m.name } });
+    if (!exists) {
+      await prisma.mockExam.create({ data: m });
+    }
   }
 
-  console.log(`✅ Seed completed for ${user.email} — ${UNIT_NAMES.length} units, ${problemsSpec.length} problems across grades`);
+  console.log(`✅ Seed completed — ${UNIT_NAMES.length} units, ${problemsSpec.length} problems, ${systemMockExams.length} mock exams.`);
+  console.log(`👤 Seed user (empty account): ${user.email}`);
   console.log(`📊 Grades: ${Object.entries(GRADE_TO_UNITS).map(([g, u]) => `${g}=${u.length} units`).join(', ')}`);
 }
 
