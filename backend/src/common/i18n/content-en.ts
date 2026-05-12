@@ -296,7 +296,6 @@ export const INSIGHT_EN: Record<string, string> = {
     'Missing intuitive link between Riemann sums and the definition of the integral.',
   'du 변환 시 dx와의 관계식에서 상수항 누락 반복':
     'Repeatedly drops the constant when relating du and dx during substitution.',
-  'AI 분석 대기 중': 'Pending AI analysis',
   // 중1 데모 wrong notes
   '괄호를 풀고 동류항 정리 후 이항 단계를 자주 빠뜨림':
     'Frequently skips the move-to-the-other-side step after expanding parentheses and combining like terms.',
@@ -1145,16 +1144,6 @@ export const RECOMMENDATION_EN = {
   strongUnit: (unit: string) => `${unit} · applied practice`,
   strongTitle: (unit: string) => `${unit} full-mock challenge`,
   strongReason: (score: number) => `Maintain & deepen mastery at ${score}%`,
-  // Fallbacks
-  fbFocusUnit: 'Accumulating · —',
-  fbFocusTitle: 'Solve problems to start collecting wrong notes',
-  fbFocusReason: 'AI needs 5+ problems to find weaknesses',
-  fbWeakUnit: 'Accumulating · —',
-  fbWeakTitle: 'Take a unit-level diagnostic',
-  fbWeakReason: 'Diagnostic recommended to measure mastery',
-  fbStrongUnit: 'Accumulating · —',
-  fbStrongTitle: 'Discover your strong units',
-  fbStrongReason: 'Surfaces once a unit reaches 70%+ mastery',
 };
 
 export const STATIC_FALLBACK_EN = {

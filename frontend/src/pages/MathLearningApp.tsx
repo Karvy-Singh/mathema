@@ -249,8 +249,11 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
           <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#C7791F' }} className="pulse-warm" />
           <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B95AB', textTransform: 'uppercase' }}>{t('dashboard.diagnosis.label')}</span>
         </div>
-        <h1 className="serif" style={{ fontSize: '48px', lineHeight: 1.15, letterSpacing: '-0.025em', fontWeight: 400, margin: 0, maxWidth: '880px' }}>
-          {diagnosis.data?.headline ?? t('dashboard.headline.fallback')}
+        <h1 className="serif" style={{
+          fontSize: '48px', lineHeight: 1.15, letterSpacing: '-0.025em', fontWeight: 400, margin: 0, maxWidth: '880px',
+          color: diagnosis.data?.headline ? '#142850' : '#8B95AB',
+        }}>
+          {diagnosis.data?.headline ?? t('dashboard.headline.empty')}
         </h1>
 
         <div className="deco-line" style={{ height: '1px', marginTop: '32px', marginBottom: '24px' }} />

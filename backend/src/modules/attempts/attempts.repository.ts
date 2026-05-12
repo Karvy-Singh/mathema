@@ -83,7 +83,8 @@ export class AttemptsRepository {
         create: {
           userId, problemId: dto.problemId,
           errorType: errorTypeForSnapshot as any,
-          insight: 'AI 분석 대기 중',
+          // insight 는 백그라운드 LLM 분석으로 채워짐. 그 전까지는 status=PENDING 으로만 표현.
+          insight: '',
           status: 'PENDING',
         },
       });

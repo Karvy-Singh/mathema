@@ -11,6 +11,12 @@ const prisma = new PrismaClient();
  * 시드 사용자: 민준 (polopot123@gmail.com / password1234) — 고3 / 목표 1등급.
  */
 async function main() {
+  // 가드: 데모 사용자·데모 오답노트 포함이라 production 에서는 절대 실행 금지.
+  // 우회 필요시 ALLOW_PROD_SEED=1 명시.
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PROD_SEED !== '1') {
+    console.error('Refusing to seed in production. Set ALLOW_PROD_SEED=1 to override.');
+    process.exit(1);
+  }
   console.log('🌱 Seeding...');
 
   // ===== Unit + SubUnit (학년별 매핑 포함) =====

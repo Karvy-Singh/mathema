@@ -91,7 +91,7 @@ const ko = {
 
   // ===== Dashboard =====
   'dashboard.diagnosis.label': 'AI 진단 · 실시간 업데이트',
-  'dashboard.headline.fallback': '오늘 23분만 더 투자하면 지난주 놓친 8점을 회복할 수 있어요',
+  'dashboard.headline.empty': 'AI 진단을 위해 몇 문제만 더 풀어볼까요',
   'dashboard.stat.todayStudy': '오늘 학습',
   'dashboard.stat.streak': '연속 학습',
   'dashboard.stat.weeklyAccuracy': '주간 정답률',
@@ -506,7 +506,7 @@ const en: typeof ko = {
 
   // Dashboard
   'dashboard.diagnosis.label': 'AI Diagnosis · live',
-  'dashboard.headline.fallback': 'Just 23 more minutes today can recover the 8 points you lost last week',
+  'dashboard.headline.empty': 'Solve a few more problems so we can diagnose your level',
   'dashboard.stat.todayStudy': 'Today',
   'dashboard.stat.streak': 'Streak',
   'dashboard.stat.weeklyAccuracy': 'Weekly accuracy',
@@ -924,7 +924,7 @@ const hi: Partial<typeof ko> = {
 
   // Dashboard
   'dashboard.diagnosis.label': 'AI निदान · लाइव',
-  'dashboard.headline.fallback': 'आज 23 मिनट और देने से पिछले सप्ताह खोए 8 अंक वापस आ सकते हैं',
+  'dashboard.headline.empty': 'AI निदान के लिए कुछ और प्रश्न हल करें',
   'dashboard.stat.todayStudy': 'आज',
   'dashboard.stat.streak': 'स्ट्रीक',
   'dashboard.stat.weeklyAccuracy': 'साप्ताहिक सटीकता',

@@ -87,9 +87,11 @@ export default function LoginPage() {
       <div style={{ textAlign: 'center', fontSize: 12, color: '#8B95AB', marginTop: -4 }}>
         <Link to="/forgot-password" style={{ color: '#5C6B85' }}>{t('forgot.title')}</Link>
       </div>
-      <div style={{ marginTop: 8, padding: 12, fontSize: 12, color: '#8B95AB', backgroundColor: '#14285008', borderRadius: 4 }}>
-        {t('auth.seedHint')}
-      </div>
+      {import.meta.env.DEV && (
+        <div style={{ marginTop: 8, padding: 12, fontSize: 12, color: '#8B95AB', backgroundColor: '#14285008', borderRadius: 4 }}>
+          {t('auth.seedHint')}
+        </div>
+      )}
     </form>
   </AuthShell>;
 }
