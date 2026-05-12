@@ -7,17 +7,18 @@ import { useAuth } from './context/AuthContext';
 
 /**
  * 명세서 §1 — 역할별 자동 라우팅.
- *   STUDENT → MathLearningApp (기존 통합 화면, 학생 데이터 흐름)
+ *   STUDENT → /student (Phase 4 신규 Dashboard, AI 처방 시스템 기반)
  *   PARENT  → /parent
  *   TEACHER → /teacher
- *   ADMIN   → /teacher (관리용으로 강사 화면 + override)
+ *   ADMIN   → /teacher
+ *   (/app 옛 7탭 통합 화면은 직접 URL 입력으로만 접근)
  */
 function RoleRedirect() {
   const { user } = useAuth();
   const role = (user as any)?.role as 'STUDENT' | 'PARENT' | 'TEACHER' | 'ADMIN' | undefined;
   if (role === 'PARENT')  return <Navigate to="/parent"  replace />;
   if (role === 'TEACHER' || role === 'ADMIN') return <Navigate to="/teacher" replace />;
-  return <Navigate to="/app" replace />;
+  return <Navigate to="/student" replace />;
 }
 
 // 코드 스플리팅 — 페이지별 lazy import 로 초기 번들 경감.

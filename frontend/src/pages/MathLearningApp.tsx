@@ -1386,13 +1386,44 @@ function StudySession({ sessionId, focusProblemId, onClear }: { sessionId: strin
               }</span>
               <span style={{ fontSize: '11px', color: '#5C6B85', marginLeft: 'auto' }}>{t('study.aiGuide.autoAdjust')}</span>
             </div>
-            <div style={{ fontSize: 13, lineHeight: 1.75, color: '#142850', whiteSpace: 'pre-wrap', minHeight: 120 }}>
-              {guide.isLoading ? t('study.aiGuide.loading') :
-               guide.data?.text ?? t('study.aiGuide.error')}
+            <div style={{ minHeight: 120 }}>
+              {guide.isLoading && (
+                <div style={{ fontSize: 13, color: '#5C6B85', fontStyle: 'italic' }}>{t('study.aiGuide.loading')}</div>
+              )}
+              {!guide.isLoading && !guide.data && (
+                <div style={{ fontSize: 13, color: '#5C6B85' }}>{t('study.aiGuide.error')}</div>
+              )}
+              {!guide.isLoading && guide.data?.steps?.map((s) => (
+                <div key={s.num} style={{
+                  display: 'flex', gap: 12, padding: '12px 0',
+                  borderBottom: '1px dashed #14285015',
+                  opacity: s.done ? 0.55 : 1,
+                }}>
+                  <div style={{
+                    flexShrink: 0, width: 28, height: 28, borderRadius: 14,
+                    backgroundColor: s.current ? '#142850' : s.done ? '#4A5D3A' : '#14285020',
+                    color: s.current || s.done ? '#EFEBDF' : '#5C6B85',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
+                  }}>
+                    {s.done ? '✓' : s.num}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#142850', marginBottom: 4 }}>{s.title}</div>
+                    <div style={{ fontSize: 12, lineHeight: 1.65, color: '#5C6B85' }}>{s.desc}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-            {guide.data && (guide.data.inputTokens > 0 || guide.data.outputTokens > 0) && (
-              <div style={{ marginTop: 12, fontSize: 11, color: '#AAB4C5', fontFamily: 'JetBrains Mono, monospace' }}>
-                tokens · in {guide.data.inputTokens} / out {guide.data.outputTokens}
+            {guide.data && (
+              <div style={{ marginTop: 12, fontSize: 11, color: '#AAB4C5', fontFamily: 'JetBrains Mono, monospace', display: 'flex', gap: 8 }}>
+                <span>tokens · in {guide.data.inputTokens} / out {guide.data.outputTokens}</span>
+                {guide.data.validationStatus === 'fallback' && (
+                  <span style={{ color: '#B45309' }}>· fallback (AI 응답 형식 오류 — 기본 단계 표시)</span>
+                )}
+                {guide.data.validationStatus === 'empty' && (
+                  <span style={{ color: '#8B95AB' }}>· 데이터 부족 (문제 미연결)</span>
+                )}
               </div>
             )}
           </div>

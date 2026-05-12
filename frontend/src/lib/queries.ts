@@ -300,7 +300,18 @@ export type StudySession = {
   id: string; unitId: string; sessionNumber: number; totalSessions: number;
   currentStep: number; startedAt: string; endedAt: string | null;
 };
-export type SessionGuide = { text: string; inputTokens: number; outputTokens: number };
+/** 명세서 §3-1 정합: 실 문제 + 학생 mastery/error-pattern 기반 5단계 JSON 가이드. */
+export type GuideStep = { num: number; title: string; desc: string; current: boolean; done: boolean };
+export type SessionGuide = {
+  perspective: '공식 중심' | '단계별' | '시각화' | '실생활 예시';
+  problemId: string | null;
+  steps: GuideStep[];
+  validationStatus: 'validated' | 'fallback' | 'empty';
+  parseError?: string | null;
+  text: string;                  // 호환 — 옛 UI 가 단순 text 만 쓸 때
+  inputTokens: number;
+  outputTokens: number;
+};
 export type Unit = {
   id: string; name: string; displayName?: string; order: number;
   gradeLevels?: GradeLevel[];
