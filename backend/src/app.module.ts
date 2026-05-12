@@ -40,6 +40,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { PushModule } from './modules/push/push.module';
 import { PrivacyModule } from './modules/privacy/privacy.module';
 import { LlmAnalysisModule } from './modules/llm-analysis/llm-analysis.module';
+import { FeedbackModule } from './modules/feedback/feedback.module';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { LlmAnalysisModule } from './modules/llm-analysis/llm-analysis.module';
     PushModule,
     PrivacyModule,
     LlmAnalysisModule,
+    FeedbackModule,
   ],
 })
 export class AppModule {}

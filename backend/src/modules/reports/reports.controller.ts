@@ -1,13 +1,23 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CurrentLang, Lang } from '../../common/i18n/current-lang.decorator';
+import { WeeklyReportService } from './weekly-report.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('reports')
 export class ReportsController {
-  constructor(private readonly service: ReportsService) {}
+  constructor(
+    private readonly service: ReportsService,
+    private readonly weekly: WeeklyReportService,
+  ) {}
+
+  /** 명세서 §5 — POST /weekly-reports/generate. 이번 주 (또는 주어진 weekStart) 리포트 upsert. */
+  @Post('weekly/generate')
+  generate(@CurrentUser('id') userId: string) {
+    return this.weekly.generate(userId);
+  }
 
   // 헤더 4 stat: 주간 학습시간 / 푼 문제 / 정답률 / AI 종합 점수
   @Get('weekly/current')

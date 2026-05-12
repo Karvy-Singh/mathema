@@ -7,6 +7,7 @@ import { MaintainStrengthStrategy } from './strategies/maintain-strength.strateg
 import { StudyBalanceService } from './services/study-balance.service';
 import { AdaptiveNextProblemService } from './services/adaptive-next-problem.service';
 import { SimilarProblemService } from './services/similar-problem.service';
+import { ReviewScheduleService } from './services/review-schedule.service';
 
 @Module({
   controllers: [RecommendationsController],
@@ -18,12 +19,14 @@ import { SimilarProblemService } from './services/similar-problem.service';
     StudyBalanceService,
     AdaptiveNextProblemService,
     SimilarProblemService,
+    ReviewScheduleService,
   ],
   exports: [
     RecommendationsService,
     StudyBalanceService,
     AdaptiveNextProblemService,
     SimilarProblemService,
+    ReviewScheduleService,
   ],
 })
 export class RecommendationsModule {}

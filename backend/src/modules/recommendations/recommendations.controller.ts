@@ -5,6 +5,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CurrentLang, Lang } from '../../common/i18n/current-lang.decorator';
 import { AdaptiveNextProblemService } from './services/adaptive-next-problem.service';
 import { SimilarProblemService } from './services/similar-problem.service';
+import { ReviewScheduleService } from './services/review-schedule.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('recommendations')
@@ -13,7 +14,14 @@ export class RecommendationsController {
     private readonly service: RecommendationsService,
     private readonly nextProblem: AdaptiveNextProblemService,
     private readonly similar: SimilarProblemService,
+    private readonly review: ReviewScheduleService,
   ) {}
+
+  /** 명세서 §4 Flow 6 — SM-2 forgettingRisk 기반 복습 후보. */
+  @Get('review-schedule')
+  reviewSchedule(@CurrentUser('id') userId: string) {
+    return this.review.getForUser(userId);
+  }
 
   @Get('today')
   today(@CurrentUser('id') userId: string, @CurrentLang() lang: Lang) {
