@@ -107,6 +107,13 @@ export function TeacherDashboardPage({ embedded = false }: { embedded?: boolean 
           </>
         )}
 
+        {/* (명세서 §1 강사 UI) 진단 메트릭 4종 — concept 별 반응시간/힌트율/confidence gap + 오답 원인 비율 */}
+        <SectionTitle no="04a" title={lang === 'ko' ? '진단 메트릭 (concept 별)' : 'Diagnostic metrics'} />
+        <DiagnosticMetricsTable rows={mastery.data ?? []} />
+
+        <SectionTitle no="04b" title={lang === 'ko' ? '오답 원인 코드 비율' : 'Error-code breakdown'} />
+        <ErrorCodeBreakdown rows={patterns.data ?? []} />
+
         {/* (4) ErrorPatternProfile 테이블 */}
         <SectionTitle no="04" title={lang === 'ko' ? '반복 오답 패턴' : 'Error patterns'} />
         <PatternTable rows={patterns.data ?? []} onOverride={(p) => setOverrideTarget({ type: 'ERROR_PATTERN', id: p.id, current: p })} />
@@ -238,6 +245,76 @@ function HistoryCard({ conceptId }: { conceptId: string }) {
       <div style={{ fontSize: 11, color: COLORS.sub }}>
         {rows.length}개 시계열 (좌→우 시간순). 막대 색: 녹 = mastery 상승, 적 = 하락.
       </div>
+    </Card>
+  );
+}
+
+/**
+ * 명세서 §1 강사 UI 명시 메트릭:
+ *   - 반응시간 변화 (averageResponseTimeSec)
+ *   - 힌트 사용률  (hintUsageRate)
+ *   - 자신감 점수와 실제 정답률 차이 (confidenceGap)
+ */
+function DiagnosticMetricsTable({ rows }: { rows: ConceptMastery[] }) {
+  if (rows.length === 0) return <Card><Sub>데이터 없음.</Sub></Card>;
+  return (
+    <Card style={{ padding: 0 }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <thead>
+          <tr style={{ borderBottom: `1px solid ${COLORS.line}`, backgroundColor: '#14285008' }}>
+            {['Concept', 'Mastery', 'Recent Acc.', 'Resp(s)', 'Hint%', 'Conf Gap', 'Trend'].map((h) => (
+              <th key={h} style={{ textAlign: 'left', padding: '10px 14px', fontSize: 11, letterSpacing: '0.1em', color: COLORS.sub }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((m) => {
+            const gapColor = m.confidenceGap >= 20 ? COLORS.bad : m.confidenceGap >= 10 ? COLORS.warn : COLORS.sub;
+            return (
+              <tr key={m.id} style={{ borderBottom: `1px dashed ${COLORS.line}` }}>
+                <td style={{ padding: '10px 14px' }}>{m.concept.name}</td>
+                <td style={{ padding: '10px 14px', fontFamily: 'JetBrains Mono, monospace' }}>{Math.round(m.masteryScore)}</td>
+                <td style={{ padding: '10px 14px', fontFamily: 'JetBrains Mono, monospace' }}>{Math.round(m.recentAccuracy * 100)}%</td>
+                <td style={{ padding: '10px 14px', fontFamily: 'JetBrains Mono, monospace' }}>{m.averageResponseTimeSec}</td>
+                <td style={{ padding: '10px 14px', fontFamily: 'JetBrains Mono, monospace' }}>{Math.round(m.hintUsageRate * 100)}%</td>
+                <td style={{ padding: '10px 14px', fontFamily: 'JetBrains Mono, monospace', color: gapColor, fontWeight: 600 }}>{Math.round(m.confidenceGap)}</td>
+                <td style={{ padding: '10px 14px', color: m.trend === 'UP' ? COLORS.good : m.trend === 'DOWN' ? COLORS.bad : COLORS.sub }}>{m.trend}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </Card>
+  );
+}
+
+/** 명세서 §1 강사 UI — 오답 원인 코드 비율 (전체 패턴의 frequency 합계 기준). */
+function ErrorCodeBreakdown({ rows }: { rows: ErrorPatternRow[] }) {
+  if (rows.length === 0) return <Card><Sub>오답 패턴 없음.</Sub></Card>;
+  const totalsByCode = new Map<string, number>();
+  for (const r of rows) totalsByCode.set(r.errorCode, (totalsByCode.get(r.errorCode) ?? 0) + r.frequency);
+  const total = [...totalsByCode.values()].reduce((s, x) => s + x, 0) || 1;
+  const palette: Record<string, string> = {
+    SIGN: '#8B3A1F', ALG: '#B5552B', CON: '#C7791F', FORMULA: '#D9A055',
+    GRAPH: '#5C6B85', UNIT: '#A89684', CALC: '#4A5D3A', LOGIC: '#1F1A14',
+  };
+  const items = [...totalsByCode.entries()].sort((a, b) => b[1] - a[1]);
+  return (
+    <Card>
+      {items.map(([code, count]) => {
+        const pct = Math.round((count / total) * 100);
+        return (
+          <div key={code} style={{ marginBottom: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 12 }}>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', color: COLORS.ink }}>{code}</span>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', color: COLORS.sub }}>{count}회 · {pct}%</span>
+            </div>
+            <div style={{ height: 6, backgroundColor: '#14285010', borderRadius: 3, overflow: 'hidden' }}>
+              <div style={{ width: `${pct}%`, height: '100%', backgroundColor: palette[code] ?? COLORS.sub }} />
+            </div>
+          </div>
+        );
+      })}
     </Card>
   );
 }

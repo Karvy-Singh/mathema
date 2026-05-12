@@ -8,6 +8,7 @@ import { SubmitAnswerDto } from './dto/submit-answer.dto';
 import { SessionContext } from '../../common/enums/session-context.enum';
 import { Lang } from '../../common/i18n/current-lang.decorator';
 import { CHOICE_EN } from '../../common/i18n/content-en';
+import { AdaptiveNextProblemService } from '../recommendations/services/adaptive-next-problem.service';
 
 @Injectable()
 export class StudySessionsService {
@@ -16,9 +17,23 @@ export class StudySessionsService {
     private readonly aiGuide: AiGuideService,
     private readonly attempts: AttemptsService,
     private readonly prisma: PrismaService,
+    private readonly adaptive: AdaptiveNextProblemService,
   ) {}
 
-  start(userId: string, dto: StartSessionDto, _lang: Lang = 'ko') { return this.repo.create(userId, dto); }
+  /**
+   * 명세서 §4 Flow 1 — 세션 시작 시 Adaptive Engine 추천 문제 1개를 함께 반환.
+   *   { session-row, nextProblem: { problemId, reason, ... } | null }
+   */
+  async start(userId: string, dto: StartSessionDto, _lang: Lang = 'ko') {
+    const session = await this.repo.create(userId, dto);
+    let nextProblem: any = null;
+    try {
+      nextProblem = await this.adaptive.getNext(userId, { sessionId: session.id });
+    } catch {
+      // 추천 실패해도 세션 자체는 반환 (학생 흐름 차단 X).
+    }
+    return { ...session, nextProblem };
+  }
   get(userId: string, id: string, _lang: Lang = 'ko') { return this.repo.findOne(userId, id); }
 
   /** 특정 문제로 학습 세션 시작 — 그 문제의 단원으로 세션을 만들고 focusProblemId 도 함께 반환. */

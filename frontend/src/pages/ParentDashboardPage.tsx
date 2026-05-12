@@ -59,6 +59,9 @@ export function ParentDashboardPage({ embedded = false }: { embedded?: boolean }
 
         {latest && (
           <>
+            {/* 명세서 §1 학부모 UI — "아이가 실제로 개선 중인지 여부" 종합 판단 */}
+            <ImprovementVerdict mastery={mastery.data ?? []} patterns={patterns.data ?? []} lang={lang} />
+
             {/* (6) parentSummary — 본문 */}
             <Card>
               <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: COLORS.ink }}>
@@ -116,6 +119,56 @@ export function ParentDashboardPage({ embedded = false }: { embedded?: boolean }
         )}
       </main>
     </div>
+  );
+}
+
+/**
+ * 명세서 §1 학부모 UI — "아이가 실제로 개선 중인지 여부".
+ *   UP / DOWN / STABLE 비율 + IMPROVING ErrorPattern 수 + RESOLVED 수를 종합해 한 줄 진단.
+ */
+function ImprovementVerdict({ mastery, patterns, lang }: { mastery: ConceptMastery[]; patterns: ErrorPatternRow[]; lang: 'ko' | 'en' | 'hi' }) {
+  if (mastery.length === 0) return null;
+  const up      = mastery.filter((m) => m.trend === 'UP').length;
+  const down    = mastery.filter((m) => m.trend === 'DOWN').length;
+  const stable  = mastery.filter((m) => m.trend === 'STABLE').length;
+  // ErrorPattern 의 상태 (parent UI 는 ACTIVE 만 받지만 화면에 보강 가능)
+  const activeCount = patterns.length;
+
+  let verdict: 'improving' | 'mixed' | 'stable' | 'attention';
+  let label: string;
+  let color: string;
+  if (up >= Math.max(2, down + 1)) {
+    verdict = 'improving';
+    label = lang === 'ko' ? '전반적으로 개선 중' : 'Improving overall';
+    color = COLORS.good;
+  } else if (down >= up && down >= 2) {
+    verdict = 'attention';
+    label = lang === 'ko' ? '주의 — 일부 개념이 약해지고 있어요' : 'Some areas declining';
+    color = COLORS.bad;
+  } else if (up === 0 && down === 0) {
+    verdict = 'stable';
+    label = lang === 'ko' ? '안정적' : 'Stable';
+    color = COLORS.sub;
+  } else {
+    verdict = 'mixed';
+    label = lang === 'ko' ? '개선과 보강이 섞여있어요' : 'Mixed progress';
+    color = COLORS.warn;
+  }
+
+  const detail = lang === 'ko'
+    ? `상승 ${up}개 · 하락 ${down}개 · 유지 ${stable}개 · 반복 실수 패턴 ${activeCount}건`
+    : `${up} up · ${down} down · ${stable} stable · ${activeCount} repeated patterns`;
+
+  return (
+    <Card style={{ borderLeft: `4px solid ${color}` }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+        <span style={{ fontSize: 11, color, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 600 }}>
+          {lang === 'ko' ? '진척 판정' : 'Progress'}
+        </span>
+        <span style={{ fontSize: 16, fontWeight: 600, color }}>{label}</span>
+      </div>
+      <div style={{ fontSize: 12, color: COLORS.sub }}>{detail}</div>
+    </Card>
   );
 }
 
