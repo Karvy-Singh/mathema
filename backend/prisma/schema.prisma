@@ -129,6 +129,14 @@ enum SchoolLevel {
   HIGH
 }
 
+/// 사용자 역할 — 명세서 §1 학생/학부모/강사/관리자 분리 UI 의 기반.
+enum UserRole {
+  STUDENT
+  PARENT
+  TEACHER
+  ADMIN
+}
+
 /// 오답 원인 코드 — 요구사항 errorCodes. ErrorPatternProfile / Attempt 양쪽에서 사용.
 enum ErrorCode {
   SIGN // 부호 처리
@@ -234,6 +242,11 @@ model User {
   country      CountryCode  @default(IN)
   /// 학교 단계 — 요구사항 Student.schoolLevel. 학년에서 유도되지만 명시 저장이 분석에 편리.
   schoolLevel  SchoolLevel?
+  /// 역할 — 명세서 §1 학생/학부모/강사/관리자 분리 UI 의 기반. 기본 STUDENT.
+  role         UserRole     @default(STUDENT)
+  /// 학부모-자녀 매핑 (Parent → Student.id). PARENT 역할일 때만 사용.
+  /// (Phase 후속: 학부모가 여러 자녀 관리 시 별도 ParentChildLink 모델로 분리)
+  childOfUserId String?
   /// 학원/기관 (multi-tenant). null = solo 학생.
   tenantId     String?
   /// 소프트 삭제 — null이면 활성 사용자. 값이 있으면 인증 차단되며 분석 자산은 보존.

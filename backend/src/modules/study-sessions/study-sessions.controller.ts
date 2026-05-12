@@ -6,8 +6,9 @@ import { CurrentLang, Lang } from '../../common/i18n/current-lang.decorator';
 import { StartSessionDto } from './dto/start-session.dto';
 import { SubmitAnswerDto } from './dto/submit-answer.dto';
 
+// 명세서 §5: /api/sessions/... 별칭과 기존 /api/study-sessions/... 둘 다 노출.
 @UseGuards(JwtAuthGuard)
-@Controller('study-sessions')
+@Controller(['study-sessions', 'sessions'])
 export class StudySessionsController {
   constructor(private readonly service: StudySessionsService) {}
 

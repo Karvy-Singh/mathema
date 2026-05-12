@@ -3,6 +3,22 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ToastHost } from './components/Toast';
 import { trackPageView } from './lib/analytics';
+import { useAuth } from './context/AuthContext';
+
+/**
+ * 명세서 §1 — 역할별 자동 라우팅.
+ *   STUDENT → MathLearningApp (기존 통합 화면, 학생 데이터 흐름)
+ *   PARENT  → /parent
+ *   TEACHER → /teacher
+ *   ADMIN   → /teacher (관리용으로 강사 화면 + override)
+ */
+function RoleRedirect() {
+  const { user } = useAuth();
+  const role = (user as any)?.role as 'STUDENT' | 'PARENT' | 'TEACHER' | 'ADMIN' | undefined;
+  if (role === 'PARENT')  return <Navigate to="/parent"  replace />;
+  if (role === 'TEACHER' || role === 'ADMIN') return <Navigate to="/teacher" replace />;
+  return <Navigate to="/app" replace />;
+}
 
 // 코드 스플리팅 — 페이지별 lazy import 로 초기 번들 경감.
 // 인증·랜딩만 즉시 필요, 학습/설정은 인증 후에만 로드.
@@ -98,6 +114,14 @@ export default function App() {
           />
           <Route
             path="/"
+            element={
+              <ProtectedRoute>
+                <RoleRedirect />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app"
             element={
               <ProtectedRoute>
                 <MathLearningApp />

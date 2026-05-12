@@ -41,6 +41,7 @@ import { PushModule } from './modules/push/push.module';
 import { PrivacyModule } from './modules/privacy/privacy.module';
 import { LlmAnalysisModule } from './modules/llm-analysis/llm-analysis.module';
 import { FeedbackModule } from './modules/feedback/feedback.module';
+import { StudentsModule } from './modules/students/students.module';
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { FeedbackModule } from './modules/feedback/feedback.module';
     PrivacyModule,
     LlmAnalysisModule,
     FeedbackModule,
+    StudentsModule,
   ],
 })
 export class AppModule {}

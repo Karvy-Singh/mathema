@@ -71,7 +71,14 @@ export type TimeVsAccuracy = Array<{ week: string; time: number; accuracy: numbe
 export type FocusItem = { unit: string; area: string; priority: string; color: string; impact: string };
 export type Achievement = { icon: string; title: string; sub: string; color: string };
 export type GradeLevel = 'G_MIDDLE_1' | 'G_MIDDLE_2' | 'G_MIDDLE_3' | 'G_HIGH_1' | 'G_HIGH_2' | 'G_HIGH_3';
-export type Me = { id: string; name: string; email: string; examDate: string; targetGrade: number; dDay: number; gradeLevel?: GradeLevel | null };
+export type UserRole = 'STUDENT' | 'PARENT' | 'TEACHER' | 'ADMIN';
+export type Me = {
+  id: string; name: string; email: string;
+  examDate: string; targetGrade: number; dDay: number;
+  gradeLevel?: GradeLevel | null;
+  role?: UserRole;
+  tenantId?: string | null;
+};
 
 // fetchers
 export const fetchMe = () => get<Me>('/users/me');
