@@ -3,3 +3,8 @@ dist
 .env
 .env.local
 *.log
+
+# Playwright temp + dev scratch
+test-results/
+playwright-report/
+curr.json
