@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 
 export interface LlmRequest {
   prompt: string;
@@ -17,12 +18,9 @@ export interface LlmResponse {
 
 /**
  * 외부 LLM 호출 어댑터.
- * 도메인 코드(ai-coach, study-sessions, wrong-notes)는 이 클래스만 의존한다.
+ *   AI_LLM_PROVIDER=anthropic | openai
  *
- * ⚑ api입력칸 ⚑
- * 실제 SDK 호출부는 환경에 맞게 채워 넣는다.
- *  - Anthropic:  @anthropic-ai/sdk
- *  - OpenAI:     openai
+ * 도메인 코드(ai-coach, study-sessions, wrong-notes)는 이 클래스만 의존한다.
  */
 @Injectable()
 export class LlmProvider {
@@ -30,45 +28,35 @@ export class LlmProvider {
   private readonly apiKey: string;
   private readonly provider: string;
   private readonly model: string;
+  private anthropic: Anthropic | null = null;
+  private openai: OpenAI | null = null;
 
   constructor(private readonly config: ConfigService) {
-    this.apiKey = this.config.get<string>('ai.llm.apiKey')!;
-    this.provider = this.config.get<string>('ai.llm.provider')!;
-    this.model = this.config.get<string>('ai.llm.model')!;
+    this.apiKey = this.config.get<string>('ai.llm.apiKey') ?? '';
+    this.provider = (this.config.get<string>('ai.llm.provider') ?? 'anthropic').toLowerCase();
+    this.model = this.config.get<string>('ai.llm.model') ?? '';
+
+    if (this.isConfigured()) {
+      if (this.provider === 'anthropic') {
+        this.anthropic = new Anthropic({ apiKey: this.apiKey });
+      } else if (this.provider === 'openai') {
+        this.openai = new OpenAI({ apiKey: this.apiKey });
+      }
+    }
   }
 
-  /**
-   * 텍스트 생성 호출.
-   * @param req prompt + system + 옵션
-   * @returns 생성된 텍스트와 토큰 사용량
-   *
-   * ⚑ api입력칸 ⚑ — 아래 throw 부분을 실제 SDK 호출로 교체
-   *
-   *   if (this.provider === 'anthropic') {
-   *     const client = new Anthropic({ apiKey: this.apiKey });
-   *     const res = await client.messages.create({
-   *       model: this.model,
-   *       system: req.system,
-   *       max_tokens: req.maxTokens ?? 1024,
-   *       messages: [{ role: 'user', content: req.prompt }],
-   *     });
-   *     return {
-   *       text: res.content[0].type === 'text' ? res.content[0].text : '',
-   *       inputTokens: res.usage.input_tokens,
-   *       outputTokens: res.usage.output_tokens,
-   *     };
-   *   }
-   */
+  private isConfigured(): boolean {
+    return !!this.apiKey && this.apiKey !== 'api입력칸';
+  }
+
   async generate(req: LlmRequest): Promise<LlmResponse> {
-    if (!this.apiKey || this.apiKey === 'api입력칸') {
-      // 운영에서는 이 분기에 들어오면 안 됨. 서비스 측에 명확히 알리고 호출자가 fallback 처리.
-      this.logger.error('AI_LLM_API_KEY not configured — refusing to return sample text.');
+    if (!this.isConfigured()) {
+      this.logger.error('AI_LLM_API_KEY not configured.');
       throw new Error('LLM_PROVIDER_NOT_CONFIGURED');
     }
 
-    if (this.provider === 'anthropic') {
-      const client = new Anthropic({ apiKey: this.apiKey });
-      const res = await client.messages.create({
+    if (this.provider === 'anthropic' && this.anthropic) {
+      const res = await this.anthropic.messages.create({
         model: this.model || 'claude-sonnet-4-6',
         max_tokens: req.maxTokens ?? 1024,
         temperature: req.temperature ?? 0.4,
@@ -83,6 +71,24 @@ export class LlmProvider {
       };
     }
 
-    throw new Error(`LlmProvider: provider=${this.provider} not implemented yet (only 'anthropic' wired).`);
+    if (this.provider === 'openai' && this.openai) {
+      const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
+      if (req.system) messages.push({ role: 'system', content: req.system });
+      messages.push({ role: 'user', content: req.prompt });
+      const res = await this.openai.chat.completions.create({
+        model: this.model || 'gpt-4o',
+        max_completion_tokens: req.maxTokens ?? 1024,
+        temperature: req.temperature ?? 0.4,
+        messages,
+      });
+      const choice = res.choices?.[0];
+      return {
+        text: choice?.message?.content ?? '',
+        inputTokens: res.usage?.prompt_tokens ?? 0,
+        outputTokens: res.usage?.completion_tokens ?? 0,
+      };
+    }
+
+    throw new Error(`LlmProvider: provider=${this.provider} not wired (configured? ${this.isConfigured()}).`);
   }
 }

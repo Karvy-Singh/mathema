@@ -9,10 +9,10 @@
  */
 
 import { ChatAnthropic } from '@langchain/anthropic';
-import { AzureChatOpenAI } from '@langchain/openai';
+import { AzureChatOpenAI, ChatOpenAI } from '@langchain/openai';
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 
-export type LlmProviderType = 'anthropic' | 'azure-openai';
+export type LlmProviderType = 'anthropic' | 'azure-openai' | 'openai';
 
 export interface ChatModelOptions {
   /** 응답 다양성. 0 = 결정론적, 1 = 매우 다양. (기본 0.4) */
@@ -25,7 +25,9 @@ export interface ChatModelOptions {
 
 export function getLlmProvider(): LlmProviderType {
   const v = (process.env.LLM_PROVIDER ?? 'anthropic').toLowerCase();
-  return v === 'azure-openai' ? 'azure-openai' : 'anthropic';
+  if (v === 'azure-openai') return 'azure-openai';
+  if (v === 'openai') return 'openai';
+  return 'anthropic';
 }
 
 export function buildChatModel(opts: ChatModelOptions = {}): BaseChatModel {
@@ -36,7 +38,7 @@ export function buildChatModel(opts: ChatModelOptions = {}): BaseChatModel {
   if (provider === 'azure-openai') {
     return new AzureChatOpenAI({
       azureOpenAIApiKey: process.env.AZURE_OPENAI_API_KEY,
-      azureOpenAIApiInstanceName: process.env.AZURE_OPENAI_INSTANCE, // 예: 'mathema-aoai' (mathema-aoai.openai.azure.com)
+      azureOpenAIApiInstanceName: process.env.AZURE_OPENAI_INSTANCE,
       azureOpenAIApiDeploymentName: process.env.AZURE_OPENAI_DEPLOYMENT ?? 'gpt-4o',
       azureOpenAIApiVersion: process.env.AZURE_OPENAI_API_VERSION ?? '2024-08-01-preview',
       temperature,
@@ -44,8 +46,17 @@ export function buildChatModel(opts: ChatModelOptions = {}): BaseChatModel {
     }) as unknown as BaseChatModel;
   }
 
+  if (provider === 'openai') {
+    return new ChatOpenAI({
+      apiKey: process.env.OPENAI_API_KEY ?? process.env.AI_LLM_API_KEY,
+      model: process.env.AI_LLM_MODEL ?? 'gpt-4o',
+      temperature,
+      maxTokens,
+    }) as unknown as BaseChatModel;
+  }
+
   return new ChatAnthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
+    apiKey: process.env.ANTHROPIC_API_KEY ?? process.env.AI_LLM_API_KEY,
     model: process.env.AI_LLM_MODEL ?? 'claude-opus-4-5',
     temperature,
     maxTokens,

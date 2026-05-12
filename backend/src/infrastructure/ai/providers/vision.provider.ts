@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 
 export interface VisionParseResult {
   body: string;        // 인식된 문제 본문 (LaTeX 변환 포함)
@@ -27,14 +28,16 @@ export class VisionProvider {
   private readonly provider: string;
   private readonly model: string;
   private anthropic: Anthropic | null = null;
+  private openai: OpenAI | null = null;
 
   constructor(private readonly config: ConfigService) {
     this.apiKey = this.config.get<string>('ai.vision.apiKey') ?? '';
-    this.provider = this.config.get<string>('ai.vision.provider') ?? 'anthropic';
-    this.model = this.config.get<string>('ai.vision.model') ?? 'claude-sonnet-4-6';
+    this.provider = (this.config.get<string>('ai.vision.provider') ?? 'anthropic').toLowerCase();
+    this.model = this.config.get<string>('ai.vision.model') ?? 'gpt-4o';
 
-    if (this.isConfigured() && this.provider === 'anthropic') {
-      this.anthropic = new Anthropic({ apiKey: this.apiKey });
+    if (this.isConfigured()) {
+      if (this.provider === 'anthropic') this.anthropic = new Anthropic({ apiKey: this.apiKey });
+      else if (this.provider === 'openai') this.openai = new OpenAI({ apiKey: this.apiKey });
     }
   }
 
@@ -52,8 +55,56 @@ export class VisionProvider {
     if (this.provider === 'anthropic' && this.anthropic) {
       return this.parseWithAnthropic(imageBuffer);
     }
+    if (this.provider === 'openai' && this.openai) {
+      return this.parseWithOpenAI(imageBuffer);
+    }
 
     throw new Error(`VisionProvider: provider=${this.provider} not implemented`);
+  }
+
+  /**
+   * OpenAI gpt-4o Vision — base64 이미지를 messages 의 image_url 로 전달.
+   * Claude vision 과 동일하게 JSON 출력 강제.
+   */
+  private async parseWithOpenAI(imageBuffer: Buffer): Promise<VisionParseResult> {
+    const base64 = imageBuffer.toString('base64');
+    const mediaType = this.detectMediaType(imageBuffer);
+    const dataUrl = `data:${mediaType};base64,${base64}`;
+
+    const res = await this.openai!.chat.completions.create({
+      model: this.model || 'gpt-4o',
+      max_completion_tokens: 1000,
+      response_format: { type: 'json_object' },
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a math OCR. Extract the problem text from the image. ' +
+            'Output strict JSON: { "body": string, "answer": string|null, "source": string|null, "confidence": number }. ' +
+            'Use LaTeX-friendly symbols (∫, π, √, ²). Do not solve the problem — just transcribe.',
+        },
+        {
+          role: 'user',
+          content: [
+            { type: 'image_url', image_url: { url: dataUrl } },
+            { type: 'text', text: 'Transcribe this math problem. Return JSON only.' },
+          ],
+        },
+      ],
+    });
+    const text = res.choices?.[0]?.message?.content ?? '{}';
+    try {
+      const json = JSON.parse(text);
+      return {
+        body: String(json.body ?? '').trim() || '[empty]',
+        answer: json.answer ?? undefined,
+        source: json.source ?? undefined,
+        confidence: typeof json.confidence === 'number' ? json.confidence : 0.7,
+      };
+    } catch (e) {
+      this.logger.warn(`OpenAI vision JSON parse failed; raw="${text.slice(0, 200)}"`);
+      return { body: text.slice(0, 500), confidence: 0.4 };
+    }
   }
 
   /**
