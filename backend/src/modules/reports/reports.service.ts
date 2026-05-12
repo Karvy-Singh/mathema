@@ -60,7 +60,7 @@ export class ReportsService {
       where: { userId }, include: { unit: true }, orderBy: { score: 'asc' }, take: 3,
     });
     const palette = ['#8B3A1F', '#B45309', '#A16207'];
-    const isEn = lang === 'en';
+    const isEn = lang !== 'ko';
     const priorities = isEn ? ['Top', 'High', 'Mid'] : ['최우선', '높음', '중간'];
     const impacts = isEn ? ['+8 pts est.', '+5 pts est.', '+3 pts est.'] : ['+8점 예상', '+5점 예상', '+3점 예상'];
     const fallbackPriority = isEn ? 'Mid' : '중간';
@@ -89,7 +89,7 @@ export class ReportsService {
     const streak = await this.prisma.dailyActivity.count({
       where: { userId, intensity: { gt: 0 } },
     });
-    if (lang === 'en') {
+    if (lang !== 'ko') {
       return [
         { icon: 'Flame', title: `${streak}-day learning streak`, sub: 'New personal record', color: '#B45309' },
         { icon: 'TrendingUp', title: 'Accuracy passed 70%', sub: 'First 70%+ in 6 weeks', color: '#4A5D3A' },
@@ -119,7 +119,7 @@ export class ReportsService {
       where: { userId, confidence: { not: null } },
       select: { confidence: true, isCorrect: true, createdAt: true },
     });
-    const isEn = lang === 'en';
+    const isEn = lang !== 'ko';
 
     if (attempts.length === 0) {
       return {

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { translations, TranslationKey } from './translations';
 
-export type Lang = 'ko' | 'en';
+export type Lang = 'ko' | 'en' | 'hi';
 
 type I18nContext = {
   lang: Lang;
@@ -25,11 +25,14 @@ const STORAGE_KEY = 'mathema.lang';
  */
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(() => {
-    if (typeof window === 'undefined') return 'en';
+    if (typeof window === 'undefined') return 'hi';
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === 'ko' || saved === 'en') return saved;
-    // 브라우저 언어 감지 — Korean 만 명시적으로 KO, 그 외(IN/US/GB/...)는 EN.
-    return navigator.language.startsWith('ko') ? 'ko' : 'en';
+    if (saved === 'ko' || saved === 'en' || saved === 'hi') return saved;
+    // 인도 PoC 디폴트 = HI. 브라우저 언어가 ko/en 이면 그쪽으로.
+    const nav = navigator.language.toLowerCase();
+    if (nav.startsWith('ko')) return 'ko';
+    if (nav.startsWith('en')) return 'en';
+    return 'hi';
   });
 
   const setLang = (l: Lang) => {
@@ -51,8 +54,10 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const t = (key: TranslationKey, params?: Record<string, string | number>): string => {
     const dict = translations[lang] as Record<string, string>;
-    const fallback = translations.ko as Record<string, string>;
-    let str = dict[key] ?? fallback[key] ?? key;
+    // HI 가 누락된 키는 EN 으로, EN도 없으면 KO 로, 모두 없으면 key 그대로.
+    const en = translations.en as Record<string, string>;
+    const ko = translations.ko as Record<string, string>;
+    let str = dict[key] ?? en[key] ?? ko[key] ?? key;
     if (params) {
       for (const [k, v] of Object.entries(params)) {
         str = str.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));

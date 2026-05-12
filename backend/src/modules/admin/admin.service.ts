@@ -4,7 +4,7 @@ import { Lang } from '../../common/i18n/current-lang.decorator';
 import { UNIT_NAME_EN } from '../../common/i18n/content-en';
 
 const localizeUnit = (name: string | undefined | null, lang: Lang) =>
-  lang === 'en' ? (name && UNIT_NAME_EN[name]) || name || '—' : name || '—';
+  lang !== 'ko' ? (name && UNIT_NAME_EN[name]) || name || '—' : name || '—';
 
 /**
  * 관리자 데이터 — 전체 사용자/시스템 통계 + 개별 사용자 상세.

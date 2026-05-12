@@ -501,9 +501,12 @@ model ConceptLesson {
   chapterCode     String       @unique
   titleKo         String       // "정수"
   titleEn         String       // "Integers"
+  /// 힌디어 챕터명 — 인도 PoC 1차 출시 언어. 누락 시 service 가 titleEn 으로 fallback.
+  titleHi         String?      // "पूर्णांक"
   /// 빅 아이디어 — 학습자가 이번 차시에서 가져가야 할 핵심 통찰 (1~2 문장).
   bigIdeaKo       String       @db.Text
   bigIdeaEn       String       @db.Text
+  bigIdeaHi       String?      @db.Text
   /// 예상 학습 시간 (분). 기본 15.
   estimatedMin    Int          @default(15)
   /// 학습 강도 0~3 (인지부하 추정). 0=가벼움, 3=킬러 챕터.
@@ -533,12 +536,21 @@ model ConceptStep {
   kind            ConceptStepKind
   titleKo         String
   titleEn         String
+  titleHi         String?          // 인도 PoC. 없으면 titleEn fallback.
   /// 본문 (Markdown + LaTeX 허용)
   bodyKo          String           @db.Text
   bodyEn          String           @db.Text
+  bodyHi          String?          @db.Text
   /// 시각 자료 — Pictorial/Concrete 단계용. URL 또는 SVG 데이터.
   visualType      String?          // 'figure' | 'video' | 'manipulative' | 'graph' | 'svg'
   visualUrl       String?
+  /// 동적 그래프 렌더링용 JSON 파라미터 — visualType='graph' 일 때 사용.
+  ///   { type: 'unit-circle', angle: 120 }
+  ///   { type: 'parabola', a: 1, b: 0, c: -3, range: [-3, 3] }
+  ///   { type: 'number-line', marks: [-3, 0, 5], highlight: 5 }
+  ///   { type: 'venn-2set', a: 18, b: 14, both: 6, labelA: 'Football', labelB: 'Basketball' }
+  ///   { type: 'sine-wave', amplitude: 1, period: 360, marked: [{x: 30, y: 0.5}] }
+  visualData      Json?
   /// MISCONCEPTION 단계 페이로드:
   ///   { wrong: "흔한 오답", why: "왜 헷갈리는지", correct: "올바른 사고" }
   misconception   Json?

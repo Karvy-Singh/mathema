@@ -37,13 +37,13 @@ export class WrongNotesService {
   async uploadPhoto(_userId: string, file: Express.Multer.File, lang: Lang = 'ko') {
     if (!file) return { ok: false, message: 'file required' };
     return { ok: true,
-      message: lang === 'en' ? STATIC_FALLBACK_EN.uploadPhotoOk
+      message: lang !== 'ko' ? STATIC_FALLBACK_EN.uploadPhotoOk
         : '사진 등록 — Vision API 연동(api입력칸) 후 자동 인식됩니다.' };
   }
   async uploadPdf(_userId: string, file: Express.Multer.File, lang: Lang = 'ko') {
     if (!file) return { ok: false, message: 'file required' };
     return { ok: true,
-      message: lang === 'en' ? STATIC_FALLBACK_EN.uploadPdfOk
+      message: lang !== 'ko' ? STATIC_FALLBACK_EN.uploadPdfOk
         : 'PDF 일괄 추출 — LLM 연동(api입력칸) 후 자동 분리됩니다.' };
   }
 

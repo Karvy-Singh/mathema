@@ -24,7 +24,7 @@ const shuffle = <T>(arr: T[]): T[] => {
 const sanitizeForClient = (p: any, lang: Lang = 'ko') => {
   if (!p) return p;
   const { answer, ...rest } = p;
-  if (lang === 'en') {
+  if (lang !== 'ko') {
     const en = PROBLEM_EN[p.source];
     if (en) rest.body = en.body;
     if (SOURCE_EN[p.source]) rest.source = SOURCE_EN[p.source];
@@ -41,12 +41,12 @@ const sanitizeForClient = (p: any, lang: Lang = 'ko') => {
         const choiceEn = CHOICE_EN[choiceKey];
         return {
           id: c.id, choiceIndex: c.choiceIndex,
-          text: lang === 'en' && choiceEn ? choiceEn.text : c.text,
+          text: lang !== 'ko' && choiceEn ? choiceEn.text : c.text,
         };
       });
       return {
         id: s.id, stepIndex: s.stepIndex, stepType: s.stepType,
-        prompt: lang === 'en' && promptEn ? promptEn : s.prompt,
+        prompt: lang !== 'ko' && promptEn ? promptEn : s.prompt,
         choices: shuffle(choices),
       };
     });

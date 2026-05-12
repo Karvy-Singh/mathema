@@ -5,10 +5,38 @@ import { ERROR_TYPE_LABEL_KO } from '../../common/enums/error-type.enum';
 import { DIFFICULTY_LABEL_KO } from '../../common/enums/difficulty.enum';
 import { Lang } from '../../common/i18n/current-lang.decorator';
 import { UNIT_NAME_EN, SUB_UNIT_NAME_EN, DIFFICULTY_EN, ERROR_TYPE_EN, SOURCE_EN, INSIGHT_EN, PROBLEM_EN, CONCEPT_EN, FORMULA_EN } from '../../common/i18n/content-en';
+import { UNIT_NAME_HI, SUB_UNIT_NAME_HI, DIFFICULTY_HI, ERROR_TYPE_HI } from '../../common/i18n/content-hi';
+
+function pickUnit(name: string, lang: Lang): string {
+  if (lang === 'hi') return UNIT_NAME_HI[name] ?? UNIT_NAME_EN[name] ?? name;
+  if (lang === 'en') return UNIT_NAME_EN[name] ?? name;
+  return name;
+}
+function pickSub(name: string, lang: Lang): string {
+  if (lang === 'hi') return SUB_UNIT_NAME_HI[name] ?? SUB_UNIT_NAME_EN[name] ?? name;
+  if (lang === 'en') return SUB_UNIT_NAME_EN[name] ?? name;
+  return name;
+}
+function pickDifficulty(key: string, lang: Lang): string {
+  if (lang === 'hi') return DIFFICULTY_HI[key] ?? DIFFICULTY_EN[key] ?? key;
+  if (lang === 'en') return DIFFICULTY_EN[key] ?? key;
+  return DIFFICULTY_LABEL_KO[key as keyof typeof DIFFICULTY_LABEL_KO] ?? key;
+}
+function pickErrorType(key: string, lang: Lang): string {
+  if (lang === 'hi') return ERROR_TYPE_HI[key] ?? ERROR_TYPE_EN[key as keyof typeof ERROR_TYPE_EN] ?? key;
+  if (lang === 'en') return ERROR_TYPE_EN[key as keyof typeof ERROR_TYPE_EN] ?? key;
+  return ERROR_TYPE_LABEL_KO[key as keyof typeof ERROR_TYPE_LABEL_KO] ?? key;
+}
 
 const formatDate = (d: Date, lang: Lang) => {
   const days = Math.floor((Date.now() - d.getTime()) / 86400000);
-  if (lang === 'en') {
+  if (lang === 'hi') {
+    if (days <= 1) return 'आज';
+    if (days < 7) return `${days} दिन पहले`;
+    if (days < 30) return `${Math.floor(days / 7)} सप्ताह पहले`;
+    return `${Math.floor(days / 30)} माह पहले`;
+  }
+  if (lang !== 'ko') {
     if (days <= 1) return 'today';
     if (days < 7) return `${days}d ago`;
     if (days < 30) return `${Math.floor(days / 7)}w ago`;
@@ -24,7 +52,12 @@ const formatDueIn = (next: Date | null, lang: Lang): string | null => {
   if (!next) return null;
   const ms = next.getTime() - Date.now();
   const days = Math.ceil(ms / 86400000);
-  if (lang === 'en') {
+  if (lang === 'hi') {
+    if (ms <= 0) return 'अभी समीक्षा';
+    if (days <= 1) return 'कल';
+    return `${days} दिन में`;
+  }
+  if (lang !== 'ko') {
     if (ms <= 0) return 'Review now';
     if (days <= 1) return 'Tomorrow';
     return `In ${days}d`;
@@ -45,14 +78,14 @@ const toCardShape = (n: any, lang: Lang = 'ko') => {
   const conceptKo = (n.problem.concept ?? null) as string | null;
   const formulaKo = (n.problem.formula ?? null) as string | null;
   const en = PROBLEM_EN[sourceKo];
-  const problemBody = lang === 'en' && en?.body ? en.body : bodyKo;
-  const problemAnswer = lang === 'en' && en?.answer ? en.answer : answerKo;
-  const problemConcept = lang === 'en' && CONCEPT_EN[sourceKo] ? CONCEPT_EN[sourceKo] : conceptKo;
-  const problemFormula = lang === 'en' && FORMULA_EN[sourceKo] ? FORMULA_EN[sourceKo] : formulaKo;
+  const problemBody = lang !== 'ko' && en?.body ? en.body : bodyKo;
+  const problemAnswer = lang !== 'ko' && en?.answer ? en.answer : answerKo;
+  const problemConcept = lang !== 'ko' && CONCEPT_EN[sourceKo] ? CONCEPT_EN[sourceKo] : conceptKo;
+  const problemFormula = lang !== 'ko' && FORMULA_EN[sourceKo] ? FORMULA_EN[sourceKo] : formulaKo;
   return {
     id: n.id,
     problemId: n.problemId,
-    problem: lang === 'en' ? (SOURCE_EN[sourceKo] ?? sourceKo) : sourceKo,
+    problem: lang !== 'ko' ? (SOURCE_EN[sourceKo] ?? sourceKo) : sourceKo,
     /** 실제 문제 본문 (오답노트에서 어떤 문제였는지 즉시 확인 가능) */
     problemBody,
     /** 정답 — 오답노트 상세에서 노출 */
@@ -61,16 +94,12 @@ const toCardShape = (n: any, lang: Lang = 'ko') => {
     problemConcept,
     /** 관련 공식 — 개념 패널 안의 공식 라인 */
     problemFormula,
-    unit: lang === 'en' ? (UNIT_NAME_EN[unitKo] ?? unitKo) : unitKo,
-    subUnit: lang === 'en' ? (SUB_UNIT_NAME_EN[subUnitKo] ?? subUnitKo) : subUnitKo,
-    errorType: lang === 'en'
-      ? ERROR_TYPE_EN[n.errorType as keyof typeof ERROR_TYPE_EN]
-      : ERROR_TYPE_LABEL_KO[n.errorType as keyof typeof ERROR_TYPE_LABEL_KO],
+    unit: pickUnit(unitKo, lang),
+    subUnit: pickSub(subUnitKo, lang),
+    errorType: pickErrorType(n.errorType, lang),
     errorTypeRaw: n.errorType,
-    insight: lang === 'en' ? (INSIGHT_EN[insightKo] ?? insightKo) : insightKo,
-    diff: lang === 'en'
-      ? DIFFICULTY_EN[n.problem.difficulty as keyof typeof DIFFICULTY_EN]
-      : DIFFICULTY_LABEL_KO[n.problem.difficulty as keyof typeof DIFFICULTY_LABEL_KO],
+    insight: lang !== 'ko' ? (INSIGHT_EN[insightKo] ?? insightKo) : insightKo,
+    diff: pickDifficulty(n.problem.difficulty, lang),
     date: formatDate(n.createdAt, lang),
     similarCount: n.similarCount,
     status: n.status.toLowerCase(),

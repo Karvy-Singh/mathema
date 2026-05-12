@@ -111,10 +111,14 @@ export class StudySessionsService {
     enriched.sort((a, b) => b.weight - a.weight);
     const top = enriched.slice(0, count);
 
-    // 표시용 reason 라벨 (KO/EN)
+    // 표시용 reason 라벨 (KO / EN / HI)
     const labelize = (e: typeof enriched[number]) => {
       const parts: string[] = [];
-      if (lang === 'en') {
+      if (lang === 'hi') {
+        parts.push(`दक्षता ${e.mastery}%`);
+        if (e.wrongCount > 0) parts.push(`${e.wrongCount} गलत नोट`);
+        parts.push(`${e.studyMinutes} मिनट अध्ययन`);
+      } else if (lang !== 'ko') {
         parts.push(`Mastery ${e.mastery}%`);
         if (e.wrongCount > 0) parts.push(`${e.wrongCount} wrong note${e.wrongCount > 1 ? 's' : ''}`);
         parts.push(`${e.studyMinutes} min studied`);
@@ -126,10 +130,14 @@ export class StudySessionsService {
       return parts.join(' · ');
     };
 
-    // 단원명 EN 변환
+    // 단원명 EN / HI 변환
     const unitDisplay = (name: string) => {
-      if (lang !== 'en') return name;
+      if (lang === 'ko') return name;
       const { UNIT_NAME_EN } = require('../../common/i18n/content-en');
+      if (lang === 'hi') {
+        const { UNIT_NAME_HI } = require('../../common/i18n/content-hi');
+        return UNIT_NAME_HI[name] ?? UNIT_NAME_EN[name] ?? name;
+      }
       return UNIT_NAME_EN[name] ?? name;
     };
 
@@ -175,7 +183,7 @@ export class StudySessionsService {
           step: { select: { stepIndex: true, problem: { select: { source: true } } } },
         },
       });
-      if (choice && lang === 'en' && choice.step) {
+      if (choice && lang !== 'ko' && choice.step) {
         const key = `${choice.step.problem.source}:${choice.step.stepIndex}:${(await this.prisma.problemChoice.findUnique({ where: { id: choice.id }, select: { choiceIndex: true } }))?.choiceIndex}`;
         const en = CHOICE_EN[key];
         if (en) {

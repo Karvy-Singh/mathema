@@ -28,6 +28,7 @@ export interface ConceptStepBlueprint {
   /** UI 에 노출되는 라벨 */
   labelKo: string;
   labelEn: string;
+  labelHi?: string;
   /** 단계 목적 (UX 의 진행도 툴팁용) */
   purposeKo: string;
   purposeEn: string;
@@ -46,6 +47,7 @@ export const STANDARD_SEQUENCE: ConceptStepBlueprint[] = [
     kind: ConceptStepKind.HOOK,
     labelKo: '왜 배우는가',
     labelEn: 'Why this matters',
+    labelHi: 'यह क्यों ज़रूरी है',
     purposeKo: '오늘 배울 개념이 어떤 문제를 해결해주는지 사전 지식과 연결.',
     purposeEn: 'Anchor today\'s idea to a real problem and prior knowledge.',
     principle: 'Ausubel — Advance Organizer',
@@ -55,6 +57,7 @@ export const STANDARD_SEQUENCE: ConceptStepBlueprint[] = [
     kind: ConceptStepKind.CONCRETE,
     labelKo: '구체 예시',
     labelEn: 'Concrete example',
+    labelHi: 'ठोस उदाहरण',
     purposeKo: '손에 잡히는 실물·수치 사례로 개념의 작동을 직접 본다.',
     purposeEn: 'Watch the idea operate on tangible objects or numbers.',
     principle: 'Bruner — Concrete representation',
@@ -64,6 +67,7 @@ export const STANDARD_SEQUENCE: ConceptStepBlueprint[] = [
     kind: ConceptStepKind.PICTORIAL,
     labelKo: '그림·도식',
     labelEn: 'Picture & diagram',
+    labelHi: 'चित्र और आरेख',
     purposeKo: '같은 구조를 다이어그램·수직선·표로 시각화 (dual coding).',
     purposeEn: 'Re-encode the same structure as a diagram (dual coding).',
     principle: 'Bruner — Pictorial / Dual Coding',
@@ -73,6 +77,7 @@ export const STANDARD_SEQUENCE: ConceptStepBlueprint[] = [
     kind: ConceptStepKind.ABSTRACT,
     labelKo: '기호와 정의',
     labelEn: 'Symbols & definition',
+    labelHi: 'प्रतीक और परिभाषा',
     purposeKo: '기호·수식·일반화된 정의로 압축. 변주 1차원만 노출.',
     purposeEn: 'Compress to symbols, formal definition; vary only one dimension.',
     principle: 'Bruner — Abstract / Marton — Variation',
@@ -82,6 +87,7 @@ export const STANDARD_SEQUENCE: ConceptStepBlueprint[] = [
     kind: ConceptStepKind.WORKED_EXAMPLE,
     labelKo: '풀이 시연',
     labelEn: 'Worked example',
+    labelHi: 'हल किया गया उदाहरण',
     purposeKo: '전체 풀이를 단계별로 보며 schema 를 형성. 외재 부하 최소.',
     purposeEn: 'See a full solution decomposed step-by-step.',
     principle: 'Sweller — Worked-example effect',
@@ -91,6 +97,7 @@ export const STANDARD_SEQUENCE: ConceptStepBlueprint[] = [
     kind: ConceptStepKind.MISCONCEPTION,
     labelKo: '흔한 함정',
     labelEn: 'Common pitfalls',
+    labelHi: 'सामान्य भूल',
     purposeKo: '학생들이 자주 잘못 추론하는 지점을 노출하고 올바른 사고와 대조.',
     purposeEn: 'Expose typical wrong reasoning and contrast with correct.',
     principle: 'Conceptual change theory',
@@ -100,6 +107,7 @@ export const STANDARD_SEQUENCE: ConceptStepBlueprint[] = [
     kind: ConceptStepKind.RETRIEVAL,
     labelKo: '자가 점검',
     labelEn: 'Recall check',
+    labelHi: 'स्मरण जाँच',
     purposeKo: '입력 없이 회상하여 답한다. 통과해야 문제풀이 단계로 진입.',
     purposeEn: 'Answer from memory; required to unlock problem practice.',
     principle: 'Karpicke — Retrieval Practice',
@@ -127,6 +135,7 @@ export const DEEP_SEQUENCE: ConceptStepBlueprint[] = [
     kind: ConceptStepKind.GUIDED_PRACTICE,
     labelKo: '함께 풀어보기',
     labelEn: 'Guided practice',
+    labelHi: 'मार्गदर्शित अभ्यास',
     purposeKo: '풀이 단계 일부를 가린 채 학생이 채워보는 fading scaffolding.',
     purposeEn: 'Fill in faded steps — scaffolded practice.',
     principle: 'Renkl — Fading worked-examples',
@@ -138,6 +147,7 @@ export const DEEP_SEQUENCE: ConceptStepBlueprint[] = [
     kind: ConceptStepKind.REFLECT,
     labelKo: '내 말로 정리',
     labelEn: 'My own summary',
+    labelHi: 'मेरा सारांश',
     purposeKo: '한 문장으로 개념을 자기 말로 요약 — 자기설명 효과.',
     purposeEn: 'Summarise the concept in your own words.',
     principle: 'Chi — Self-explanation effect',

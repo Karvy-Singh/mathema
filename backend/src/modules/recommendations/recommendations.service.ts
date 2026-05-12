@@ -4,6 +4,7 @@ import { ReinforceWeaknessStrategy } from './strategies/reinforce-weakness.strat
 import { MaintainStrengthStrategy } from './strategies/maintain-strength.strategy';
 import { Lang } from '../../common/i18n/current-lang.decorator';
 import { RECOMMENDATION_EN } from '../../common/i18n/content-en';
+import { RECOMMENDATION_HI } from '../../common/i18n/content-hi';
 
 /**
  * 대시보드 "오늘의 맞춤 학습" 카드 3장 동적 구성.
@@ -41,13 +42,14 @@ export class RecommendationsService {
   }
 
   private fallbackCard(idx: number, lang: Lang = 'ko') {
-    if (lang === 'en') {
-      const en = [
-        { tag: RECOMMENDATION_EN.tagFocus, tagColor: '#8B3A1F', unitId: null, unit: RECOMMENDATION_EN.fbFocusUnit, title: RECOMMENDATION_EN.fbFocusTitle, reason: RECOMMENDATION_EN.fbFocusReason, time: '—', type: 'Interactive practice', icon: 'Layers' },
-        { tag: RECOMMENDATION_EN.tagWeak, tagColor: '#B45309', unitId: null, unit: RECOMMENDATION_EN.fbWeakUnit, title: RECOMMENDATION_EN.fbWeakTitle, reason: RECOMMENDATION_EN.fbWeakReason, time: '20 min', type: 'Visualization', icon: 'Eye' },
-        { tag: RECOMMENDATION_EN.tagStrong, tagColor: '#4A5D3A', unitId: null, unit: RECOMMENDATION_EN.fbStrongUnit, title: RECOMMENDATION_EN.fbStrongTitle, reason: RECOMMENDATION_EN.fbStrongReason, time: '—', type: 'Practice', icon: 'Zap' },
+    if (lang !== 'ko') {
+      const D = lang === 'hi' ? RECOMMENDATION_HI : RECOMMENDATION_EN;
+      const cards = [
+        { tag: D.tagFocus, tagColor: '#8B3A1F', unitId: null, unit: D.fbFocusUnit, title: D.fbFocusTitle, reason: D.fbFocusReason, time: '—', type: lang === 'hi' ? 'इंटरैक्टिव अभ्यास' : 'Interactive practice', icon: 'Layers' },
+        { tag: D.tagWeak, tagColor: '#B45309', unitId: null, unit: D.fbWeakUnit, title: D.fbWeakTitle, reason: D.fbWeakReason, time: lang === 'hi' ? '20 मिनट' : '20 min', type: lang === 'hi' ? 'दृश्यांकन' : 'Visualization', icon: 'Eye' },
+        { tag: D.tagStrong, tagColor: '#4A5D3A', unitId: null, unit: D.fbStrongUnit, title: D.fbStrongTitle, reason: D.fbStrongReason, time: '—', type: lang === 'hi' ? 'अभ्यास' : 'Practice', icon: 'Zap' },
       ];
-      return en[idx];
+      return cards[idx];
     }
     const ko = [
       { tag: '오답 집중', tagColor: '#8B3A1F', unitId: null, unit: '데이터 누적 중 · —', title: '문제를 풀어 오답을 모아주세요', reason: 'AI가 약점을 찾으려면 5문제 이상 필요', time: '—', type: '인터랙티브 학습', icon: 'Layers' },

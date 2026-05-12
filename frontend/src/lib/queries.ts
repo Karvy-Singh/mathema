@@ -187,9 +187,14 @@ export type ConceptStep = {
   body: string;
   visualType: string | null;
   visualUrl: string | null;
+  visualData: any | null;   // <GraphRenderer/> JSON 파라미터 — VisualData union
   misconception: { wrongKo: string; whyKo: string; correctKo: string; wrongEn: string; whyEn: string; correctEn: string } | null;
   workedSteps: Array<{ math: string; narrationKo: string; narrationEn: string }> | null;
-  retrievalCheck: { prompt: string; hint: string | null } | null;
+  retrievalCheck: {
+    prompt: string;
+    hint: string | null;
+    choices: Array<{ choiceIndex: number; text: string }>;
+  } | null;
   reflectPrompts: { promptsKo: string[]; promptsEn: string[] } | null;
 };
 

@@ -3,6 +3,7 @@ import { ConceptStepKind, NcertClass } from '@prisma/client';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { Lang } from '../../common/i18n/current-lang.decorator';
 import { UNIT_NAME_EN } from '../../common/i18n/content-en';
+import { UNIT_NAME_HI } from '../../common/i18n/content-hi';
 
 /**
  * 수학식 답안 비교 — 학생 표기 변이를 흡수.
@@ -101,22 +102,60 @@ export class ConceptLessonsService {
     const progress = lesson.progress[0] ?? null;
     return {
       ...this.shapeSummary(lesson, lang),
-      steps: lesson.steps.map((s) => ({
+      steps: lesson.steps.map((s) => {
+        // lang 별 title/body 우선순위 (hi → hi → en → ko fallback)
+        const sTitle =
+          lang === 'hi' ? ((s as any).titleHi ?? s.titleEn) :
+          lang === 'en' ? s.titleEn :
+          s.titleKo;
+        const sBody =
+          lang === 'hi' ? ((s as any).bodyHi ?? s.bodyEn) :
+          lang === 'en' ? s.bodyEn :
+          s.bodyKo;
+        // workedSteps · misconception JSON 에서 lang 에 맞는 필드만 추려서 노출 (다른 언어 누출 차단)
+        const filteredWorkedSteps = Array.isArray(s.workedSteps)
+          ? (s.workedSteps as any[]).map((w) => ({
+              math: w.math,
+              narration:
+                lang === 'hi' ? (w.narrationHi ?? w.narrationEn) :
+                lang === 'en' ? w.narrationEn :
+                w.narrationKo,
+            }))
+          : null;
+        const filteredMisc = s.misconception
+          ? {
+              wrong:
+                lang === 'hi' ? ((s.misconception as any).wrongHi ?? (s.misconception as any).wrongEn) :
+                lang === 'en' ? (s.misconception as any).wrongEn :
+                (s.misconception as any).wrongKo,
+              why:
+                lang === 'hi' ? ((s.misconception as any).whyHi ?? (s.misconception as any).whyEn) :
+                lang === 'en' ? (s.misconception as any).whyEn :
+                (s.misconception as any).whyKo,
+              correct:
+                lang === 'hi' ? ((s.misconception as any).correctHi ?? (s.misconception as any).correctEn) :
+                lang === 'en' ? (s.misconception as any).correctEn :
+                (s.misconception as any).correctKo,
+            }
+          : null;
+        return {
         id: s.id,
         stepIndex: s.stepIndex,
         kind: s.kind,
-        title: lang === 'en' ? s.titleEn : s.titleKo,
-        body: lang === 'en' ? s.bodyEn : s.bodyKo,
+        title: sTitle,
+        body: sBody,
         visualType: s.visualType,
         visualUrl: s.visualUrl,
-        misconception: s.misconception,
-        workedSteps: s.workedSteps,
+        visualData: (s as any).visualData ?? null,
+        misconception: filteredMisc,
+        workedSteps: filteredWorkedSteps,
         // RETRIEVAL 응답 비교용 정답은 클라이언트에 노출하지 않는다 (check 엔드포인트에서만 비교).
         retrievalCheck: s.retrievalCheck
           ? this.publicRetrieval(s.retrievalCheck as any, lang)
           : null,
         reflectPrompts: s.reflectPrompts,
-      })),
+        };
+      }),
       progress: progress
         ? {
             currentStep: progress.currentStep,
@@ -221,8 +260,19 @@ export class ConceptLessonsService {
     }
 
     const check = (step.retrievalCheck as any) ?? {};
-    const accept: string[] = check.accept ?? [];
-    const passed = accept.some((a) => answersMatch(a, answer));
+    // 5지선다 객관식 우선 — choiceIndex 가 오면 그 정답성으로 채점.
+    let passed = false;
+    const choices: Array<{ choiceIndex: number; isCorrect: boolean }> = check.choices ?? [];
+    const trimmed = (answer ?? '').trim();
+    const idx = Number(trimmed);
+    if (choices.length > 0 && Number.isInteger(idx) && idx >= 1 && idx <= choices.length) {
+      const sel = choices.find((c) => c.choiceIndex === idx);
+      passed = !!sel?.isCorrect;
+    } else {
+      // 텍스트 입력 (이전 모드) 호환 — accept 배열과 비교
+      const accept: string[] = check.accept ?? [];
+      passed = accept.some((a) => answersMatch(a, answer));
+    }
 
     const progress = await this.prisma.conceptProgress.upsert({
       where: { userId_lessonId: { userId, lessonId: lesson.id } },
@@ -268,21 +318,34 @@ export class ConceptLessonsService {
   // ---------- helpers ----------
   private shapeSummary(l: any, lang: Lang) {
     const progress = (l.progress ?? [])[0] ?? null;
+    // lang 별 우선순위: hi → hi 컬럼 (없으면 en fallback), en → en, ko → ko.
+    const title =
+      lang === 'hi' ? (l.titleHi ?? l.titleEn) :
+      lang === 'en' ? l.titleEn :
+      l.titleKo;
+    const bigIdea =
+      lang === 'hi' ? (l.bigIdeaHi ?? l.bigIdeaEn) :
+      lang === 'en' ? l.bigIdeaEn :
+      l.bigIdeaKo;
     return {
       id: l.id,
       chapterCode: l.chapterCode,
       ncertClass: l.ncertClass,
       chapterNumber: l.chapterNumber,
-      title: lang === 'en' ? l.titleEn : l.titleKo,
-      bigIdea: lang === 'en' ? l.bigIdeaEn : l.bigIdeaKo,
+      title,
+      bigIdea,
       estimatedMin: l.estimatedMin,
       cognitiveLoad: l.cognitiveLoad,
       prerequisiteCodes: l.prerequisiteCodes,
-      // Unit.name 은 DB 상 한국어로 저장됨. EN 응답에서는 UNIT_NAME_EN 으로 영어 변환.
+      // Unit.name 은 DB 상 한국어로 저장됨. lang 에 따라 EN/HI 변환.
       unit: l.unit
         ? {
             id: l.unit.id,
-            name: lang === 'en' ? (UNIT_NAME_EN[l.unit.name] ?? l.unit.name) : l.unit.name,
+            name: lang === 'hi'
+              ? (UNIT_NAME_HI[l.unit.name] ?? UNIT_NAME_EN[l.unit.name] ?? l.unit.name)
+              : lang === 'en'
+                ? (UNIT_NAME_EN[l.unit.name] ?? l.unit.name)
+                : l.unit.name,
           }
         : null,
       mastered: !!progress?.masteredAt,
@@ -296,14 +359,27 @@ export class ConceptLessonsService {
   private publicRetrieval(check: any, lang: Lang) {
     const promptKo = check?.prompt?.ko ?? '';
     const promptEn = check?.prompt?.en ?? promptKo;
+    const promptHi = check?.prompt?.hi ?? promptEn;
+    const prompt = lang === 'hi' ? promptHi : lang === 'en' ? promptEn : promptKo;
     const hint = check?.hint
-      ? lang === 'en'
-        ? check.hint.en
+      ? lang === 'hi' ? (check.hint.hi ?? check.hint.en)
+        : lang === 'en' ? check.hint.en
         : check.hint.ko
       : null;
+    // 5지선다 보기 — isCorrect/rationale 은 비공개, text 만 lang 분기 노출.
+    const choices = Array.isArray(check?.choices)
+      ? check.choices.map((c: any) => ({
+          choiceIndex: c.choiceIndex,
+          text:
+            lang === 'hi' ? (c.textHi ?? c.textEn ?? c.text ?? '') :
+            lang === 'en' ? (c.textEn ?? c.text ?? '') :
+            (c.textKo ?? c.text ?? ''),
+        }))
+      : [];
     return {
-      prompt: lang === 'en' ? promptEn : promptKo,
+      prompt,
       hint,
+      choices,
     };
   }
 }

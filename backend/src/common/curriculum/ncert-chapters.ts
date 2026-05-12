@@ -21,8 +21,12 @@ export interface NcertChapter {
   chapterCode: string;          // e.g. "C7-CH01-INTEGERS"
   titleKo: string;
   titleEn: string;
+  /** 힌디어 챕터명 (인도 PoC). 누락 시 titleEn fallback. */
+  titleHi?: string;
   bigIdeaKo: string;
   bigIdeaEn: string;
+  /** 힌디어 빅 아이디어 (인도 PoC). 누락 시 bigIdeaEn fallback. */
+  bigIdeaHi?: string;
   cognitiveLoad: 0 | 1 | 2 | 3;
   estimatedMin: number;
   /** 선수 학습 chapterCode 리스트 (빈 배열이면 진입 가능) */

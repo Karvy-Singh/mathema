@@ -2,7 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { CurriculumRepository } from './curriculum.repository';
 import { Lang } from '../../common/i18n/current-lang.decorator';
 import { UNIT_NAME_EN, SUB_UNIT_NAME_EN } from '../../common/i18n/content-en';
+import { UNIT_NAME_HI, SUB_UNIT_NAME_HI } from '../../common/i18n/content-hi';
 import { GradeLevel, GRADE_LEVELS } from '../../common/enums/unit.enum';
+
+function localizeUnit(name: string, lang: Lang): string {
+  if (lang === 'hi') return UNIT_NAME_HI[name] ?? UNIT_NAME_EN[name] ?? name;
+  if (lang === 'en') return UNIT_NAME_EN[name] ?? name;
+  return name;
+}
+function localizeSub(name: string, lang: Lang): string {
+  if (lang === 'hi') return SUB_UNIT_NAME_HI[name] ?? SUB_UNIT_NAME_EN[name] ?? name;
+  if (lang === 'en') return SUB_UNIT_NAME_EN[name] ?? name;
+  return name;
+}
 
 @Injectable()
 export class CurriculumService {
@@ -28,20 +40,19 @@ export class CurriculumService {
     return units.map((u: any) => this.shape(u, lang));
   }
 
-  /** lang='en' 시 한국어 음절이 결과 문자열에 남아있으면 한국어 누출. 마지막 안전망. */
-  private safeEn(name: string): string {
+  /** 한국어 음절 누출 안전망 — lang 이 ko 가 아닌데 결과에 한글 음절이 남으면 빈 문자열로 차단. */
+  private safeLocalised(name: string, lang: Lang): string {
+    if (lang === 'ko') return name;
     if (/[가-힣]/.test(name)) {
-      // 매핑이 누락된 케이스 — 표시는 빈 라벨로 막고 로그.
       // eslint-disable-next-line no-console
-      console.warn(`[curriculum] UNIT/SUB_UNIT EN mapping missing for: ${name}`);
+      console.warn(`[curriculum] localisation missing for: ${name} (lang=${lang})`);
       return '';
     }
     return name;
   }
 
   private shape(u: any, lang: Lang) {
-    const rawUnit = lang === 'en' ? (UNIT_NAME_EN[u.name] ?? u.name) : u.name;
-    const unitName = lang === 'en' ? this.safeEn(rawUnit) : rawUnit;
+    const unitName = this.safeLocalised(localizeUnit(u.name, lang), lang);
     return {
       id: u.id,
       name: unitName,
@@ -49,8 +60,7 @@ export class CurriculumService {
       order: u.order,
       gradeLevels: u.gradeLevels ?? [],
       subUnits: (u.subUnits ?? []).map((s: any) => {
-        const rawSub = lang === 'en' ? (SUB_UNIT_NAME_EN[s.name] ?? s.name) : s.name;
-        const subName = lang === 'en' ? this.safeEn(rawSub) : rawSub;
+        const subName = this.safeLocalised(localizeSub(s.name, lang), lang);
         return {
           id: s.id,
           name: subName,

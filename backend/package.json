@@ -9,9 +9,10 @@
   "scripts": {
     "build": "nest build",
     "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main.js",
+    "predev": "prisma generate && prisma migrate deploy",
+    "start:dev": "npm run predev && nest start --watch",
+    "start:debug": "npm run predev && nest start --debug --watch",
+    "start:prod": "prisma migrate deploy && node dist/main.js",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "test": "jest",

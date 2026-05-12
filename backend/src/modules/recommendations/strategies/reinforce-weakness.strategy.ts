@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import { Lang } from '../../../common/i18n/current-lang.decorator';
 import { UNIT_NAME_EN, RECOMMENDATION_EN } from '../../../common/i18n/content-en';
+import { UNIT_NAME_HI, RECOMMENDATION_HI } from '../../../common/i18n/content-hi';
 
 /**
  * "약점 보강" — MasterySnapshot 점수가 가장 낮은 단원을 추천.
@@ -24,17 +25,20 @@ export class ReinforceWeaknessStrategy {
     const score = Math.round(weakest.score);
     const gap = ReinforceWeaknessStrategy.PEER_AVG - score;
 
-    if (lang === 'en') {
-      const unitEn = UNIT_NAME_EN[weakest.unit.name] ?? weakest.unit.name;
+    if (lang !== 'ko') {
+      const D = lang === 'hi' ? RECOMMENDATION_HI : RECOMMENDATION_EN;
+      const unitLocal = lang === 'hi'
+        ? (UNIT_NAME_HI[weakest.unit.name] ?? UNIT_NAME_EN[weakest.unit.name] ?? weakest.unit.name)
+        : (UNIT_NAME_EN[weakest.unit.name] ?? weakest.unit.name);
       return {
-        tag: RECOMMENDATION_EN.tagWeak,
+        tag: D.tagWeak,
         tagColor: '#B45309',
         unitId: weakest.unitId,
-        unit: RECOMMENDATION_EN.weakUnit(unitEn),
-        title: RECOMMENDATION_EN.weakTitle(unitEn),
-        reason: gap > 0 ? RECOMMENDATION_EN.weakReasonGap(score, gap) : RECOMMENDATION_EN.weakReasonStable(score),
+        unit: D.weakUnit(unitLocal),
+        title: D.weakTitle(unitLocal),
+        reason: gap > 0 ? D.weakReasonGap(score, gap) : D.weakReasonStable(score),
         time: this.estimateTime(score, lang),
-        type: 'Visualization',
+        type: lang === 'hi' ? 'दृश्यांकन' : 'Visualization',
         icon: 'Eye',
       };
     }
@@ -54,7 +58,12 @@ export class ReinforceWeaknessStrategy {
   }
 
   private estimateTime(score: number, lang: Lang = 'ko'): string {
-    if (lang === 'en') {
+    if (lang === 'hi') {
+      if (score < 40) return '30 मिनट';
+      if (score < 60) return '20 मिनट';
+      return '15 मिनट';
+    }
+    if (lang !== 'ko') {
       if (score < 40) return '30 min';
       if (score < 60) return '20 min';
       return '15 min';

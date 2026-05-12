@@ -11,7 +11,7 @@ export function stepwiseGuidePrompt(ctx: {
   sessionId: string;
   userId: string;
   perspective: '공식 중심' | '단계별' | '시각화' | '실생활 예시';
-  lang?: 'ko' | 'en';
+  lang?: 'ko' | 'en' | 'hi';
 }): LlmRequest {
   if (ctx.lang === 'en') {
     return {

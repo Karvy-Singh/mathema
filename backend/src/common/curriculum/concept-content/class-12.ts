@@ -1,5 +1,6 @@
 /**
- * Class 12 (NCERT XII) — 챕터별 개념학습 콘텐츠. JEE / CBSE Board 핵심 단원 집중.
+ * Class 12 (NCERT XII) — 챕터별 개념학습 콘텐츠 (production grade).
+ * JEE / CBSE Board 핵심. 모든 13 챕터에 HOOK/CONCRETE/PICTORIAL/ABSTRACT/WORKED/MISCONCEPTION/RETRIEVAL 완비.
  */
 
 import { ChapterContentMap } from './types';
@@ -9,6 +10,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
     hook: {
       ko: '함수 f 의 역함수 f⁻¹ 이 존재하려면? "1대1, 위로의" 두 조건.',
       en: 'When does f⁻¹ exist? f must be both one-to-one and onto.',
+    },
+    concrete: {
+      ko: 'f(x) = 2x+1 은 모든 실수에서 1대1, 위로의 → f⁻¹(y) = (y−1)/2. f(x) = x² 는 1대1 아님(±x 같은 출력) → 역함수 X (단, 정의역 제한 시 가능).',
+      en: 'f(x)=2x+1 on ℝ is bijective ⇒ f⁻¹(y)=(y−1)/2. f(x)=x² is not injective (both ±x give same output) ⇒ no inverse (unless domain restricted).',
+    },
+    pictorial: {
+      ko: '함수 그래프를 y=x 직선에 대해 대칭이동하면 역함수 그래프. 1대1이 아니면 거울 반사가 함수 조건을 깨짐.',
+      en: 'Reflect a function\'s graph across y=x to get its inverse. If not injective, the reflection fails the vertical-line test.',
     },
     abstract: {
       ko: '일대일(injective): f(x₁)=f(x₂) ⇒ x₁=x₂. 위로의(surjective): 치역 = 공역. 둘 다 ⇒ 역함수 존재.',
@@ -21,6 +30,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
         { math: 'y = 3x + 1 ⇒ x = (y − 1)/3', narrationKo: 'y 에 대해 x.', narrationEn: 'Solve for x.' },
         { math: 'f⁻¹(y) = (y − 1)/3',          narrationKo: '역함수.',   narrationEn: 'Inverse.' },
       ],
+    },
+    misconception: {
+      wrongKo: 'f⁻¹(x) = 1/f(x)',
+      wrongEn: 'f⁻¹(x) = 1/f(x)',
+      whyKo: '역함수 표기와 역수 표기를 혼동.',
+      whyEn: 'Confused inverse-function notation with reciprocal.',
+      correctKo: 'f⁻¹ 는 역함수 (입력↔출력 뒤집기), 1/f 는 역수. 완전히 다른 것.',
+      correctEn: 'f⁻¹ undoes f (swap input/output); 1/f is the reciprocal — entirely different.',
     },
     retrieval: {
       promptKo: 'f(x) = 2x − 4 ⇒ f⁻¹(x) = ?',
@@ -35,6 +52,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
     hook: {
       ko: 'arcsin(½) 의 값은 30° 또는 150° 또는 … 한 값을 골라야 함수가 된다.',
       en: 'arcsin(½) = 30° or 150° or… choosing one principal range makes it a function.',
+    },
+    concrete: {
+      ko: 'sin x = ½ 의 해는 30°, 150°, 390°, 510°, … 무한히 많음. arcsin(½) 라고 쓰면 그 중 [−90°, 90°] 안에 있는 30° 하나만.',
+      en: 'sin x = ½ has solutions 30°, 150°, 390°, 510°… infinitely many. arcsin(½) picks just the one in [−90°, 90°]: 30°.',
+    },
+    pictorial: {
+      ko: '단위원 y = ½ 수평선은 두 점에서 교차. 주값 범위 [−π/2, π/2] 안에 들어가는 점만 채택.',
+      en: 'y = ½ horizontal line on the unit circle crosses at two points. Pick only the one in [−π/2, π/2].',
     },
     abstract: {
       ko: 'sin⁻¹: [−1,1] → [−π/2, π/2]. cos⁻¹: [−1,1] → [0, π]. tan⁻¹: ℝ → (−π/2, π/2).',
@@ -70,6 +95,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
       ko: 'AB ≠ BA (일반적). 곱이 교환되지 않는 첫 만남 — 그래도 강력한 도구.',
       en: 'AB ≠ BA in general — your first non-commutative product, yet a mighty tool.',
     },
+    concrete: {
+      ko: '회전 행렬 R90 (90° 반시계) 과 반사 행렬 Sx (x축 대칭). R90·Sx 와 Sx·R90 는 결과 다름 — 회전 후 반사 vs 반사 후 회전.',
+      en: 'Rotation matrix R90 vs reflection Sx. R90·Sx ≠ Sx·R90 — rotate-then-reflect differs from reflect-then-rotate.',
+    },
+    pictorial: {
+      ko: '행렬을 "선형변환" 으로 시각화: 단위정사각형 → 평행사변형. 행은 변환된 i, j 단위 벡터.',
+      en: 'Visualise matrix as a linear transform: unit square → parallelogram. Rows are where i, j unit vectors land.',
+    },
     abstract: {
       ko: '(AB)ᵢⱼ = Σₖ aᵢₖ bₖⱼ. 단위행렬 I 에 대해 AI = IA = A.',
       en: '(AB)ᵢⱼ = Σₖ aᵢₖ bₖⱼ. Identity I gives AI = IA = A.',
@@ -82,6 +115,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
         { math: '행 2: (3·2+4·1, 3·0+4·2) = (10, 8)', narrationKo: '둘째 행.', narrationEn: 'Row 2.' },
         { math: '[[4,4],[10,8]]',                       narrationKo: '결과.',  narrationEn: 'Result.' },
       ],
+    },
+    misconception: {
+      wrongKo: '(A + B)² = A² + 2AB + B²',
+      wrongEn: '(A + B)² = A² + 2AB + B²',
+      whyKo: '실수처럼 곱셈 교환을 가정.',
+      whyEn: 'Assumed commutativity like with real numbers.',
+      correctKo: '(A+B)² = A² + AB + BA + B² ≠ A² + 2AB + B² (AB ≠ BA 일반적).',
+      correctEn: '(A+B)² = A² + AB + BA + B². The 2AB shortcut fails because AB ≠ BA generally.',
     },
     retrieval: {
       promptKo: '[[1,0],[0,1]] · [[5,7],[3,2]] = ?',
@@ -97,6 +138,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
       ko: '행렬식이 0이면 역행렬이 없다. 즉 변환이 차원을 깎는다는 신호.',
       en: 'Zero determinant ⇒ no inverse — the map collapses a dimension.',
     },
+    concrete: {
+      ko: '[[2,0],[0,3]] 은 x 방향 2배, y 방향 3배 확대. det = 6 = 단위정사각형 → 6배 면적. [[1,2],[2,4]] 는 두 행 비례 → 평행사변형이 직선으로 찌부 → det = 0.',
+      en: '[[2,0],[0,3]] scales x×2, y×3. det = 6 = area factor of unit square. [[1,2],[2,4]]: rows proportional → squashed to a line → det = 0.',
+    },
+    pictorial: {
+      ko: '|A| = 행렬이 만드는 평행사변형/평행육면체의 부호 있는 면적/부피. 0 = 차원 붕괴.',
+      en: '|A| = signed area/volume of the parallelogram/parallelepiped spanned by the rows. Zero = dimension collapse.',
+    },
     abstract: {
       ko: '|A| = ad − bc (2×2). |A·B| = |A|·|B|. |A| ≠ 0 ⇔ A 가역.',
       en: '|A| = ad − bc for 2×2. |AB| = |A|·|B|. |A| ≠ 0 ⇔ invertible.',
@@ -107,6 +156,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
       steps: [
         { math: '2·4 − 3·1 = 5', narrationKo: 'ad − bc.', narrationEn: 'ad − bc.' },
       ],
+    },
+    misconception: {
+      wrongKo: '|A + B| = |A| + |B|',
+      wrongEn: '|A + B| = |A| + |B|',
+      whyKo: '행렬식은 선형이 아닌데 + 분배 가정.',
+      whyEn: 'Determinant isn\'t linear in the matrix — wrongly distributed over +.',
+      correctKo: '|AB| = |A|·|B| 은 성립. + 에 대해선 단순 관계 없음.',
+      correctEn: '|AB| = |A|·|B| holds, but no simple rule for sums.',
     },
     retrieval: {
       promptKo: '|[[1,2],[2,4]]|.',
@@ -121,6 +178,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
     hook: {
       ko: '|x| 는 0 에서 미분 가능한가? 그래프가 꺾이면 답은 No — 연속이지만 미분 불가능.',
       en: 'Is |x| differentiable at 0? The graph has a corner — continuous, but not differentiable.',
+    },
+    concrete: {
+      ko: 'f(x) = |x| 는 모든 곳 연속. 그러나 0에서 좌극한 기울기 −1, 우극한 +1 — 일치 X. 미분 불가능.',
+      en: 'f(x) = |x| is continuous everywhere. But at 0: left slope −1, right slope +1 — mismatch ⇒ not differentiable.',
+    },
+    pictorial: {
+      ko: '연속 = 곡선에 구멍·점프 없음. 미분가능 = 곡선이 매끄럽고 꺾임 없음. |x| 의 V 꼭짓점이 꺾임.',
+      en: 'Continuous = no holes/jumps. Differentiable = smooth with no corners. The V tip of |x| is a corner.',
     },
     abstract: {
       ko: 'f 가 a 에서 연속: lim_{x→a} f(x) = f(a). 미분가능: lim_{h→0} (f(a+h)−f(a))/h 존재.',
@@ -157,6 +222,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
       ko: '도함수가 0 인 점이 극값일까? 후보일 뿐 — 2계 도함수가 진짜 판정.',
       en: 'Zero derivative ⇒ extremum? Only a candidate — the second derivative confirms.',
     },
+    concrete: {
+      ko: 'f(x) = x³ 는 f\'(0) = 0 이지만 극값 X (변곡점). f(x) = x² 는 f\'(0)=0, f\'\'(0)=2>0 → 극소.',
+      en: 'f(x) = x³ has f\'(0)=0 but no extremum (inflection). f(x) = x²: f\'(0)=0, f\'\'(0)=2>0 ⇒ minimum.',
+    },
+    pictorial: {
+      ko: 'f\' 부호 변화: + → 0 → − 는 극대, − → 0 → + 는 극소, +/− 안 바뀌면 평탄점(변곡 또는 안장).',
+      en: 'Sign of f\' changes: +→0→− gives max, −→0→+ gives min, no change = saddle/inflection.',
+    },
     abstract: {
       ko: 'f\'(c) = 0 (임계점). f\'\'(c) > 0 ⇒ 극소, < 0 ⇒ 극대, = 0 ⇒ 추가 검사.',
       en: 'f\'(c) = 0 (critical). f\'\'(c) > 0 ⇒ min, < 0 ⇒ max, = 0 ⇒ further test.',
@@ -169,6 +242,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
         { math: 'f\'\'(x) = 6x', narrationKo: '2계 도함수.', narrationEn: 'Second derivative.' },
         { math: 'f\'\'(1)=6>0 ⇒ 극소. f\'\'(−1)=−6<0 ⇒ 극대', narrationKo: '판정.', narrationEn: 'Classify.' },
       ],
+    },
+    misconception: {
+      wrongKo: 'f\'(c) = 0 이면 항상 극값.',
+      wrongEn: 'f\'(c) = 0 always gives an extremum.',
+      whyKo: '변곡점(예: x³ at 0)을 극값으로 잘못 분류.',
+      whyEn: 'Misclassifies inflection points (e.g. x³ at 0).',
+      correctKo: '임계점은 후보일 뿐. f\' 부호 변화 또는 f\'\' 부호로 확인 필요.',
+      correctEn: 'Critical points are only candidates. Confirm via sign change of f\' or f\'\'.',
     },
     retrieval: {
       promptKo: 'f(x) = x² 에서 극값을 갖는 x.',
@@ -183,6 +264,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
     hook: {
       ko: '미분은 "변화율", 적분은 "누적량". 두 연산은 본질적으로 서로의 역 (FTC).',
       en: 'Differentiation = rate, integration = accumulation. They reverse each other (FTC).',
+    },
+    concrete: {
+      ko: '속도 v(t) = 2t 인 차의 0~3초 사이 이동거리 = ∫₀³ 2t dt = [t²]₀³ = 9 m. 즉 속도의 누적 = 거리.',
+      en: 'Car with velocity v(t) = 2t. Distance in 0~3 s = ∫₀³ 2t dt = [t²]₀³ = 9 m. Accumulated velocity = distance.',
+    },
+    pictorial: {
+      ko: '곡선 y = f(x) 와 x 축 사이 면적을 무한히 얇은 직사각형들의 합으로 본 것이 ∫f dx.',
+      en: 'The area under y = f(x) above the x-axis, built as a limit of infinitely thin rectangles.',
     },
     abstract: {
       ko: '∫ xⁿ dx = x^(n+1)/(n+1) + C (n ≠ −1). ∫ u dv = uv − ∫ v du (부분적분).',
@@ -220,6 +309,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
       ko: '곡선 아래 면적은 무한히 얇은 직사각형들의 합 — 정적분의 시각.',
       en: 'Area under a curve = limit of infinitely thin rectangles — the integral picture.',
     },
+    concrete: {
+      ko: 'y = x² 와 x 축, x=0, x=2 로 둘러싸인 면적 = ∫₀² x² dx = 8/3 ≈ 2.67. 회전체(x축 기준) 부피 = π∫(x²)² dx = 32π/5.',
+      en: 'Area bounded by y = x², x-axis, x=0, x=2: ∫₀² x² dx = 8/3 ≈ 2.67. Volume of revolution (about x-axis) = π∫(x²)² dx = 32π/5.',
+    },
+    pictorial: {
+      ko: '회전체 부피: 곡선을 x 축 둘레로 회전 시켜 만든 입체. 단면(원) 넓이 π[f(x)]² 를 x로 누적.',
+      en: 'Volume of revolution: rotate the curve around the x-axis. Each cross-section is a disk of area π[f(x)]²; sum along x.',
+    },
     abstract: {
       ko: '면적 A = ∫ₐᵇ f(x) dx. 회전체 부피 (x축) = π ∫ₐᵇ [f(x)]² dx.',
       en: 'Area A = ∫ₐᵇ f(x) dx. Volume of revolution (x-axis) = π ∫ₐᵇ [f(x)]² dx.',
@@ -230,6 +327,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
       steps: [
         { math: '∫₀² x² dx = [x³/3]₀² = 8/3', narrationKo: '정적분.', narrationEn: 'Definite integral.' },
       ],
+    },
+    misconception: {
+      wrongKo: '회전체 부피 = π ∫ f(x) dx (제곱 없이).',
+      wrongEn: 'Volume of revolution = π ∫ f(x) dx (no square).',
+      whyKo: '단면이 원(반지름 f(x))이므로 넓이 π[f(x)]² 인 것을 놓침.',
+      whyEn: 'Forgot that each disk has area π·r² where r = f(x).',
+      correctKo: 'V = π ∫ [f(x)]² dx — 반드시 제곱.',
+      correctEn: 'V = π ∫ [f(x)]² dx — always square.',
     },
     retrieval: {
       promptKo: '∫₀¹ x dx = ?',
@@ -245,6 +350,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
       ko: '인구는 인구에 비례해 자라고, 식어가는 커피는 온도차에 비례해 식는다 — 모두 미분방정식.',
       en: 'Populations grow proportional to themselves; coffee cools proportional to gap — all differential equations.',
     },
+    concrete: {
+      ko: '뉴턴의 냉각 법칙: dT/dt = −k(T − T_env). 풀면 T(t) = T_env + (T₀ − T_env)e^(−kt). 시간 ↑ 일 때 T 가 환경 온도로 수렴.',
+      en: 'Newton\'s cooling: dT/dt = −k(T − T_env). Solution T(t) = T_env + (T₀ − T_env)e^(−kt). As t→∞, T approaches ambient.',
+    },
+    pictorial: {
+      ko: '방향장 (slope field): 평면 각 점에 미분방정식이 지시하는 짧은 화살표 그리기 → 해 곡선이 화살표를 따라가는 흐름.',
+      en: 'Slope field: draw short arrows at each point given by dy/dx. Solutions are curves that flow along the arrows.',
+    },
     abstract: {
       ko: '변수분리: dy/dx = f(x)·g(y) ⇒ ∫ dy/g(y) = ∫ f(x) dx.',
       en: 'Separable: dy/dx = f(x)·g(y) ⇒ ∫ dy/g(y) = ∫ f(x) dx.',
@@ -257,6 +370,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
         { math: 'ln|y| = x + C', narrationKo: '적분.', narrationEn: 'Integrate.' },
         { math: 'y = e^x',        narrationKo: '초기조건.', narrationEn: 'Initial condition.' },
       ],
+    },
+    misconception: {
+      wrongKo: '미분방정식의 일반해에 +C 를 잊는다.',
+      wrongEn: 'Forgets the +C in the general solution.',
+      whyKo: '부정적분 결과에 적분상수 미포함.',
+      whyEn: 'Skipped the constant of integration.',
+      correctKo: '일반해는 항상 +C 포함. 초기조건이 주어지면 그제야 C 결정.',
+      correctEn: 'General solution always carries +C; an initial condition pins it down.',
     },
     retrieval: {
       promptKo: 'dy/dx = 2x 의 일반해.',
@@ -271,6 +392,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
     hook: {
       ko: '내적은 "한 방향으로의 그림자", 외적은 "두 벡터가 만드는 평행사변형의 면적".',
       en: 'Dot = shadow on one direction. Cross = parallelogram area spanned by two vectors.',
+    },
+    concrete: {
+      ko: '바람이 동쪽 5 m/s, 비행기가 북동 30° 방향 비행. 바람 성분 = 비행 방향으로의 내적. 두 변(3, 4) 평행사변형 면적 = |a × b| = 12.',
+      en: 'Wind 5 m/s east; plane flies 30° NE. Headwind component = dot product. Parallelogram with sides 3, 4 has area |a × b| = 12.',
+    },
+    pictorial: {
+      ko: '내적 a·b: b 방향으로 a 의 그림자 길이 × |b|. 외적 a × b: a, b 가 만드는 평행사변형 면적, 방향은 오른손법칙.',
+      en: 'Dot a·b: length of a\'s shadow on b times |b|. Cross a × b: area of parallelogram; direction by right-hand rule.',
     },
     abstract: {
       ko: 'a·b = |a||b|cos θ. a×b 의 크기 = |a||b|sin θ, 방향 = 오른손법칙.',
@@ -306,6 +435,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
       ko: '공간 위 한 직선은 (점 + 방향벡터)로, 평면은 (점 + 법선벡터)로 — 벡터 언어가 모두 통합.',
       en: 'A line is point + direction; a plane is point + normal — vectors unify both.',
     },
+    concrete: {
+      ko: '점 (1,2,3) 을 지나고 방향 (1,0,0) 인 직선: r = (1,2,3) + t(1,0,0) = (1+t, 2, 3). 평면 2x+3y−z=5 는 법선 (2,3,−1).',
+      en: 'Line through (1,2,3) with direction (1,0,0): r = (1,2,3) + t(1,0,0) = (1+t, 2, 3). Plane 2x+3y−z=5 has normal (2,3,−1).',
+    },
+    pictorial: {
+      ko: '직선 = 점에서 방향벡터를 따라 ± 늘인 자취. 평면 = 한 점에서 법선과 직각인 모든 점.',
+      en: 'Line = trace of point ± direction vector. Plane = all points perpendicular to a normal from one point.',
+    },
     abstract: {
       ko: '직선 r = a + t·d. 평면 n·(r − a) = 0. 두 직선의 각: cos θ = |d₁·d₂|/(|d₁||d₂|).',
       en: 'Line r = a + t·d. Plane n·(r − a) = 0. Angle between lines: cos θ = |d₁·d₂|/(|d₁||d₂|).',
@@ -318,6 +455,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
         { math: '|d₁| = |d₂| = 3',   narrationKo: '크기.', narrationEn: 'Magnitudes.' },
         { math: 'cos θ = 8/9',        narrationKo: '각도.', narrationEn: 'Angle.' },
       ],
+    },
+    misconception: {
+      wrongKo: '평면 ax+by+cz=d 의 법선은 (a, b, c, d).',
+      wrongEn: 'Normal of ax+by+cz=d is (a, b, c, d).',
+      whyKo: 'd 까지 포함시키는 흔한 실수.',
+      whyEn: 'Includes the constant d in the normal.',
+      correctKo: '법선은 (a, b, c). d 는 평면이 원점에서 떨어진 정도(상수항).',
+      correctEn: 'Normal is (a, b, c); d is the offset from origin.',
     },
     retrieval: {
       promptKo: '평면 2x + 3y − z = 5 의 법선벡터.',
@@ -333,6 +478,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
       ko: '식량·노동 같은 제약 안에서 최대 이익을 — 답은 항상 다각형의 꼭짓점에 있다.',
       en: 'Maximise profit under constraints — the answer always sits at a vertex of the feasible polygon.',
     },
+    concrete: {
+      ko: '공장: 의자 x, 책상 y 만들 때 목재 2x+3y ≤ 12, 시간 x+y ≤ 5. 이익 Z = 4x + 5y 최대화. 꼭짓점 시험 → (3, 2) 에서 Z=22.',
+      en: 'Factory: chairs x, desks y. Wood 2x+3y ≤ 12, time x+y ≤ 5. Maximise Z = 4x + 5y. Test vertices → max at (3,2), Z=22.',
+    },
+    pictorial: {
+      ko: '평면에 제약 부등식들을 그리면 가능영역 = 다각형. 목적함수 Z = c·x + c·y 의 등치선이 다각형 위로 평행이동하면 최댓점은 꼭짓점에서.',
+      en: 'Draw constraints on the plane → feasible region is a polygon. Sliding the objective level line, max touches a vertex.',
+    },
     abstract: {
       ko: '목적함수 max/min Z = c₁x + c₂y, 제약 부등식들. 최적해는 가능영역(다각형)의 꼭짓점에서.',
       en: 'Maximise Z = c₁x + c₂y under inequalities. Optimum at a vertex of the feasible region.',
@@ -345,6 +498,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
         { math: 'Z 값: 0, 16, 28, 26, 18', narrationKo: '대입.', narrationEn: 'Evaluate.' },
         { math: '최대 = 28 at (4,4)', narrationKo: '최적.', narrationEn: 'Optimal.' },
       ],
+    },
+    misconception: {
+      wrongKo: 'LP 최적해는 가능영역 내부에서 발생할 수 있다.',
+      wrongEn: 'LP optimum can occur inside the feasible region.',
+      whyKo: '선형 목적함수는 내부 임계점이 없음.',
+      whyEn: 'A linear objective has no interior critical point.',
+      correctKo: '선형 함수는 평면 위 기울어진 면 → 최적은 항상 꼭짓점(또는 변 전체) 에서.',
+      correctEn: 'Linear = tilted plane; extrema land on vertices (or entire edges).',
     },
     retrieval: {
       promptKo: 'LP 의 최적해 후보는 어디?',
@@ -359,6 +520,14 @@ export const CLASS_12_CONTENT: ChapterContentMap = {
     hook: {
       ko: '"양성 검사 결과 ⇒ 실제 환자" 확률은? 검사 정확도만큼 단순하지 않다 — 베이즈가 알려준다.',
       en: '"Positive test ⇒ truly sick" — not as obvious as test accuracy suggests; Bayes tells the truth.',
+    },
+    concrete: {
+      ko: '질병 유병률 1%. 검사 정확도 99%. 양성 결과 1건이 진짜 환자일 확률? 직관 99%인데 베이즈로 계산하면 약 50%. 사전확률이 결정적.',
+      en: 'Disease prevalence 1%. Test 99% accurate. P(sick | positive)? Intuition says 99%; Bayes gives ~50%. Prior dominates.',
+    },
+    pictorial: {
+      ko: '트리 다이어그램: 첫 가지 = 질병 유무 (1% / 99%), 둘째 가지 = 검사 결과. 양성 경로 비율로 베이즈 계산.',
+      en: 'Tree diagram: first branch = sick/well (1%/99%), second = test outcome. Compare positive branches.',
     },
     abstract: {
       ko: 'P(A|B) = P(A ∩ B)/P(B). 베이즈: P(A|B) = P(B|A)P(A)/P(B).',

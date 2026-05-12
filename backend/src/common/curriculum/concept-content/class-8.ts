@@ -1,5 +1,6 @@
 /**
- * Class 8 (NCERT VIII) — 챕터별 개념학습 콘텐츠.
+ * Class 8 (NCERT VIII) — 챕터별 개념학습 콘텐츠 (production grade).
+ * 모든 13 챕터 7단계 완비.
  */
 
 import { ChapterContentMap } from './types';
@@ -9,6 +10,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
     hook: {
       ko: '−⅔ + ⅗ 를 빠르게 계산하려면? 분수 연산은 단순한 규칙 하나만 알면 모두 풀린다.',
       en: 'How do we compute −2/3 + 3/5 quickly? One rule unifies every fractional operation.',
+    },
+    concrete: {
+      ko: '−2/3 + 3/5: 공통분모 15 → −10/15 + 9/15 = −1/15. 분수 곱셈은 통분 X — (−2/3)·(3/5) = −6/15 = −2/5.',
+      en: '−2/3 + 3/5: common denominator 15 → −10/15 + 9/15 = −1/15. For multiplication no common denominator — (−2/3)·(3/5) = −2/5.',
+    },
+    pictorial: {
+      ko: '수직선 위 분수: −2/3 은 0 왼쪽 2/3 거리, 3/5 는 0 오른쪽 3/5 거리. 두 점 사이 합은 결과 위치.',
+      en: 'Fractions on a number line: −2/3 left of 0, 3/5 right. Their sum lands somewhere between, closer to 0.',
     },
     abstract: {
       ko: 'a/b ± c/d = (ad ± bc)/bd. ℚ 는 +, −, ×, ÷ 에 대해 닫혀있고 결합·교환·분배법칙 모두 성립.',
@@ -43,6 +52,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
     hook: {
       ko: '"내 나이의 두 배에서 5를 빼면 31이다." 내 나이는? 일차방정식 한 줄로 즉답.',
       en: '"Twice my age minus 5 is 31." How old am I? One linear equation tells you.',
+    },
+    concrete: {
+      ko: '2x − 3 = 5x + 9 풀이: 양변에 −2x 더해 −3 = 3x + 9 → −12 = 3x → x = −4. 검산 2(−4)−3 = −11, 5(−4)+9 = −11 ✓.',
+      en: 'Solve 2x − 3 = 5x + 9: add −2x → −3 = 3x + 9 → −12 = 3x → x = −4. Check 2(−4)−3 = −11, 5(−4)+9 = −11 ✓.',
+    },
+    pictorial: {
+      ko: '저울 양쪽 모형: 같은 양을 빼거나 더하면 균형 유지. x 만 한쪽에 남기는 게 풀이.',
+      en: 'Balance-scale model: same on both sides keeps balance. Isolate x on one side.',
     },
     abstract: {
       ko: '일변수 일차방정식: ax + b = cx + d ⇒ (a − c)x = d − b ⇒ x = (d − b)/(a − c).',
@@ -79,6 +96,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
       ko: '"평행사변형 = 직사각형이다" 는 참인가? 사각형들 사이에는 위계가 있다.',
       en: 'Is every parallelogram a rectangle? Quadrilaterals form a hierarchy.',
     },
+    concrete: {
+      ko: '정사각형 ⊂ 직사각형 ⊂ 평행사변형 ⊂ 사다리꼴 ⊂ 사각형. 정사각형은 모든 좁은 정의 만족. 사다리꼴은 한 쌍만 평행.',
+      en: 'Square ⊂ rectangle ⊂ parallelogram ⊂ trapezium ⊂ quadrilateral. Square satisfies every condition; trapezium only one pair parallel.',
+    },
+    pictorial: {
+      ko: '벤 다이어그램: 가장 안쪽이 정사각형, 점점 바깥쪽이 더 일반적인 사각형. 모든 사각형 내각의 합 360°.',
+      en: 'Venn diagram from inner (square) outward to general quadrilateral. All sum to 360° interior angles.',
+    },
     abstract: {
       ko: '평행사변형 ⊂ 직사각형 ⊂ 정사각형, 평행사변형 ⊂ 마름모 ⊂ 정사각형. 사각형 내각의 합 = 360°.',
       en: 'Parallelogram ⊂ rectangle ⊂ square; parallelogram ⊂ rhombus ⊂ square. Sum of interior angles = 360°.',
@@ -113,6 +138,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
       ko: '도시 인구의 30% 가 어린이라면, 원그래프에서 그 부분은 몇 도일까?',
       en: 'If 30% of a city are children, how many degrees does that slice take in a pie chart?',
     },
+    concrete: {
+      ko: '학교 인구 1200: 어린이 30%, 청소년 50%, 어른 20%. 원그래프 각도 = 108°, 180°, 72°. 합 360°.',
+      en: 'School of 1200: 30% kids, 50% teens, 20% adults. Slice angles 108°, 180°, 72°. Sum 360°.',
+    },
+    pictorial: {
+      ko: '원 전체 360° 를 비율대로 분할. 막대그래프는 길이 비교, 원그래프는 부분/전체 비교에 적합.',
+      en: 'Divide 360° proportionally. Bar charts compare lengths; pie charts compare parts to whole.',
+    },
     abstract: {
       ko: '원그래프의 한 부분 = (해당 비율) × 360°. 확률 = 유리한 경우 / 전체 경우 (동일 가능 가정).',
       en: 'Pie slice = (proportion) × 360°. Probability = favourable / total (equally likely).',
@@ -124,6 +157,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
         { math: '0.30 × 360°', narrationKo: '비율 × 원의 회전각.', narrationEn: 'Fraction times full turn.' },
         { math: '= 108°',       narrationKo: '계산.', narrationEn: 'Compute.' },
       ],
+    },
+    misconception: {
+      wrongKo: '원그래프 모든 부분의 각도 합 = 100°.',
+      wrongEn: 'Pie chart angles sum to 100°.',
+      whyKo: '백분율과 각도를 혼동.',
+      whyEn: 'Confused percent with degrees.',
+      correctKo: '원 전체는 360°. 백분율 합은 100%, 각도 합은 360°.',
+      correctEn: 'Full circle = 360°. Percentages sum to 100%, angles to 360°.',
     },
     retrieval: {
       promptKo: '동전을 던져 앞면이 나올 확률?',
@@ -138,6 +179,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
     hook: {
       ko: '√144 는 쉽지만 √150 은? 비완전제곱수의 √ 는 끝없는 소수다.',
       en: '√144 is easy; √150 isn\'t — non-perfect-square roots run on forever.',
+    },
+    concrete: {
+      ko: '196 = 2²·7² → √196 = 2·7 = 14. 200 = 2³·5² = 4·50 → √200 = 2√50, 더 분해 50 = 25·2 → √200 = 10√2.',
+      en: '196 = 2²·7² ⇒ √196 = 2·7 = 14. 200 = 2³·5² → √200 = 10√2 after pulling out perfect-square factors.',
+    },
+    pictorial: {
+      ko: '제곱근의 추정: √50 ≈ 7 (49 < 50 < 64). 두 완전제곱 사이의 선형 보간.',
+      en: 'Estimate √50 between √49 = 7 and √64 = 8. Linear interpolation gives ≈ 7.07.',
     },
     abstract: {
       ko: 'n 의 제곱근 √n: x² = n 이 되는 음이 아닌 x. n 이 완전제곱수가 아니면 √n 은 무리수.',
@@ -173,6 +222,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
       ko: '주사위 부피가 64 cm³. 한 변은? 세제곱근의 직관적 의미.',
       en: 'A cubic die has volume 64 cm³. Its edge length? That\'s the cube root intuition.',
     },
+    concrete: {
+      ko: '∛216: 216 = 2³·3³ → ∛216 = 2·3 = 6. ∛(−27) = −3 (음수의 세제곱근은 실수). 비교: √(−27) 은 실수 X.',
+      en: '∛216 = ∛(2³·3³) = 6. ∛(−27) = −3 (cube root of negative is real). Note: √(−27) is not real.',
+    },
+    pictorial: {
+      ko: '한 변 a 인 정육면체 → 부피 a³. 부피를 알 때 한 변 = ∛부피. 음수 부피라는 건 (수학적 일반화) 음의 방향 확장.',
+      en: 'Cube of edge a has volume a³. Given volume, edge = ∛V. Negative cube root is the "mirror" direction.',
+    },
     abstract: {
       ko: '∛n: x³ = n 이 되는 실수 x (단 한 개). 음수의 세제곱근도 실수 (∛−8 = −2).',
       en: '∛n: unique real x with x³ = n. Cube root of negatives is real (∛−8 = −2).',
@@ -184,6 +241,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
         { math: '216 = 2³ · 3³', narrationKo: '소인수분해.', narrationEn: 'Prime factorise.' },
         { math: '∛(2³·3³) = 2·3 = 6', narrationKo: '세제곱 쌍.', narrationEn: 'Triplet root.' },
       ],
+    },
+    misconception: {
+      wrongKo: '∛(−27) 은 실수가 아니다.',
+      wrongEn: '∛(−27) is not real.',
+      whyKo: '제곱근(짝수 거듭제곱)과 세제곱근(홀수)을 같이 묶음.',
+      whyEn: 'Confused odd roots with even roots.',
+      correctKo: '홀수 거듭제곱근은 음수의 실수 값을 가짐. ∛(−27) = −3.',
+      correctEn: 'Odd roots of negatives are real: ∛(−27) = −3.',
     },
     retrieval: {
       promptKo: '∛(−27) = ?',
@@ -198,6 +263,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
     hook: {
       ko: '같은 이자율 10%, 단리 vs 복리 — 10년 뒤 차이는?',
       en: 'Same 10% rate, simple vs compound interest — how big is the gap after 10 years?',
+    },
+    concrete: {
+      ko: '₹1000, 10%, 10년. 단리 = 1000 + 100·10 = ₹2000. 복리 = 1000·(1.1)¹⁰ ≈ ₹2594. 차이 ≈ ₹594.',
+      en: '₹1000 @ 10% for 10 yrs. Simple = 1000 + 100·10 = ₹2000. Compound = 1000·(1.1)¹⁰ ≈ ₹2594. Gap ≈ ₹594.',
+    },
+    pictorial: {
+      ko: '단리는 직선 (선형), 복리는 위로 휘어진 지수 곡선. 시간이 길수록 두 선의 차이가 커짐.',
+      en: 'Simple = straight line, compound = upward-curving exponential. Gap grows with time.',
     },
     abstract: {
       ko: '단리 SI = P·r·t.  복리 A = P(1 + r/n)^(nt). 복리는 지수 성장.',
@@ -233,6 +306,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
       ko: '(x + 5)² 을 펼치려고 분배법칙으로 한 줄씩 계산할 필요는 없다 — 항등식이 단축한다.',
       en: 'Expanding (x + 5)² doesn\'t need term-by-term FOIL — identities give shortcuts.',
     },
+    concrete: {
+      ko: '(x+5)² = x² + 10x + 25. (x−3)² = x² − 6x + 9. (x+4)(x−4) = x² − 16. 항등식으로 5초 안에.',
+      en: '(x+5)² = x² + 10x + 25. (x−3)² = x² − 6x + 9. (x+4)(x−4) = x² − 16. Identities make it 5-second work.',
+    },
+    pictorial: {
+      ko: '(a+b)² 를 한 변 a+b 인 정사각형으로 시각화: 작은 정사각형 a², b² + 두 직사각형 ab+ab = 2ab.',
+      en: 'Visualise (a+b)² as a square of side a+b: small squares a², b² + two rectangles ab + ab = 2ab.',
+    },
     abstract: {
       ko: '(a ± b)² = a² ± 2ab + b².  (a + b)(a − b) = a² − b².',
       en: '(a ± b)² = a² ± 2ab + b².  (a + b)(a − b) = a² − b².',
@@ -267,6 +348,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
       ko: '원기둥 음료캔의 라벨이 떨어지면, 그 라벨은 어떤 모양의 종이일까?',
       en: 'Peel the label off a cylindrical can — what shape is that flat sheet?',
     },
+    concrete: {
+      ko: '반지름 3, 높이 10 원기둥. 라벨(직사각형) = 2π·3 × 10 = 60π. 윗·아랫면 2π·9 = 18π. 부피 = π·9·10 = 90π.',
+      en: 'Cylinder r=3, h=10. Label (rectangle) = 2π·3 × 10 = 60π. Top+bottom = 18π. Volume = 90π.',
+    },
+    pictorial: {
+      ko: '원기둥 전개도: 두 원 + 한 직사각형. 직사각형 한 변 = 원의 둘레 2πr, 다른 변 = 높이 h.',
+      en: 'Cylinder net: 2 circles + 1 rectangle. One side of rectangle = circumference 2πr, other side = height h.',
+    },
     abstract: {
       ko: '직사각형 라벨 = 2πr × h.  원기둥 전체 겉넓이 = 2πr(r + h). 부피 = πr²h.',
       en: 'Lateral surface = 2πr·h. Total surface = 2πr(r + h). Volume = πr²h.',
@@ -278,6 +367,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
         { math: 'V = π·3²·10 = 90π', narrationKo: '공식.', narrationEn: 'Plug in.' },
         { math: '≈ 282.7',           narrationKo: '값.',  narrationEn: 'Evaluate.' },
       ],
+    },
+    misconception: {
+      wrongKo: '원기둥 라벨 넓이 = πr × h.',
+      wrongEn: 'Cylinder label area = πr × h.',
+      whyKo: '둘레 2πr 대신 πr 사용.',
+      whyEn: 'Used πr instead of full circumference 2πr.',
+      correctKo: '라벨 = (전체 둘레)·(높이) = 2πr·h.',
+      correctEn: 'Label = (full circumference)·height = 2πr·h.',
     },
     retrieval: {
       promptKo: '한 변 4 cm 정육면체 부피?',
@@ -293,6 +390,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
       ko: '5⁰ 의 값은? 1 — 그런데 왜? 지수 법칙을 일관되게 확장하면 그렇게 정의된다.',
       en: 'What\'s 5⁰? It\'s 1 — but why? The laws force this definition for consistency.',
     },
+    concrete: {
+      ko: '5³/5³ = 125/125 = 1, 동시에 5³⁻³ = 5⁰. 두 결과가 일치해야 하므로 5⁰ = 1. 5⁻² = 1/5² = 1/25 도 같은 논리.',
+      en: '5³/5³ = 1; also 5³⁻³ = 5⁰. To stay consistent, 5⁰ = 1. Similarly 5⁻² = 1/5² = 1/25.',
+    },
+    pictorial: {
+      ko: '지수 sequence: 5³=125, 5²=25, 5¹=5, 5⁰=1, 5⁻¹=1/5, 5⁻²=1/25. 각 단계마다 ÷5. 0 과 음수까지 자연스럽게 확장.',
+      en: 'Sequence: 5³=125, 5²=25, 5¹=5, 5⁰=1, 5⁻¹=1/5. Each step divides by 5 — naturally extends to 0 and negatives.',
+    },
     abstract: {
       ko: 'a⁰ = 1 (a ≠ 0).  a⁻ⁿ = 1/aⁿ.  aᵐ/aⁿ = a^(m−n).',
       en: 'a⁰ = 1.  a⁻ⁿ = 1/aⁿ.  aᵐ/aⁿ = a^(m−n).',
@@ -304,6 +409,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
         { math: '2^(5 − (−2)) = 2⁷', narrationKo: '지수 차.', narrationEn: 'Subtract exponents.' },
         { math: '= 128',              narrationKo: '값.',    narrationEn: 'Evaluate.' },
       ],
+    },
+    misconception: {
+      wrongKo: '0⁰ = 1.',
+      wrongEn: '0⁰ = 1.',
+      whyKo: 'a⁰ = 1 규칙을 a = 0 에도 적용.',
+      whyEn: 'Applied a⁰ = 1 rule even when a = 0.',
+      correctKo: '0⁰ 는 정의되지 않음 (또는 맥락에 따라 1 로 정의). a⁰ = 1 은 a ≠ 0 에서만.',
+      correctEn: '0⁰ is undefined (or context-defined as 1). The rule a⁰ = 1 holds only for a ≠ 0.',
     },
     retrieval: {
       promptKo: '3⁻² = ?',
@@ -318,6 +431,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
     hook: {
       ko: '같은 일을 5명이 6시간 한다면, 10명이서는 몇 시간? 사람 수가 늘면 시간은 줄어든다 — 반비례.',
       en: '5 people finish a job in 6 hours. 10 people? Time shrinks as workforce grows — inverse proportion.',
+    },
+    concrete: {
+      ko: '정비례 y=3x: x=1, y=3; x=2, y=6; x=3, y=9. 비율 y/x=3 일정. 반비례 y=12/x: x=1,y=12; x=2,y=6; x=3,y=4. 곱 xy=12 일정.',
+      en: 'Direct y=3x: ratio y/x stays 3. Inverse y=12/x: product xy stays 12.',
+    },
+    pictorial: {
+      ko: '정비례 그래프는 원점 지나는 직선. 반비례 그래프는 1·3 사분면에 있는 곡선(쌍곡선).',
+      en: 'Direct: straight line through origin. Inverse: hyperbola in quadrants I and III.',
     },
     abstract: {
       ko: '정비례: y = kx (k 상수). 반비례: y = k/x ⇔ xy = k 일정.',
@@ -353,6 +474,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
       ko: '한 식을 두 인수의 곱으로 바꾸면 0 이 되는 값을 즉시 알 수 있다 — 인수분해의 힘.',
       en: 'Factor an expression and its zeros pop out — that\'s the power of factorisation.',
     },
+    concrete: {
+      ko: '6x³ + 9x²: 공통인수 3x² → 3x²(2x + 3). x² − 9: 두제곱차 → (x−3)(x+3). x² − 6x + 9: 완전제곱 → (x−3)².',
+      en: '6x³ + 9x²: factor 3x² → 3x²(2x+3). x² − 9 (diff of squares) → (x−3)(x+3). x² − 6x + 9 (perfect square) → (x−3)².',
+    },
+    pictorial: {
+      ko: '인수분해 결정 트리: 공통인수 있나? → 항이 2개? (두제곱차) → 3개? (완전제곱 또는 트리노미알) → 4개? (그루핑).',
+      en: 'Factor decision tree: common factor? → 2 terms? (diff of sqrs) → 3 terms? (perfect sq or trinomial) → 4 terms? (grouping).',
+    },
     abstract: {
       ko: '공통인수 → 두제곱차 a²−b²=(a+b)(a−b) → 완전제곱 → 그루핑 순으로 시도.',
       en: 'Try in order: common factor → diff. of squares → perfect square → grouping.',
@@ -385,6 +514,14 @@ export const CLASS_8_CONTENT: ChapterContentMap = {
     hook: {
       ko: '시간이 지남에 따라 변하는 온도, 거리, 점수 — 모두 좌표평면 위 한 점들로 그려진다.',
       en: 'Temperature, distance, scores over time — all become points on a coordinate plane.',
+    },
+    concrete: {
+      ko: '두 점 (1, 2), (4, 11): 기울기 = (11−2)/(4−1) = 9/3 = 3. 직선의 식 y − 2 = 3(x − 1) → y = 3x − 1.',
+      en: 'Two points (1,2),(4,11): slope = (11−2)/(4−1) = 3. Line: y − 2 = 3(x − 1) → y = 3x − 1.',
+    },
+    pictorial: {
+      ko: '좌표평면 4 사분면. 기울기 양수 = 오른쪽 위로, 음수 = 오른쪽 아래로. 기울기 0 = 수평선.',
+      en: 'Coordinate plane (4 quadrants). Positive slope rises rightward; negative falls; zero is horizontal.',
     },
     abstract: {
       ko: '좌표평면: (x, y) — 가로 x, 세로 y. 직선의 기울기 m = (y₂ − y₁)/(x₂ − x₁).',

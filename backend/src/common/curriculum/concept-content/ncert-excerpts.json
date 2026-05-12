@@ -1,0 +1,326 @@
+{
+  "C7-CH05-LINES-ANGLES": {
+    "ncertClass": "CLASS_7",
+    "chapterNumber": 5,
+    "sourceLine": 4253,
+    "excerpt": "You already know how to identify different lines, line segments and angles in a given shape. Can you identify the different line segments and angles formed in the following figures? (Fig 5.1) (i) (ii) (iii) (iv) Fig 5.1 Can you also identify whether the angles made are acute or obtuse or right? Recall that a line segment has two end points. If we extend the two end points in either direction endlessly, we get a line. Thus, we can say that a line has no end points. On the other hand, recall that a ray has one end point (namely its starting point). For example, look at the figures given below: (i) (ii) (iii) Fig 5.2 Here, Fig 5.2 (i) shows a line segment, Fig 5.2 (ii) shows a line and Fig 5.2 (iii) is that of a ray. Aline segment PQ is generally denoted by the symbol PQ , a lineAB is denoted by uuur the symbol AB and the ray OP is denoted by OP . Give some examples of line segments and rays from your daily life and discuss them with your friends."
+  },
+  "C7-CH06-TRIANGLE": {
+    "ncertClass": "CLASS_7",
+    "chapterNumber": 6,
+    "sourceLine": 4719,
+    "excerpt": "A triangle, you have seen, is a simple closed curve made of three line segments. It has three vertices, three sides and three angles. Here is ABC (Fig 6.1). It has Sides: AB , BC , CA Angles: BAC, ABC, BCA Fig 6.1 Vertices: A, B, C The side opposite to the vertex A is BC. Can you name the angle opposite to the side AB? You know how to classify triangles based on the (i) sides (ii) angles. (i) Based on Sides: Scalene, Isosceles and Equilateral triangles. (ii) Based onAngles:Acute-angled, Obtuse-angled and Right-angled triangles. Make paper-cut models of the above triangular shapes. Compare your models with those of your friends and discuss about them. TRY THESE 1. Write the six elements (i.e., the 3 sides and the 3 angles) of ABC. 2. Write the: (i) Side opposite to the vertex Q of PQR (ii) Angle opposite to the side LM of LMN (iii) Vertex opposite to the side RT of RST"
+  },
+  "C7-CH08-RATIONAL-NUMBERS": {
+    "ncertClass": "CLASS_7",
+    "chapterNumber": 8,
+    "sourceLine": 6488,
+    "excerpt": "You began your study of numbers by counting objects around you. The numbers used for this purpose were called counting numbers or natural numbers. They are 1, 2, 3, 4, ... By including 0 to natural numbers, we got the whole numbers, i.e., 0, 1, 2, 3, ... The negatives of natural numbers were then put together with whole numbers to make up integers. Integers are ..., 3, 2, 1, 0, 1, 2, 3, .... We, thus, extended the number system, from natural numbers to whole numbers and from whole numbers to integers. You were also introduced to fractions. These are numbers of the form numerator , denominator where the numerator is either 0 or a positive integer and the denominator, a positive integer. You compared two fractions, found their equivalent forms and studied all the four basic operations of addition, subtraction, multiplication and division on them. In this Chapter, we shall extend the number system further. We shall introduce the concept of rational numbers alongwith their addition, subtraction, multiplication and division operations."
+  },
+  "C7-CH10-ALG-EXPRESSIONS": {
+    "ncertClass": "CLASS_7",
+    "chapterNumber": 10,
+    "sourceLine": 8305,
+    "excerpt": "We have already come across simple algebraic expressions like x + 3, y 5, 4x + 5, 10y 5 and so on. In Class VI, we have seen how these expressions are useful in formu- lating puzzles and problems. We have also seen examples of several expressions in the chapter on simple equations. Expressions are a central concept in algebra. This Chapter is devoted to algebraic expressions. When you have studied this Chapter, you will know how algebraic expressions are formed, how they can be combined, how we can find their values and how they can be used."
+  },
+  "C7-CH11-EXPONENTS": {
+    "ncertClass": "CLASS_7",
+    "chapterNumber": 11,
+    "sourceLine": 8870,
+    "excerpt": "Do you know what the mass of earth is? It is 5,970,000,000,000,000,000,000,000 kg! Can you read this number? Mass of Uranus is 86,800,000,000,000,000,000,000,000 kg. Which has greater mass, Earth or Uranus? Distance between Sun and Saturn is 1,433,500,000,000 m and distance between Saturn and Uranus is 1,439,000,000,000 m. Can you read these numbers? Which distance is less? These very large numbers are difficult to read, understand and compare. To make these numbers easy to read, understand and compare, we use exponents. In this Chapter, we shall learn about exponents and also learn how to use them."
+  },
+  "C7-CH12-SYMMETRY": {
+    "ncertClass": "CLASS_7",
+    "chapterNumber": 12,
+    "sourceLine": 9765,
+    "excerpt": "Symmetry is an important geometrical concept, commonly exhibited in nature and is used almost in every field of activity. Artists, professionals, designers of clothing or jewellery, car manufacturers, architects and many others make use of the idea of symmetry. The beehives, the flowers, the tree-leaves, religious symbols, rugs, and handkerchiefs -- everywhere you find symmetrical designs. Architecture Engineering Nature You have already had a `feel' of line symmetry in your previous class. A figure has a line symmetry, if there is a line about which the figure may be folded so that the two parts of the figure will coincide. You might like to recall these ideas. Here are some activities to help you. Compose a picture-album Create some colourful Make some symmetrical showing symmetry. Ink-dot devils paper-cut designs. SYMMETRY 187 Enjoy identifying lines (also called axes) of symmetry in the designs you collect. Let us now strengthen our ideas on symmetry further. Study the following figures in which the lines of symmetry are marked with dotted lines. [Fig 12.1 (i) to (iv)] (i) (ii) (iii) (iv) Fig 12.1"
+  },
+  "C7-CH13-SOLID-SHAPES": {
+    "ncertClass": "CLASS_7",
+    "chapterNumber": 13,
+    "sourceLine": 10259,
+    "excerpt": "In this chapter, you will classify figures you have seen in terms of what is known as dimension. In our day to day life, we see several objects like books, balls, ice-cream cones etc., around us which have different shapes. One thing common about most of these objects is that they all have some length, breadth and height or depth. That is, they all occupy space and have three dimensions. Hence, they are called three dimensional shapes. Do you remember some of the three dimensional shapes (i.e., solid shapes) we have seen in earlier classes? TRY THESE Match the shape with the name: (i) (a) Cuboid (iv) (d) Sphere (ii) (b) Cylinder (v) (e) Pyramid (iii) (c) Cube (vi) (f) Cone Fig 13.1 VISUALISING SOLID SHAPES 199 Try to identify some objects shaped like each of these. By a similar argument, we can say figures drawn on paper which have only length and"
+  },
+  "C8-CH01-RATIONAL-NUMBERS": {
+    "ncertClass": "CLASS_8",
+    "chapterNumber": 1,
+    "sourceLine": 12116,
+    "excerpt": "In Mathematics, we frequently come across simple equations to be solved. For example, the equation x + 2 = 13 (1) is solved when x = 11, because this value of x satisfies the given equation. The solution 11 is a natural number. On the other hand, for the equation x + 5 =5 (2) the solution gives the whole number 0 (zero). If we consider only natural numbers, equation (2) cannot be solved. To solve equations like (2), we added the number zero to the collection of natural numbers and obtained the whole numbers. Even whole numbers will not be sufficient to solve equations of type x + 18 = 5 (3) Do you see `why'? We require the number 13 which is not a whole number. This led us to think of integers, (positive and negative). Note that the positive integers correspond to natural numbers. One may think that we have enough numbers to solve all simple equations with the available list of integers. Now consider the equations 2x = 3 (4) 5x + 7 = 0 (5) for which we cannot find a solution from the integers. (Check this) 3 -7"
+  },
+  "C8-CH02-LINEAR-EQ-ONE-VAR": {
+    "ncertClass": "CLASS_8",
+    "chapterNumber": 2,
+    "sourceLine": 12790,
+    "excerpt": "In the earlier classes, you have come across several algebraic expressions and equations. Some examples of expressions we have so far worked with are: 5x, 2x 3, 3x + y, 2xy + 5, xyz + x + y + z, x2 + 1, y + y2 Some examples of equations are: 5x = 25, 2x 3 = 9, 2y + 5 = 37 , 6z + 10 = -2 2 2 You would remember that equations use the equality (=) sign; it is missing in expressions. Of these given expressions, many have more than one variable. For example, 2xy + 5 has two variables. We however, restrict to expressions with only one variable when we form equations. Moreover, the expressions we use to form equations are linear. This means that the highest power of the variable appearing in the expression is 1. These are linear expressions: 2x, 2x + 1, 3y 7, 12 5z, 5 (x 4) + 10 These are not linear expressions: x2 + 1, y + y2, 1 + z + z2 + z3 (since highest power of variable > 1) Here we will deal with equations with linear expressions in one variable only. Such equations are known as linear equations in one variable. The simple equations which you studied in the earlier classes were all of this type. Let us briefly revise what we know:"
+  },
+  "C8-CH03-QUADRILATERALS": {
+    "ncertClass": "CLASS_8",
+    "chapterNumber": 3,
+    "sourceLine": 13054,
+    "excerpt": "You know that the paper is a model for a plane surface. When you join a number of points without lifting a pencil from the paper (and without retracing any portion of the drawing other than single points), you get a plane curve. 3.1.1 Convex and concave polygons A simple closed curve made up of only line segments is called a polygon. Curves that are polygons Curves that are not polygons Here are some convex polygons and some concave polygons. (Fig 3.1) Convex polygons Concave polygons Fig 3.1 Can you find how these types of polygons differ from one another? Polygons that are convex have no portions of their diagonals in their exteriors or any line segment joining any two different points, in the interior of the polygon, lies wholly in the interior of it . Is this true with concave polygons? Study the figures given. Then try to describe in your own words what we mean by a convex polygon and what we mean by a concave polygon. Give two rough sketches of each kind. In our work in this class, we will be dealing with convex polygons only. 3.1.2 Regular and irregular polygons Aregular polygon is both `equiangular'and `equilateral'. For example, a square has sides"
+  },
+  "C8-CH05-SQUARES-ROOTS": {
+    "ncertClass": "CLASS_8",
+    "chapterNumber": 5,
+    "sourceLine": 14500,
+    "excerpt": "You know that the area of a square = side side (where `side' means `the length of a side'). Study the following table. Side of a square (in cm) Area of the square (in cm2) 1 1 1 = 1 = 12 2 2 2 = 4 = 22 3 3 3 = 9 = 32 5 5 5 = 25 = 52 8 8 8 = 64 = 82 a a a = a2 What is special about the numbers 4, 9, 25, 64 and other such numbers? Since, 4 can be expressed as 2 2 = 22, 9 can be expressed as 3 3 = 32, all such numbers can be expressed as the product of the number with itself. Such numbers like 1, 4, 9, 16, 25, ... are known as square numbers. In general, if a natural number m can be expressed as n2, where n is also a natural number, then m is a square number. Is 32 a square number? We know that 52 = 25 and 62 = 36. If 32 is a square number, it must be the square of a natural number between 5 and 6. But there is no natural number between 5 and 6. Therefore 32 is not a square number."
+  },
+  "C8-CH06-CUBES-ROOTS": {
+    "ncertClass": "CLASS_8",
+    "chapterNumber": 6,
+    "sourceLine": 15740,
+    "excerpt": "This is a story about one of India's great mathematical geniuses, S. Ramanujan. Once another famous mathematician Prof. G.H. Hardy came to visit him in a taxi whose number was 1729. While talking to Ramanujan, Hardy described this number Hardy Ramanujan \"a dull number\". Ramanujan quickly pointed out that 1729 was indeed Number interesting. He said it is the smallest number that can be expressed as a sum of two cubes in two different ways: 1729 is the smallest Hardy Ramanujan Number. There 1729 = 1728 + 1 = 123 + 13 are an infinitely many such numbers. Few are 4104 1729 = 1000 + 729 = 103 + 93 (2, 16; 9, 15), 13832 (18, 20; 2, 24), Check it with the 1729 has since been known as the Hardy Ramanujan Number, numbers given in the brackets. even though this feature of 1729 was known more than 300 years before Ramanujan. How did Ramanujan know this? Well, he loved numbers. All through his life, he experimented with numbers. He probably found numbers that were expressed as the sum of two squares and sum of two cubes also."
+  },
+  "C8-CH09-MENSURATION": {
+    "ncertClass": "CLASS_8",
+    "chapterNumber": 9,
+    "sourceLine": 17449,
+    "excerpt": "We have learnt that for a closed plane figure, the perimeter is the distance around its boundary and its area is the region covered by it. We found the area and perimeter of various plane figures such as triangles, rectangles, circles etc. We have also learnt to find the area of pathways or borders in rectangular shapes. In this chapter, we will try to solve problems related to perimeter and area of other plane closed figures like quadrilaterals. We will also learn about surface area and volume of solids such as cube, cuboid and cylinder."
+  },
+  "C8-CH10-EXPONENTS": {
+    "ncertClass": "CLASS_8",
+    "chapterNumber": 10,
+    "sourceLine": 18331,
+    "excerpt": "Do you know? Mass of earth is 5,970,000,000,000, 000, 000, 000, 000 kg. We have already learnt in earlier class how to write such large numbers more conveniently using exponents, as, 5.97 1024 kg. We read 1024 as 10 raised to the power 24. We know 25 = 2 2 2 2 2 and 2m = 2 2 2 2 ... 2 2 ... (m times) Let us now find what is 2 2 is equal to?"
+  },
+  "C8-CH11-DIRECT-INVERSE": {
+    "ncertClass": "CLASS_8",
+    "chapterNumber": 11,
+    "sourceLine": 18821,
+    "excerpt": "Mohan prepares tea for himself and his sister. He uses 300 mL of water, 2 spoons of sugar, 1 spoon of tea leaves and 50 mL of milk. How much quantity of each item will he need, if he has to make tea for five persons? If two students take 20 minutes to arrange chairs for an assembly, then how much time would five students take to do the same job? We come across many such situations in our day-to-day life, where we need to see variation in one quantity bringing in variation in the other quantity. For example: (i) If the number of articles purchased increases, the total cost also increases. (ii) More the money deposited in a bank, more is the interest earned. (iii) As the speed of a vehicle increases, the time taken to cover the same distance decreases. (iv) For a given job, more the number of workers, less will be the time taken to complete the work. Observe that change in one quantity leads to change in the other quantity. Write five more such situations where change in one quantity leads to change in"
+  },
+  "C8-CH12-FACTORISATION": {
+    "ncertClass": "CLASS_8",
+    "chapterNumber": 12,
+    "sourceLine": 19638,
+    "excerpt": "12.1.1 Factors of natural numbers You will remember what you learnt about factors in Class VI. Let us take a natural number, say 30, and write it as a product of other natural numbers, say 30 = 2 15 We know that 30 can also be written as 30 = 1 30 = 3 10 = 5 6 Thus, 1, 2, 3, 5, 6, 10, 15 and 30 are the factors of 30. Thus, 1 and 30 are also factors of 30. Of these, 2, 3 and 5 are the prime factors of 30 (Why?) You will notice that 1 is a factor of any A number written as a product of prime factors is said to number. For example, 101 = 1 101. be in the prime factor form; for example, 30 written as However, when we write a number as a 2 3 5 is in the prime factor form. product of factors, we shall not write 1 as a factor, unless it is specially required. The prime factor form of 70 is 2 5 7. The prime factor form of 90 is 2 3 3 5, and so on. Similarly, we can express algebraic expressions as products of their factors. This is what we shall learn to do in this chapter. 12.1.2 Factors of algebraic expressions We have seen in Class VII that in algebraic expressions, terms are formed as products of"
+  },
+  "C8-CH13-GRAPHS": {
+    "ncertClass": "CLASS_8",
+    "chapterNumber": 13,
+    "sourceLine": 20387,
+    "excerpt": "Have you seen graphs in the newspapers, television, magazines, books etc.? The purpose of the graph is to show numerical facts in visual form so that they can be understood quickly, easily and clearly. Thus graphs are visual representations of data collected. Data can also be presented in the form of a table; however a graphical presentation is easier to understand. This is true in particular when there is a trend or comparison to be shown. We have already seen some types of graphs. Let us quickly recall them here. 13.1.1 A line graph A line graph displays data that changes continuously over periods of time. When Renu fell sick, her doctor maintained a record of her body temperature, taken every four hours. It was in the form of a graph (shown in Fig 13.1 and Fig 13.2). We may call this a \"time-temperature graph\". It is a pictorial representation of the following data, given in tabular form. Time 6 a.m. 10 a.m. 2 p.m. 6 p.m. Temperature(C) 37 40 38 35 The horizontal line (usually called the x-axis) shows the timings at which the temperatures were recorded. What are labelled on the vertical line (usually called the y-axis)?"
+  },
+  "C10-CH01-REAL-NUMBERS": {
+    "ncertClass": "CLASS_10",
+    "chapterNumber": 1,
+    "sourceLine": 23442,
+    "excerpt": "In Class IX, you began your exploration of the world of real numbers and encountered irrational numbers. We continue our discussion on real numbers in this chapter. We begin with very important properties of positive integers in Sections 1.2, namely the Euclid's division algorithm and the Fundamental Theorem of Arithmetic. Euclid's division algorithm, as the name suggests, has to do with divisibility of integers. Stated simply, it says any positive integer a can be divided by another positive integer b in such a way that it leaves a remainder r that is smaller than b. Many of you probably recognise this as the usual long division process. Although this result is quite easy to state and understand, it has many applications related to the divisibility properties of integers. We touch upon a few of them, and use it mainly to compute the HCF of two positive integers. The Fundamental Theorem of Arithmetic, on the other hand, has to do something with multiplication of positive integers. You already know that every composite number can be expressed as a product of primes in a unique way -- this important fact is the Fundamental Theorem of Arithmetic. Again, while it is a result that is easy to state and understand, it has some very deep and significant applications in the field of mathematics. We use the Fundamental Theorem of Arithmetic for two main applications. First, we use it to prove the irrationality of many of the numbers you studied in Class IX, such as"
+  },
+  "C10-CH02-POLYNOMIALS": {
+    "ncertClass": "CLASS_10",
+    "chapterNumber": 2,
+    "sourceLine": 23873,
+    "excerpt": "In Class IX, you have studied polynomials in one variable and their degrees. Recall that if p(x) is a polynomial in x, the highest power of x in p(x) is called the degree of the polynomial p(x). For example, 4x + 2 is a polynomial in the variable x of degree 1, 2y2 3y + 4 is a polynomial in the variable y of degree 2, 5x3 4x2 + x 2 is a polynomial in the variable x of degree 3 and 7u6 3 u4 4u2 u 8 is a polynomial in the variable u of degree 6. Expressions like 1 1 , x 2 , x2 2x 3 etc., are x 1 not polynomials. A polynomial of degree 1 is called a linear polynomial. For example, 2x 3, 3x 5, y 2 , x 2 , 3z + 4, 2 u 1 , etc., are all linear polynomials. Polynomials 11 3 such as 2x + 5 x2, x3 + 1, etc., are not linear polynomials. A polynomial of degree 2 is called a quadratic polynomial. The name `quadratic' has been derived from the word `quadrate', which means `square'. 2x2 3x 2 , y2 2, 2 x2 3x, u 2u2 5, 5v2 2 v, 4z2 1 are some examples of 3 3 7 quadratic polynomials (whose coefficients are real numbers). More generally, any"
+  },
+  "C10-CH03-LINEAR-EQ-PAIRS": {
+    "ncertClass": "CLASS_10",
+    "chapterNumber": 3,
+    "sourceLine": 24449,
+    "excerpt": "You must have come across situations like the one given below : Akhila went to a fair in her village. She wanted to enjoy rides on the Giant Wheel and play Hoopla (a game in which you throw a ring on the items kept in a stall, and if the ring covers any object completely, you get it). The number of times she played Hoopla is half the number of rides she had on the Giant Wheel. If each ride costs ` 3, and a game of Hoopla costs ` 4, how would you find out the number of rides she had and how many times she played Hoopla, provided she spent ` 20. May be you will try it by considering different cases. If she has one ride, is it possible? Is it possible to have two rides? And so on. Or you may use the knowledge of Class IX, to represent such situations as linear equations in two variables. PAIR OF LINEAR EQUATIONS IN TWO VARIABLES 25 Let us try this approach. Denote the number of rides that Akhila had by x, and the number of times she played Hoopla by y. Now the situation can be represented by the two equations: 1 (1) y= 2x 3x + 4y = 20 (2) Can we find the solutions of this pair of equations? There are several ways of"
+  },
+  "C10-CH04-QUADRATIC-EQ": {
+    "ncertClass": "CLASS_10",
+    "chapterNumber": 4,
+    "sourceLine": 25180,
+    "excerpt": "In Chapter 2, you have studied different types of polynomials. One type was the quadratic polynomial of the form ax2 + bx + c, a 0. When we equate this polynomial to zero, we get a quadratic equation. Quadratic equations come up when we deal with many real-life situations. For instance, suppose a charity trust decides to build a prayer hall having a carpet area of 300 square metres with its length one metre more than twice its breadth. What should be the length and breadth of the hall? Suppose the breadth of the hall is x metres. Then, its length should be (2x + 1) metres. We can depict Fig. 4.1 this information pictorially as shown in Fig. 4.1. Now, area of the hall = (2x + 1). x m2 = (2x2 + x) m2 So, 2x2 + x = 300 (Given) Therefore, 2x2 + x 300 = 0 So, the breadth of the hall should satisfy the equation 2x2 + x 300 = 0 which is a quadratic equation. Many people believe that Babylonians were the first to solve quadratic equations. For instance, they knew how to find two positive numbers with a given positive sum"
+  },
+  "C10-CH05-AP": {
+    "ncertClass": "CLASS_10",
+    "chapterNumber": 5,
+    "sourceLine": 25724,
+    "excerpt": "You must have observed that in nature, many things follow a certain pattern, such as the petals of a sunflower, the holes of a honeycomb, the grains on a maize cob, the spirals on a pineapple and on a pine cone, etc. We now look for some patterns which occur in our day-to-day life. Some such examples are : (i) Reena applied for a job and got selected. She has been offered a job with a starting monthly salary of ` 8000, with an annual increment of ` 500 in her salary. Her salary (in `) for the 1st, 2nd, 3rd, . . . years will be, respectively 8000, 8500, 9000, . . . . (ii) The lengths of the rungs of a ladder decrease Fig. 5.1 uniformly by 2 cm from bottom to top (see Fig. 5.1). The bottom rung is 45 cm in length. The lengths (in cm) of the 1st, 2nd, 3rd, . . ., 8th rung from the bottom to the top are, respectively 45, 43, 41, 39, 37, 35, 33, 31"
+  },
+  "C10-CH06-TRIANGLES-III": {
+    "ncertClass": "CLASS_10",
+    "chapterNumber": 6,
+    "sourceLine": 26993,
+    "excerpt": "You are familiar with triangles and many of their properties from your earlier classes. In Class IX, you have studied congruence of triangles in detail. Recall that two figures are said to be congruent, if they have the same shape and the same size. In this chapter, we shall study about those figures which have the same shape but not necessarily the same size. Two figures having the same shape (and not necessarily the same size) are called similar figures. In particular, we shall discuss the similarity of triangles and apply this knowledge in giving a simple proof of Pythagoras Theorem learnt earlier. Can you guess how heights of mountains (say Mount Everest) or distances of some long distant objects (say moon) have been found out? Do you think these have been measured directly with the help of a measuring tape? In fact, all these heights and distances have been found out using the idea of indirect measurements, which is based on the principle of similarity of figures (see Example 7, Q.15 of Exercise 6.3 and also Chapters 8 and 9 of this book)."
+  },
+  "C10-CH07-COORDINATE-GEOM-II": {
+    "ncertClass": "CLASS_10",
+    "chapterNumber": 7,
+    "sourceLine": 28105,
+    "excerpt": "In Class IX, you have studied that to locate the position of a point on a plane, we require a pair of coordinate axes. The distance of a point from the y-axis is called its x-coordinate, or abscissa. The distance of a point from the x-axis is called its y-coordinate, or ordinate. The coordinates of a point on the x-axis are of the form (x, 0), and of a point on the y-axis are of the form (0, y). Here is a play for you. Draw a set of a pair of perpendicular axes on a graph paper. Now plot the following points and join them as directed: Join the point A(4, 8) to B(3, 9) to C(3, 8) to D(1, 6) to E(1, 5) to F(3, 3) to G(6, 3) to H(8, 5) to I(8, 6) to J(6, 8) to K(6, 9) to L(5, 8) to A. Then join the points P(3.5, 7), Q (3, 6) and R(4, 6) to form a triangle. Also join the points X(5.5, 7), Y(5, 6) and Z(6, 6) to form a triangle. Now join S(4, 5), T(4.5, 4) and U(5, 5) to form a triangle. Lastly join S to the points (0, 5) and (0, 6) and join U to the points (9, 5) and (9, 6). What picture have you got? Also, you have seen that a linear equation in two variables of the form ax + by + c = 0, (a, b are not simultaneously zero), when represented graphically, gives a straight line. Further, in Chapter 2, you have seen the graph of y = ax2 + bx + c (a 0), is a parabola. In fact, coordinate geometry has been developed as an algebraic tool for studying geometry of figures. It helps us to study geometry using algebra, and understand algebra with the help of geometry. Because of this,"
+  },
+  "C10-CH08-TRIG-INTRO": {
+    "ncertClass": "CLASS_10",
+    "chapterNumber": 8,
+    "sourceLine": 28788,
+    "excerpt": "You have already studied about triangles, and in particular, right triangles, in your earlier classes. Let us take some examples from our surroundings where right triangles can be imagined to be formed. For instance : 1. Suppose the students of a school are visiting Qutub Minar. Now, if a student is looking at the top of the Minar, a right triangle can be imagined to be made, as shown in Fig 8.1. Can the student find out the height of the Minar, without actually measuring it? 2. Suppose a girl is sitting on the balcony Fig. 8.1 of her house located on the bank of a Fig. 8.2 river. She is looking down at a flower pot placed on a stair of a temple situated nearby on the other bank of the river. A right triangle is imagined to be made in this situation as shown in Fig.8.2. If you know the height at which the"
+  },
+  "C10-CH10-CIRCLES-II": {
+    "ncertClass": "CLASS_10",
+    "chapterNumber": 10,
+    "sourceLine": 30224,
+    "excerpt": "You have studied in Class IX that a circle is a collection of all points in a plane which are at a constant distance (radius) from a fixed point (centre). You have also studied various terms related to a circle like chord, segment, sector, arc etc. Let us now examine the different situations that can arise when a circle and a line are given in a plane. So, let us consider a circle and a line PQ. There can be three possibilities given in Fig. 10.1 below: Fig. 10.1 In Fig. 10.1 (i), the line PQ and the circle have no common point. In this case, PQ is called a non-intersecting line with respect to the circle. In Fig. 10.1 (ii), there are two common points A and B that the line PQ and the circle have. In this case, we call the line PQ a secant of the circle. In Fig. 10.1 (iii), there is only one point A which is common to the line PQ and the circle. In this case, the line is called a tangent to the circle. CIRCLES 145 You might have seen a pulley fitted over a well which is used Fig. 10.2 in taking out water from the well. Look at Fig. 10.2. Here the rope on both sides of the pulley, if considered as a ray, is like a tangent"
+  },
+  "C10-CH12-SURFACE-VOLUME-II": {
+    "ncertClass": "CLASS_10",
+    "chapterNumber": 12,
+    "sourceLine": 30995,
+    "excerpt": "From Class IX, you are familiar with some of the solids like cuboid, cone, cylinder, and sphere (see Fig. 12.1). You have also learnt how to find their surface areas and volumes. Fig. 12.1 In our day-to-day life, we come across a number of solids made up of combinations of two or more of the basic solids as shown above. You must have seen a truck with a container fitted on its back (see Fig. 12.2), carrying oil or water from one place to another. Is it in the shape of any of the four basic solids mentioned above? You may guess that it is made of a cylinder with two hemispheres as its ends. Fig. 12.2 Again, you may have seen an object like the one in Fig. 12.3. Can you name it? A test tube, right! You would have used one in your science laboratory. This tube is also a combination of a cylinder and a hemisphere. Similarly, while travelling, you may have"
+  },
+  "C10-CH13-STATISTICS-II": {
+    "ncertClass": "CLASS_10",
+    "chapterNumber": 13,
+    "sourceLine": 31448,
+    "excerpt": "In Class IX, you have studied the classification of given data into ungrouped as well as grouped frequency distributions. You have also learnt to represent the data pictorially in the form of various graphs such as bar graphs, histograms (including those of varying widths) and frequency polygons. In fact, you went a step further by studying certain numerical representatives of the ungrouped data, also called measures of central tendency, namely, mean, median and mode. In this chapter, we shall extend the study of these three measures, i.e., mean, median and mode from ungrouped data to that of grouped data. We shall also discuss the concept of cumulative frequency, the cumulative frequency distribution and how to draw cumulative frequency curves, called ogives."
+  },
+  "C11-CH01-SETS": {
+    "ncertClass": "CLASS_11",
+    "chapterNumber": 1,
+    "sourceLine": 35921,
+    "excerpt": "The concept of set serves as a fundamental part of the Georg Cantor present day mathematics. Today this concept is being used (1845-1918) in almost every branch of mathematics. Sets are used to define the concepts of relations and functions. The study of geometry, sequences, probability, etc. requires the knowledge of sets. The theory of sets was developed by German mathematician Georg Cantor (1845-1918). He first encountered sets while working on \"problems on trigonometric series\". In this Chapter, we discuss some basic definitions and operations involving sets."
+  },
+  "C11-CH02-RELATIONS-FUNCTIONS": {
+    "ncertClass": "CLASS_11",
+    "chapterNumber": 2,
+    "sourceLine": 37172,
+    "excerpt": "Much of mathematics is about finding a pattern a recognisable link between quantities that change. In our daily life, we come across many patterns that characterise relations such as brother and sister, father and son, teacher and student. In mathematics also, we come across many relations such as number m is less than number n, line l is parallel to line m, set A is a subset of set B. In all these, we notice that a relation involves pairs of objects in certain order. In this Chapter, we will learn how to link pairs of objects from two sets and then introduce relations between the two objects in the pair. Finally, we will learn about G . W. Leibnitz special relations which will qualify to be functions. The (16461716) concept of function is very important in mathematics since it captures the idea of a mathematically precise correspondence between one quantity with the other."
+  },
+  "C11-CH03-TRIG-FUNCTIONS": {
+    "ncertClass": "CLASS_11",
+    "chapterNumber": 3,
+    "sourceLine": 38088,
+    "excerpt": "The word `trigonometry' is derived from the Greek words `trigon' and `metron' and it means `measuring the sides of a triangle'. The subject was originally developed to solve geometric problems involving triangles. It was studied by sea captains for navigation, surveyor to map out the new lands, by engineers and others. Currently, trigonometry is used in many areas such as the science of seismology, designing electric circuits, describing the state of an atom, predicting the heights of tides in the ocean, analysing a musical tone and in many other areas. In earlier classes, we have studied the trigonometric Arya Bhatt ratios of acute angles as the ratio of the sides of a right (476-550) angled triangle. We have also studied the trigonometric identities and application of trigonometric ratios in solving the problems related to heights and distances. In this Chapter, we will generalise the concept of trigonometric ratios to trigonometric functions and study their properties."
+  },
+  "C11-CH04-COMPLEX": {
+    "ncertClass": "CLASS_11",
+    "chapterNumber": 4,
+    "sourceLine": 39692,
+    "excerpt": "In earlier classes, we have studied linear equations in one W. R. Hamilton and two variables and quadratic equations in one variable. (1805-1865) We have seen that the equation x2 + 1 = 0 has no real solution as x2 + 1 = 0 gives x2 = 1 and square of every real number is non-negative. So, we need to extend the real number system to a larger system so that we can find the solution of the equation x2 = 1. In fact, the main objective is to solve the equation ax2 + bx + c = 0, where D = b2 4ac < 0, which is not possible in the system of real numbers."
+  },
+  "C11-CH05-LINEAR-INEQ": {
+    "ncertClass": "CLASS_11",
+    "chapterNumber": 5,
+    "sourceLine": 40265,
+    "excerpt": "In earlier classes, we have studied equations in one variable and two variables and also solved some statement problems by translating them in the form of equations. Now a natural question arises: `Is it always possible to translate a statement problem in the form of an equation? For example, the height of all the students in your class is less than 160 cm. Your classroom can occupy atmost 60 tables or chairs or both. Here we get certain statements involving a sign `<' (less than), `>' (greater than), `' (less than or equal) and (greater than or equal) which are known as inequalities. In this Chapter, we will study linear inequalities in one and two variables. The study of inequalities is very useful in solving problems in the field of science, mathematics, statistics, economics, psychology, etc."
+  },
+  "C11-CH06-PERMUTATIONS": {
+    "ncertClass": "CLASS_11",
+    "chapterNumber": 6,
+    "sourceLine": 40844,
+    "excerpt": "Suppose you have a suitcase with a number lock. The number lock has 4 wheels each labelled with 10 digits from 0 to 9. The lock can be opened if 4 specific digits are arranged in a particular sequence with no repetition. Some how, you have forgotten this specific sequence of digits. You remember only the first digit which is 7. In order to open the lock, how many sequences of 3-digits you may have to check with? To answer this question, you may, immediately, start listing all possible arrangements of 9 remaining digits taken 3 at a time. But, this method will be tedious, because the number Jacob Bernoulli of possible sequences may be large. Here, in this Chapter, (1654-1705) we shall learn some basic counting techniques which will enable us to answer this question without actually listing 3-digit arrangements. In fact, these techniques will be useful in determining the number of different ways of arranging and selecting objects without actually listing them. As a first step, we shall examine a principle which is most fundamental to the learning of these techniques."
+  },
+  "C11-CH07-BINOMIAL": {
+    "ncertClass": "CLASS_11",
+    "chapterNumber": 7,
+    "sourceLine": 42145,
+    "excerpt": "In earlier classes, we have learnt how to find the squares and cubes of binomials like a + b and a b. Using them, we could evaluate the numerical values of numbers like (98)2 = (100 2)2, (999)3 = (1000 1)3, etc. However, for higher powers like (98)5, (101)6, etc., the calculations become difficult by using repeated multiplication. This difficulty was overcome by a theorem known as binomial theorem. It gives an easier way to expand (a + b)n, where n is an integer or a rational number. In this Chapter, we study binomial theorem for positive integral indices only."
+  },
+  "C11-CH08-SEQUENCES": {
+    "ncertClass": "CLASS_11",
+    "chapterNumber": 8,
+    "sourceLine": 42563,
+    "excerpt": "In mathematics, the word, \"sequence\" is used in much the same way as it is in ordinary English. When we say that a collection of objects is listed in a sequence, we usually mean that the collection is ordered in such a way that it has an identified first member, second member, third member and so on. For example, population of human beings or bacteria at different times form a sequence. The amount of money deposited in a bank, over a number of years form a sequence. Depreciated values of certain commodity occur in a sequence. Sequences have important applications in several Fibonacci spheres of human activities. (1175-1250) Sequences, following specific patterns are called progressions. In previous class, we have studied about arithmetic progression (A.P). In this Chapter, besides discussing more about A.P.; arithmetic mean, geometric mean, relationship between A.M. and G.M., special series in forms of sum to n terms of consecutive natural numbers, sum to n terms of squares of natural numbers and sum to n terms of cubes of natural numbers will also be studied."
+  },
+  "C11-CH09-STRAIGHT-LINES": {
+    "ncertClass": "CLASS_11",
+    "chapterNumber": 9,
+    "sourceLine": 43400,
+    "excerpt": "We are familiar with two-dimensional coordinate geometry from earlier classes. Mainly, it is a combination of algebra and geometry. A systematic study of geometry by the use of algebra was first carried out by celebrated French philosopher and mathematician Ren Descartes, in his book `La Gomtry, published in 1637. This book introduced the notion of the equation of a curve and related analytical methods into the study of geometry. The resulting combination of analysis and geometry is referred now as analytical geometry. In the earlier classes, we initiated the study of coordinate geometry, where we studied about Ren Descartes coordinate axes, coordinate plane, plotting of points in a (1596 -1650) plane, distance between two points, section formulae, etc. All these concepts are the basics of coordinate geometry. Let us have a brief recall of coordinate geometry done in earlier classes. To recapitulate, the location of the points (6, 4) and (3, 0) in the XY-plane is shown in Fig 9.1. We may note that the point (6, 4) is at 6 units"
+  },
+  "C11-CH10-CONIC": {
+    "ncertClass": "CLASS_11",
+    "chapterNumber": 10,
+    "sourceLine": 44673,
+    "excerpt": "In the preceding Chapter 10, we have studied various forms of the equations of a line. In this Chapter, we shall study about some other curves, viz., circles, ellipses, parabolas and hyperbolas. The names parabola and hyperbola are given by Apollonius. These curves are in fact, known as conic sections or more commonly conics because they can be obtained as intersections of a plane with a double napped right circular cone. These curves have a very wide range of applications in fields such as planetary motion, Apollonius design of telescopes and antennas, reflectors in flashlights (262 B.C. -190 B.C.) and automobile headlights, etc. Now, in the subsequent sections we will see how the intersection of a plane with a double napped right circular cone results in different types of curves."
+  },
+  "C11-CH11-3D-INTRO": {
+    "ncertClass": "CLASS_11",
+    "chapterNumber": 11,
+    "sourceLine": 46114,
+    "excerpt": "You may recall that to locate the position of a point in a plane, we need two intersecting mutually perpendicular lines in the plane. These lines are called the coordinate axes and the two numbers are called the coordinates of the point with respect to the axes. In actual life, we do not have to deal with points lying in a plane only. For example, consider the position of a ball thrown in space at different points of time or the position of an aeroplane as it flies from one place to another at different times during its flight. Similarly, if we were to locate the position of the Leonhard Euler lowest tip of an electric bulb hanging from the ceiling of a (1707-1783) room or the position of the central tip of the ceiling fan in a room, we will not only require the perpendicular distances of the point to be located from two perpendicular walls of the room but also the height of the point from the floor of the room. Therefore, we need not only two but three numbers representing the perpendicular distances of the point from three mutually perpendicular planes, namely the floor of the room and two adjacent walls of the room. The three numbers representing the three distances are called the coordinates of the point with reference to the three coordinate"
+  },
+  "C11-CH12-LIMITS-DERIVATIVES": {
+    "ncertClass": "CLASS_11",
+    "chapterNumber": 12,
+    "sourceLine": 46566,
+    "excerpt": "This chapter is an introduction to Calculus. Calculus is that branch of mathematics which mainly deals with the study of change in the value of a function as the points in the domain change. First, we give an intuitive idea of derivative (without actually defining it). Then we give a naive definition of limit and study some algebra of limits. Then we come back to a definition of derivative and study some algebra of derivatives. We also obtain derivatives of certain standard functions."
+  },
+  "C11-CH13-STATISTICS-III": {
+    "ncertClass": "CLASS_11",
+    "chapterNumber": 13,
+    "sourceLine": 48739,
+    "excerpt": "We know that statistics deals with data collected for specific purposes. We can make decisions about the data by analysing and interpreting it. In earlier classes, we have studied methods of representing data graphically and in tabular form. This representation reveals certain salient features or characteristics of the data. We have also studied the methods of finding a representative value for the given data. This value is called the measure of central tendency. Recall mean (arithmetic mean), median and mode are three measures of central tendency. A measure of central tendency gives us a rough idea where data points are Karl Pearson centred. But, in order to make better interpretation from the (1857-1936) data, we should also have an idea how the data are scattered or how much they are bunched around a measure of central tendency. Consider now the runs scored by two batsmen in their last ten matches as follows: Batsman A : 30, 91, 0, 64, 42, 80, 30, 5, 117, 71 Batsman B : 53, 46, 48, 50, 53, 53, 58, 60, 57, 52 Clearly, the mean and median of the data are"
+  },
+  "C12-CH01-RELATIONS-FUNCTIONS-II": {
+    "ncertClass": "CLASS_12",
+    "chapterNumber": 1,
+    "sourceLine": 54632,
+    "excerpt": "Recall that the notion of relations and functions, domain, co-domain and range have been introduced in Class XI along with different types of specific real valued functions and their graphs. The concept of the term `relation' in mathematics has been drawn from the meaning of relation in English language, according to which two objects or quantities are related if there is a recognisable connection or link between the two objects or quantities. Let A be the set of students of Class XII of a school and B be the set of students of Class XI of the same school. Then some of the examples of relations from A to B are (i) {(a, b) A B: a is brother of b}, Lejeune Dirichlet (ii) {(a, b) A B: a is sister of b}, (1805-1859) (iii) {(a, b) A B: age of a is greater than age of b}, (iv) {(a, b) A B: total marks obtained by a in the final examination is less than the total marks obtained by b in the final examination}, (v) {(a, b) A B: a lives in the same locality as b}. However, abstracting from this, we define mathematically a relation R from A to B as an arbitrary subset"
+  },
+  "C12-CH02-INV-TRIG": {
+    "ncertClass": "CLASS_12",
+    "chapterNumber": 2,
+    "sourceLine": 55456,
+    "excerpt": "In Chapter 1, we have studied that the inverse of a function f, denoted by f 1, exists if f is one-one and onto. There are many functions which are not one-one, onto or both and hence we can not talk of their inverses. In Class XI, we studied that trigonometric functions are not one-one and onto over their natural domains and ranges and hence their inverses do not exist. In this chapter, we shall study about the restrictions on domains and ranges of trigonometric functions which ensure the existence of their inverses and observe their behaviour through graphical representations. Besides, some elementary properties will also be discussed. The inverse trigonometric functions play an important Aryabhata role in calculus for they serve to define many integrals. (476-550 A. D.) The concepts of inverse trigonometric functions is also used in science and engineering."
+  },
+  "C12-CH03-MATRICES": {
+    "ncertClass": "CLASS_12",
+    "chapterNumber": 3,
+    "sourceLine": 56136,
+    "excerpt": "The knowledge of matrices is necessary in various branches of mathematics. Matrices are one of the most powerful tools in mathematics. This mathematical tool simplifies our work to a great extent when compared with other straight forward methods. The evolution of concept of matrices is the result of an attempt to obtain compact and simple methods of solving system of linear equations. Matrices are not only used as a representation of the coefficients in system of linear equations, but utility of matrices far exceeds that use. Matrix notation and operations are used in electronic spreadsheet programs for personal computer, which in turn is used in different areas of business and science like budgeting, sales projection, cost estimation, analysing the results of an experiment etc. Also, many physical operations such as magnification, rotation and reflection through a plane can be represented mathematically by matrices. Matrices are also used in cryptography. This mathematical tool is not only used in certain branches of sciences, but also in genetics, economics, sociology, modern psychology and industrial management. In this chapter, we shall find it interesting to become acquainted with the fundamentals of matrix and matrix algebra."
+  },
+  "C12-CH04-DETERMINANTS": {
+    "ncertClass": "CLASS_12",
+    "chapterNumber": 4,
+    "sourceLine": 58152,
+    "excerpt": "In the previous chapter, we have studied about matrices and algebra of matrices. We have also learnt that a system of algebraic equations can be expressed in the form of matrices. This means, a system of linear equations like a1 x + b1 y = c1 a2 x + b2 y = c2 can be represented as aa12 b1 x = cc12 . Now, this b2 y system of equations has a unique solution or not, is determined by the number a1 b2 a2 b1. (Recall that if a1 b1 or, a1 b2 a2 b1 0, then the system of linear P.S. Laplace a2 b2 (1749-1827) equations has a unique solution). The number a1 b2 a2 b1 which determines uniqueness of solution is associated with the matrix A = aa12 b1 b2 and is called the determinant of A or det A. Determinants have wide applications in Engineering, Science, Economics, Social Science, etc. In this chapter, we shall study determinants up to order three only with real entries."
+  },
+  "C12-CH05-CONTINUITY-DIFF": {
+    "ncertClass": "CLASS_12",
+    "chapterNumber": 5,
+    "sourceLine": 59587,
+    "excerpt": "This chapter is essentially a continuation of our study of Sir Issac Newton differentiation of functions in Class XI. We had learnt to (1642-1727) differentiate certain functions like polynomial functions and trigonometric functions. In this chapter, we introduce the very important concepts of continuity, differentiability and relations between them. We will also learn differentiation of inverse trigonometric functions. Further, we introduce a new class of functions called exponential and logarithmic functions. These functions lead to powerful techniques of differentiation. We illustrate certain geometrically obvious conditions through differential calculus. In the process, we will learn some fundamental theorems in this area."
+  },
+  "C12-CH06-APP-DERIVATIVES": {
+    "ncertClass": "CLASS_12",
+    "chapterNumber": 6,
+    "sourceLine": 61890,
+    "excerpt": "In Chapter 5, we have learnt how to find derivative of composite functions, inverse trigonometric functions, implicit functions, exponential functions and logarithmic functions. In this chapter, we will study applications of the derivative in various disciplines, e.g., in engineering, science, social science, and many other fields. For instance, we will learn how the derivative can be used (i) to determine rate of change of quantities, (ii) to find the equations of tangent and normal to a curve at a point, (iii) to find turning points on the graph of a function which in turn will help us to locate points at which largest or smallest value (locally) of a function occurs. We will also use derivative to find intervals on which a function is increasing or decreasing. Finally, we use the derivative to find approximate value of certain quantities."
+  },
+  "C12-CH07-INTEGRALS": {
+    "ncertClass": "CLASS_12",
+    "chapterNumber": 7,
+    "sourceLine": 65114,
+    "excerpt": "Differential Calculus is centred on the concept of the derivative. The original motivation for the derivative was the problem of defining tangent lines to the graphs of functions and calculating the slope of such lines. Integral Calculus is motivated by the problem of defining and calculating the area of the region bounded by the graph of the functions. If a function f is differentiable in an interval I, i.e., its derivative f exists at each point of I, then a natural question arises that given f at each point of I, can we determine the function? The functions that could possibly have given function as a derivative are called anti derivatives (or G .W. Leibnitz primitive) of the function. Further, the formula that gives (1646 -1716) all these anti derivatives is called the indefinite integral of the function and such process of finding anti derivatives is called integration. Such type of problems arise in many practical situations. For instance, if we know the instantaneous velocity of an object at any instant, then there arises a natural question, i.e., can we determine the position of the object at any instant? There are several such practical and theoretical"
+  },
+  "C12-CH08-APP-INTEGRALS": {
+    "ncertClass": "CLASS_12",
+    "chapterNumber": 8,
+    "sourceLine": 68730,
+    "excerpt": "(1789-1857) In geometry, we have learnt formulae to calculate areas of various geometrical figures including triangles, Fig 8.1 rectangles, trapezias and circles. Such formulae are fundamental in the applications of mathematics to many real life problems. The formulae of elementary geometry allow us to calculate areas of many simple figures. However, they are inadequate for calculating the areas enclosed by curves. For that we shall need some concepts of Integral Calculus. In the previous chapter, we have studied to find the area bounded by the curve y = f (x), the ordinates x = a, x = b and x-axis, while calculating definite integral as the limit of a sum. Here, in this chapter, we shall study a specific application of integrals to find the area under simple curves, area between lines and arcs of circles, parabolas and ellipses (standard forms only). We shall also deal with finding the area bounded by the above said curves."
+  },
+  "C12-CH09-DIFF-EQ": {
+    "ncertClass": "CLASS_12",
+    "chapterNumber": 9,
+    "sourceLine": 69108,
+    "excerpt": "In Class XI and in Chapter 5 of the present book, we discussed how to differentiate a given function f with respect to an independent variable, i.e., how to find f (x) for a given function f at each x in its domain of definition. Further, in the chapter on Integral Calculus, we discussed how to find a function f whose derivative is the function g, which may also be formulated as follows: For a given function g, find a function f such that dy ... (1) = g (x), where y = f (x) dx An equation of the form (1) is known as a differential Henri Poincare equation. A formal definition will be given later. (1854-1912 ) These equations arise in a variety of applications, may it be in Physics, Chemistry, Biology, Anthropology, Geology, Economics etc. Hence, an indepth study of differential equations has assumed prime importance in all modern scientific investigations. In this chapter, we will study some basic concepts related to differential equation, general and particular solutions of a differential equation, formation of differential"
+  },
+  "C12-CH10-VECTORS": {
+    "ncertClass": "CLASS_12",
+    "chapterNumber": 10,
+    "sourceLine": 71093,
+    "excerpt": "In our day to day life, we come across many queries such as What is your height? How should a football player hit the ball to give a pass to another player of his team? Observe that a possible answer to the first query may be 1.6 meters, a quantity that involves only one value (magnitude) which is a real number. Such quantities are called scalars. However, an answer to the second query is a quantity (called force) which involves muscular strength (magnitude) and direction (in which another player is positioned). Such quantities are called vectors. In mathematics, physics and engineering, we frequently come across with both types of W.R. Hamilton quantities, namely, scalar quantities such as length, mass, (1805-1865) time, distance, speed, area, volume, temperature, work, money, voltage, density, resistance etc. and vector quantities like displacement, velocity, acceleration, force, weight, momentum, electric field intensity etc. In this chapter, we will study some of the basic concepts about vectors, various operations on vectors, and their algebraic and geometric properties. These two type of properties, when considered together give a full realisation to the concept of vectors,"
+  },
+  "C12-CH11-3D-GEOM": {
+    "ncertClass": "CLASS_12",
+    "chapterNumber": 11,
+    "sourceLine": 72850,
+    "excerpt": "In Class XI, while studying Analytical Geometry in two dimensions, and the introduction to three dimensional geometry, we confined to the Cartesian methods only. In the previous chapter of this book, we have studied some basic concepts of vectors. We will now use vector algebra to three dimensional geometry. The purpose of this approach to 3-dimensional geometry is that it makes the study simple and elegant*. In this chapter, we shall study the direction cosines and direction ratios of a line joining two points and also discuss about the equations of lines and planes in space under different conditions, angle between two lines, two Leonhard Euler planes, a line and a plane, shortest distance between two (1707-1783) skew lines and distance of a point from a plane. Most of the above results are obtained in vector form. Nevertheless, we shall also translate these results in the Cartesian form which, at times, presents a more clear geometric and analytic picture of the situation."
+  },
+  "C12-CH12-LP": {
+    "ncertClass": "CLASS_12",
+    "chapterNumber": 12,
+    "sourceLine": 73687,
+    "excerpt": "In earlier classes, we have discussed systems of linear equations and their applications in day to day problems. In Class XI, we have studied linear inequalities and systems of linear inequalities in two variables and their solutions by graphical method. Many applications in mathematics involve systems of inequalities/equations. In this chapter, we shall apply the systems of linear inequalities/equations to solve some real life problems of the type as given below: A furniture dealer deals in only two itemstables and chairs. He has Rs 50,000 to invest and has storage space of at most 60 pieces. A table costs Rs 2500 and a chair Rs 500. He estimates that from the sale of one table, he L. Kantorovich can make a profit of Rs 250 and that from the sale of one chair a profit of Rs 75. He wants to know how many tables and chairs he should buy from the available money so as to maximise his total profit, assuming that he can sell all the items which he buys. Such type of problems which seek to maximise (or, minimise) profit (or, cost) form a general class of problems called optimisation problems. Thus, an optimisation"
+  },
+  "C12-CH13-PROBABILITY-III": {
+    "ncertClass": "CLASS_12",
+    "chapterNumber": 13,
+    "sourceLine": 74241,
+    "excerpt": "In earlier Classes, we have studied the probability as a measure of uncertainty of events in a random experiment. We discussed the axiomatic approach formulated by Russian Mathematician, A.N. Kolmogorov (1903-1987) and treated probability as a function of outcomes of the experiment. We have also established equivalence between the axiomatic theory and the classical theory of probability in case of equally likely outcomes. On the basis of this relationship, we obtained probabilities of events associated with discrete sample spaces. We have also studied the addition rule of probability. In this chapter, we shall discuss the important concept of conditional probability of an event given that another event has occurred, which will be helpful in understanding the Bayes' theorem, multiplication rule of Pierre de Fermat probability and independence of events. We shall also learn (1601-1665) an important concept of random variable and its probability distribution and also the mean and variance of a probability distribution. In the last section of the chapter, we shall study an important discrete probability distribution"
+  }
+}

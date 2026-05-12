@@ -34,11 +34,11 @@ export class ProblemsService {
     });
     if (!p) throw new NotFoundException('problem not found');
     const en = PROBLEM_EN[p.source];
-    const body = lang === 'en' && en?.body ? en.body : p.body;
-    const answer = lang === 'en' && en?.answer ? en.answer : p.answer;
-    const concept = lang === 'en' && CONCEPT_EN[p.source] ? CONCEPT_EN[p.source] : p.concept;
-    const formula = lang === 'en' && FORMULA_EN[p.source] ? FORMULA_EN[p.source] : p.formula;
-    const sourceDisp = lang === 'en' && SOURCE_EN[p.source] ? SOURCE_EN[p.source] : p.source;
+    const body = lang !== 'ko' && en?.body ? en.body : p.body;
+    const answer = lang !== 'ko' && en?.answer ? en.answer : p.answer;
+    const concept = lang !== 'ko' && CONCEPT_EN[p.source] ? CONCEPT_EN[p.source] : p.concept;
+    const formula = lang !== 'ko' && FORMULA_EN[p.source] ? FORMULA_EN[p.source] : p.formula;
+    const sourceDisp = lang !== 'ko' && SOURCE_EN[p.source] ? SOURCE_EN[p.source] : p.source;
     const steps = p.steps.map((s: any) => {
       const correct = s.choices.find((c: any) => c.isCorrect);
       const promptKey = `${p.source}:${s.stepIndex}`;
@@ -48,10 +48,10 @@ export class ProblemsService {
       return {
         stepIndex: s.stepIndex,
         stepType: s.stepType,
-        prompt: lang === 'en' && promptEn ? promptEn : s.prompt,
+        prompt: lang !== 'ko' && promptEn ? promptEn : s.prompt,
         correctChoice: correct ? {
           choiceIndex: correct.choiceIndex,
-          text: lang === 'en' && choiceEn ? choiceEn.text : correct.text,
+          text: lang !== 'ko' && choiceEn ? choiceEn.text : correct.text,
         } : null,
       };
     });

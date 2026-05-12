@@ -3,6 +3,27 @@ import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { ERROR_TYPE_LABEL_KO } from '../../common/enums/error-type.enum';
 import { Lang } from '../../common/i18n/current-lang.decorator';
 import { AI_COACH_EN, ERROR_TYPE_EN, UNIT_NAME_EN, SUB_UNIT_NAME_EN } from '../../common/i18n/content-en';
+import { AI_COACH_HI, ERROR_TYPE_HI, UNIT_NAME_HI, SUB_UNIT_NAME_HI } from '../../common/i18n/content-hi';
+
+/** lang 에 맞는 AI_COACH dict (HI 가 우선, 없으면 EN). */
+function pickCoach(lang: Lang) {
+  return lang === 'hi' ? AI_COACH_HI : AI_COACH_EN;
+}
+function pickUnit(name: string, lang: Lang): string {
+  if (lang === 'hi') return UNIT_NAME_HI[name] ?? UNIT_NAME_EN[name] ?? name;
+  if (lang !== 'ko') return UNIT_NAME_EN[name] ?? name;
+  return name;
+}
+function pickSubUnit(name: string, lang: Lang): string {
+  if (lang === 'hi') return SUB_UNIT_NAME_HI[name] ?? SUB_UNIT_NAME_EN[name] ?? name;
+  if (lang !== 'ko') return SUB_UNIT_NAME_EN[name] ?? name;
+  return name;
+}
+function pickErrorType(key: string, lang: Lang): string {
+  if (lang === 'hi') return ERROR_TYPE_HI[key] ?? ERROR_TYPE_EN[key as keyof typeof ERROR_TYPE_EN] ?? key;
+  if (lang !== 'ko') return ERROR_TYPE_EN[key as keyof typeof ERROR_TYPE_EN] ?? key;
+  return key;
+}
 
 /**
  * AI 코치 — 사용자 데이터 기반 결정론적 텍스트 생성. KO/EN 분기.
@@ -24,19 +45,18 @@ export class AiCoachService {
 
     const weakScore = Math.round(weakest?.score ?? 0);
     const recoverable = Math.min(12, Math.max(2, Math.round((100 - weakScore) / 6)));
-    const weakUnitDisplay = weakest
-      ? (lang === 'en' ? (UNIT_NAME_EN[weakest.unit.name] ?? weakest.unit.name) : weakest.unit.name)
-      : null;
+    const weakUnitDisplay = weakest ? pickUnit(weakest.unit.name, lang) : null;
+    const coach = pickCoach(lang);
 
     let headline: string;
-    if (lang === 'en') {
-      if (!weakest) headline = AI_COACH_EN.diagnosis.headlineNoData;
-      else if (remainingMin === 0) headline = AI_COACH_EN.diagnosis.headlineGoalDone(weakUnitDisplay!, recoverable);
-      else headline = AI_COACH_EN.diagnosis.headlineActive(remainingMin, weakUnitDisplay!, recoverable);
-    } else {
+    if (lang === 'ko') {
       if (!weakest) headline = `학습 데이터를 모으는 중이에요. 첫 학습 세션을 시작해보세요`;
       else if (remainingMin === 0) headline = `오늘 목표를 달성했어요. ${weakest.unit.name} 약점 보강으로 +${recoverable}점 추가 가능`;
       else headline = `오늘 ${remainingMin}분만 더 투자하면 ${weakest.unit.name}에서 ${recoverable}점을 회복할 수 있어요`;
+    } else {
+      if (!weakest) headline = coach.diagnosis.headlineNoData;
+      else if (remainingMin === 0) headline = coach.diagnosis.headlineGoalDone(weakUnitDisplay!, recoverable);
+      else headline = coach.diagnosis.headlineActive(remainingMin, weakUnitDisplay!, recoverable);
     }
 
     return {
@@ -44,7 +64,7 @@ export class AiCoachService {
       weakUnit: weakUnitDisplay,
       weakScore,
       version: 'v2.4.1',
-      updatedAgo: weakest ? this.formatAgo(weakest.updatedAt, lang) : (lang === 'en' ? 'just now' : '방금'),
+      updatedAgo: weakest ? this.formatAgo(weakest.updatedAt, lang) : (lang === 'hi' ? 'अभी' : lang !== 'ko' ? 'just now' : '방금'),
     };
   }
 
@@ -66,7 +86,7 @@ export class AiCoachService {
       const found = rows.find((r) => r.errorType === k);
       return {
         key: k,
-        name: lang === 'en' ? ERROR_TYPE_EN[k] : ERROR_TYPE_LABEL_KO[k as keyof typeof ERROR_TYPE_LABEL_KO],
+        name: lang === 'ko' ? ERROR_TYPE_LABEL_KO[k as keyof typeof ERROR_TYPE_LABEL_KO] : pickErrorType(k, lang),
         value: Math.round(((found?._count ?? 0) / total) * 100),
         color: COLORS[k],
       };
@@ -80,7 +100,7 @@ export class AiCoachService {
   }
 
   private buildErrorDnaInsight(top: { key: string; name: string; value: number }, total: number, lang: Lang): string {
-    if (lang === 'en') {
+    if (lang !== 'ko') {
       if (total < 3) return AI_COACH_EN.errorDna.insufficient;
       const r = AI_COACH_EN.errorDna.advice[top.key as keyof typeof AI_COACH_EN.errorDna.advice]
         ?? AI_COACH_EN.errorDna.advice.OTHER;
@@ -159,8 +179,8 @@ export class AiCoachService {
     if (notes.length === 0) {
       return [{
         num: '01',
-        title: lang === 'en' ? AI_COACH_EN.patterns.emptyTitle : '데이터 누적 중',
-        desc: lang === 'en' ? AI_COACH_EN.patterns.emptyDesc : '오답이 누적되면 AI가 패턴을 자동 분석합니다 (5건 이상 권장).',
+        title: lang !== 'ko' ? AI_COACH_EN.patterns.emptyTitle : '데이터 누적 중',
+        desc: lang !== 'ko' ? AI_COACH_EN.patterns.emptyDesc : '오답이 누적되면 AI가 패턴을 자동 분석합니다 (5건 이상 권장).',
         count: 0,
       }];
     }
@@ -193,19 +213,19 @@ export class AiCoachService {
   }
 
   private localUnit(name: string, lang: Lang) {
-    return lang === 'en' ? (UNIT_NAME_EN[name] ?? name) : name;
+    return lang !== 'ko' ? (UNIT_NAME_EN[name] ?? name) : name;
   }
   private localSub(name: string, lang: Lang) {
-    return lang === 'en' ? (SUB_UNIT_NAME_EN[name] ?? name) : name;
+    return lang !== 'ko' ? (SUB_UNIT_NAME_EN[name] ?? name) : name;
   }
 
   private distractorTitle(b: { distractorType: string; stepType: string; unitName: string; subUnitNames: Set<string> }, lang: Lang): string {
     const subs = [...b.subUnitNames].map((s) => this.localSub(s, lang));
     const subLabel = subs.length === 1 ? ` · ${subs[0]}` : subs.length > 1
-      ? (lang === 'en' ? ` (${subs.length} areas)` : ` (${subs.length}개 영역)`)
+      ? (lang !== 'ko' ? ` (${subs.length} areas)` : ` (${subs.length}개 영역)`)
       : '';
     const unit = this.localUnit(b.unitName, lang);
-    if (lang === 'en') {
+    if (lang !== 'ko') {
       const stepLabel = AI_COACH_EN.patterns.stepLabel[b.stepType as keyof typeof AI_COACH_EN.patterns.stepLabel] ?? 'solving';
       const dtTitle = AI_COACH_EN.patterns.distractorTitle[b.distractorType as keyof typeof AI_COACH_EN.patterns.distractorTitle] ?? 'wrong choice';
       return `${unit}${subLabel} — "${dtTitle}" at ${stepLabel}`;
@@ -222,7 +242,7 @@ export class AiCoachService {
 
   private distractorDesc(b: { count: number; distractorType: string; stepType: string; unitName: string; subUnitNames: Set<string> }, lang: Lang): string {
     const unit = this.localUnit(b.unitName, lang);
-    if (lang === 'en') {
+    if (lang !== 'ko') {
       const sl = AI_COACH_EN.patterns.stepLabelLong[b.stepType as keyof typeof AI_COACH_EN.patterns.stepLabelLong] ?? 'solving';
       const dd = AI_COACH_EN.patterns.distractorDesc[b.distractorType as keyof typeof AI_COACH_EN.patterns.distractorDesc] ?? 'review your approach.';
       return `${b.count}× in ${unit} at ${sl} — ${dd}`;
@@ -240,10 +260,10 @@ export class AiCoachService {
   private patternTitle(b: { errorType: string; unitName: string; subUnitNames: Set<string> }, lang: Lang): string {
     const subs = [...b.subUnitNames].map((s) => this.localSub(s, lang));
     const subLabel = subs.length === 1 ? ` · ${subs[0]}` : subs.length > 1
-      ? (lang === 'en' ? ` (${subs.length} areas)` : ` (${subs.length}개 영역)`)
+      ? (lang !== 'ko' ? ` (${subs.length} areas)` : ` (${subs.length}개 영역)`)
       : '';
     const unit = this.localUnit(b.unitName, lang);
-    if (lang === 'en') {
+    if (lang !== 'ko') {
       const t = AI_COACH_EN.patterns.etypeTitle[b.errorType as keyof typeof AI_COACH_EN.patterns.etypeTitle] ?? 'review needed';
       return `${unit}${subLabel} — ${t}`;
     }
@@ -258,7 +278,7 @@ export class AiCoachService {
 
   private patternDesc(b: { count: number; errorType: string; unitName: string; subUnitNames: Set<string> }, lang: Lang): string {
     const unit = this.localUnit(b.unitName, lang);
-    if (lang === 'en') {
+    if (lang !== 'ko') {
       const d = AI_COACH_EN.patterns.etypeDesc[b.errorType as keyof typeof AI_COACH_EN.patterns.etypeDesc]
         ?? AI_COACH_EN.patterns.etypeDesc.OTHER;
       return `${b.count}× in ${unit} — ${d}`;
@@ -278,7 +298,7 @@ export class AiCoachService {
     });
 
     // EN 모드에선 DB의 KO 멘토 메시지를 사용하지 않고 항상 동적 EN 생성으로 우회
-    if (r?.mentorMessage && lang !== 'en') {
+    if (r?.mentorMessage && lang === 'ko') {
       return {
         week: r.isoWeek,
         generatedAt: r.generatedAt,
@@ -301,15 +321,16 @@ export class AiCoachService {
     const avgMastery = masteries.length > 0
       ? Math.round(masteries.reduce((s, m) => s + m.score, 0) / masteries.length)
       : 0;
-    const weakUnit = weakest ? this.localUnit(weakest.unit.name, lang) : (lang === 'en' ? 'your weak unit' : '약점 단원');
-    const strongUnit = strongest ? this.localUnit(strongest.unit.name, lang) : (lang === 'en' ? 'your strong unit' : '강점 단원');
+    const weakUnit = weakest ? this.localUnit(weakest.unit.name, lang) : (lang !== 'ko' ? 'your weak unit' : '약점 단원');
+    const strongUnit = strongest ? this.localUnit(strongest.unit.name, lang) : (lang !== 'ko' ? 'your strong unit' : '강점 단원');
 
     let message: string;
-    if (lang === 'en') {
-      if (attempts.length === 0) message = AI_COACH_EN.mentor.nothingThisWeek;
-      else if (acc >= 80) message = AI_COACH_EN.mentor.high(attempts.length, acc, weakUnit);
-      else if (acc >= 60) message = AI_COACH_EN.mentor.mid(attempts.length, acc, strongUnit, weakUnit);
-      else message = AI_COACH_EN.mentor.low(acc, weakUnit);
+    if (lang !== 'ko') {
+      const dict = pickCoach(lang);
+      if (attempts.length === 0) message = dict.mentor.nothingThisWeek;
+      else if (acc >= 80) message = dict.mentor.high(attempts.length, acc, weakUnit);
+      else if (acc >= 60) message = dict.mentor.mid(attempts.length, acc, strongUnit, weakUnit);
+      else message = dict.mentor.low(acc, weakUnit);
     } else {
       if (attempts.length === 0) message = '이번 주 학습 데이터가 비어있어요. 작은 한 걸음부터 다시 시작해봐요.';
       else if (acc >= 80) message = `이번 주 ${attempts.length}문제를 풀고 정답률 ${acc}%를 유지했어요. 정확도가 안정 구간에 들어섰으니, ${weakUnit} 보강에 시간을 더 투자하면 등급 상승 폭이 커집니다.`;
@@ -317,16 +338,17 @@ export class AiCoachService {
       else message = `이번 주 정답률 ${acc}% — 양보다 질이 필요한 시점이에요. ${weakUnit} 한 단원에 집중하고, 풀이 직후 즉시 복기하는 습관을 만들면 다음 주에 의미 있는 변화를 만들 수 있어요.`;
     }
 
+    const mentorDict = pickCoach(lang);
     const strength = strongest
-      ? (lang === 'en'
-          ? AI_COACH_EN.mentor.strengthTpl(strongUnit, Math.round(strongest.score))
+      ? (lang !== 'ko'
+          ? mentorDict.mentor.strengthTpl(strongUnit, Math.round(strongest.score))
           : `${strongest.unit.name} 안정 (숙련도 ${Math.round(strongest.score)}%)`)
-      : (lang === 'en' ? AI_COACH_EN.mentor.dataAccumulating : '데이터 누적 중');
+      : (lang !== 'ko' ? mentorDict.mentor.dataAccumulating : '데이터 누적 중');
     const nextGoal = weakest
-      ? (lang === 'en'
-          ? AI_COACH_EN.mentor.nextGoalTpl(weakUnit, Math.round(weakest.score), Math.min(95, Math.round(weakest.score) + 10))
+      ? (lang !== 'ko'
+          ? mentorDict.mentor.nextGoalTpl(weakUnit, Math.round(weakest.score), Math.min(95, Math.round(weakest.score) + 10))
           : `${weakest.unit.name} 숙련도 ${Math.round(weakest.score)}% → ${Math.min(95, Math.round(weakest.score) + 10)}% 도달`)
-      : (lang === 'en' ? AI_COACH_EN.mentor.nextGoalNoMastery(avgMastery) : `평균 숙련도 ${avgMastery}% 유지`);
+      : (lang !== 'ko' ? mentorDict.mentor.nextGoalNoMastery(avgMastery) : `평균 숙련도 ${avgMastery}% 유지`);
 
     return {
       week: r?.isoWeek ?? week,
@@ -340,7 +362,7 @@ export class AiCoachService {
   private formatAgo(d: Date, lang: Lang): string {
     const diffMs = Date.now() - new Date(d).getTime();
     const m = Math.floor(diffMs / 60000);
-    if (lang === 'en') {
+    if (lang !== 'ko') {
       if (m < 1) return 'just now';
       if (m < 60) return `${m} min ago`;
       const h = Math.floor(m / 60);

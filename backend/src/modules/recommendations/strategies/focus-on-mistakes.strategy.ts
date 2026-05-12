@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import { Lang } from '../../../common/i18n/current-lang.decorator';
 import { UNIT_NAME_EN, SUB_UNIT_NAME_EN, RECOMMENDATION_EN } from '../../../common/i18n/content-en';
+import { UNIT_NAME_HI, SUB_UNIT_NAME_HI, RECOMMENDATION_HI } from '../../../common/i18n/content-hi';
 
 /**
  * "오답 집중" — 마스터되지 않은 오답이 가장 많이 누적된 단원을 추천.
@@ -43,18 +44,23 @@ export class FocusOnMistakesStrategy {
     const top = [...buckets.values()].sort((a, b) => b.occurrences - a.occurrences)[0];
     const totalNotes = notes.filter((n) => n.problem.unitId === top.unitId).length;
 
-    if (lang === 'en') {
-      const unitEn = UNIT_NAME_EN[top.unitName] ?? top.unitName;
-      const subEn = SUB_UNIT_NAME_EN[top.subUnitName] ?? top.subUnitName;
+    if (lang !== 'ko') {
+      const D = lang === 'hi' ? RECOMMENDATION_HI : RECOMMENDATION_EN;
+      const unitLocal = lang === 'hi'
+        ? (UNIT_NAME_HI[top.unitName] ?? UNIT_NAME_EN[top.unitName] ?? top.unitName)
+        : (UNIT_NAME_EN[top.unitName] ?? top.unitName);
+      const subLocal = lang === 'hi'
+        ? (SUB_UNIT_NAME_HI[top.subUnitName] ?? SUB_UNIT_NAME_EN[top.subUnitName] ?? top.subUnitName)
+        : (SUB_UNIT_NAME_EN[top.subUnitName] ?? top.subUnitName);
       return {
-        tag: RECOMMENDATION_EN.tagFocus,
+        tag: D.tagFocus,
         tagColor: '#8B3A1F',
         unitId: top.unitId,
-        unit: RECOMMENDATION_EN.focusUnit(unitEn, subEn),
-        title: top.subUnitName ? RECOMMENDATION_EN.focusTitleSub(subEn) : RECOMMENDATION_EN.focusTitleUnit(unitEn),
-        reason: RECOMMENDATION_EN.focusReason(top.occurrences, totalNotes),
+        unit: D.focusUnit(unitLocal, subLocal),
+        title: top.subUnitName ? D.focusTitleSub(subLocal) : D.focusTitleUnit(unitLocal),
+        reason: D.focusReason(top.occurrences, totalNotes),
         time: this.estimateTime(top.occurrences, lang),
-        type: 'Interactive practice',
+        type: lang === 'hi' ? 'इंटरैक्टिव अभ्यास' : 'Interactive practice',
         icon: 'Layers',
       };
     }
@@ -74,6 +80,7 @@ export class FocusOnMistakesStrategy {
   private estimateTime(occurrences: number, lang: Lang = 'ko'): string {
     // 한 문제 마스터 ≈ 4분 + 누적당 +2분, 최대 45분
     const min = Math.min(45, 8 + occurrences * 2);
-    return lang === 'en' ? `${min} min` : `${min}분`;
+    if (lang === 'hi') return `${min} मिनट`;
+    return lang !== 'ko' ? `${min} min` : `${min}분`;
   }
 }

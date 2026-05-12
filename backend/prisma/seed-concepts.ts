@@ -18,6 +18,17 @@ import { NCERT_CHAPTERS } from '../src/common/curriculum/ncert-chapters';
 import { CHAPTER_CONTENT, ConceptChapterContent } from '../src/common/curriculum/concept-content';
 import { pickSequence } from '../src/common/learning/concept-framework';
 
+// NCERT 교과서 본문 발췌 — scripts/extract-ncert-excerpts.py 가 PDF 에서 자동 추출.
+// 챕터별 introduction (10~18 줄) 가 chapterCode → { excerpt, sourceLine, ... } 로 저장됨.
+// abstract step bodyEn 끝에 통합해 학생이 NCERT 원문도 함께 학습.
+// 79 챕터 중 54 챕터에 발췌 존재 (Class 9 12 챕터는 PDF 누락, 그 외 일부 패턴 불일치).
+// 누락 챕터는 그대로 자체 작성 콘텐츠만 표시.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const NCERT_EXCERPTS: Record<
+  string,
+  { ncertClass: string; chapterNumber: number; sourceLine: number; excerpt: string }
+> = require('../src/common/curriculum/concept-content/ncert-excerpts.json');
+
 export async function seedConceptLessons(
   prisma: PrismaClient,
   unitByName: Record<string, { id: string; subs: Record<string, string> }>,
@@ -61,7 +72,7 @@ export async function seedConceptLessons(
 
     await prisma.conceptStep.deleteMany({ where: { lessonId: lesson.id } });
 
-    const stepRecords = buildSteps(content, ch.cognitiveLoad);
+    const stepRecords = buildSteps(content, ch.cognitiveLoad, ch.chapterCode);
     for (let i = 0; i < stepRecords.length; i++) {
       const s = stepRecords[i];
       await prisma.conceptStep.create({
@@ -107,7 +118,9 @@ interface StepRecord {
 function buildSteps(
   content: ConceptChapterContent | undefined,
   cognitiveLoad: 0 | 1 | 2 | 3,
+  chapterCode: string,
 ): StepRecord[] {
+  const ncert = NCERT_EXCERPTS[chapterCode];
   const seq = pickSequence(cognitiveLoad);
   const steps: StepRecord[] = [];
 
@@ -158,8 +171,22 @@ function buildSteps(
       }
       case 'ABSTRACT': {
         const a = content?.abstract;
-        if (a) steps.push(stepText(bp, a.ko, a.en));
-        else  steps.push(stepText(bp, '기호·정의 정리 예정.', 'Formal definitions coming soon.'));
+        // NCERT 교과서 원문 발췌가 있으면 abstract body 끝에 부착 — 학생이 원문도 함께 본다.
+        // 발췌는 영어로만 있으므로 ko 본문 끝에도 동일 영어 발췌를 인용 ("원문" 라벨로 명시).
+        const ncertBlock = ncert?.excerpt
+          ? `\n\n📖 NCERT textbook · Class ${ncert.chapterNumber > 0 ? ncert.ncertClass.replace('CLASS_', '') : ''} · §${ncert.chapterNumber}.1 Introduction\n${ncert.excerpt}`
+          : '';
+        const koExtra = ncert?.excerpt
+          ? `\n\n📖 NCERT 교과서 §${ncert.chapterNumber}.1 (원문)\n${ncert.excerpt}`
+          : '';
+        if (a) {
+          steps.push(stepText(bp, a.ko + koExtra, a.en + ncertBlock));
+        } else {
+          steps.push(stepText(bp,
+            '기호·정의 정리 예정.' + koExtra,
+            'Formal definitions coming soon.' + ncertBlock,
+          ));
+        }
         break;
       }
       case 'WORKED_EXAMPLE': {

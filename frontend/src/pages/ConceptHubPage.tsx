@@ -43,7 +43,11 @@ const LOAD_LABEL_KO = ['가벼움', '보통', '집중', '심화'] as const;
 const LOAD_LABEL_EN = ['Light', 'Standard', 'Focused', 'Challenging'] as const;
 const LOAD_COLOR = ['#22c55e', '#3b82f6', '#f59e0b', '#dc2626'];
 
-export default function ConceptHubPage() {
+/**
+ * @param embedded — true 이면 MathLearningApp 의 한 탭으로 임베드 (외곽 padding/배경/Back 버튼 제거).
+ *                   false (기본) 이면 /learn URL 로 직접 진입한 별도 페이지.
+ */
+export default function ConceptHubPage({ embedded = false }: { embedded?: boolean } = {}) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { lang } = useT();
@@ -55,9 +59,10 @@ export default function ConceptHubPage() {
   const [activeClass, setActiveClass] = useState<NcertClass>(defaultClass);
   const LOAD_LABEL = lang === 'en' ? LOAD_LABEL_EN : LOAD_LABEL_KO;
 
-  const { data: lessons, isLoading } = useQuery<ConceptLessonSummary[]>({
+  const { data: lessons, isLoading, isError, error } = useQuery<ConceptLessonSummary[]>({
     queryKey: ['conceptLessons', activeClass],
     queryFn: () => fetchConceptLessons(activeClass),
+    retry: 0,
   });
 
   // Prerequisite lock 평가용 — 모든 학년의 mastery 가 필요할 수 있으나, 1차로 화면에 보이는
@@ -80,35 +85,29 @@ export default function ConceptHubPage() {
     return map;
   }, [lessons, prevLessons]);
 
-  const isLocked = (lesson: ConceptLessonSummary): { locked: boolean; missing: string[] } => {
-    const missing = lesson.prerequisiteCodes.filter((code) => masteryByCode[code] === false);
-    return { locked: missing.length > 0, missing };
+  // Prerequisite 잠금 완전 비활성 — 사용자가 모든 챕터를 자유롭게 탐색 가능.
+  // (백엔드 startConceptLesson 의 BadRequestException 도 ConceptLessonPage 에서 fallthrough 처리됨)
+  const isLocked = (_lesson: ConceptLessonSummary): { locked: boolean; missing: string[] } => {
+    return { locked: false, missing: [] };
   };
 
   const handleOpen = (l: ConceptLessonSummary) => {
-    const { locked, missing } = isLocked(l);
-    if (locked) {
-      toast(
-        lang === 'en'
-          ? `Finish prerequisite first: ${missing[0]}`
-          : `먼저 선수 학습을 완료하세요: ${missing[0]}`,
-        'error',
-      );
-      // 첫 missing chapter 로 안내
-      navigate(`/learn/${missing[0]}`);
-      return;
-    }
     navigate(`/learn/${l.chapterCode}`);
   };
 
-  return (
-    <div style={pageStyle}>
-      <div style={containerStyle}>
-        <button onClick={() => navigate('/')} style={backBtnStyle}>
-          <ArrowLeft size={16} /> {lang === 'en' ? 'Back to dashboard' : '대시보드로'}
-        </button>
+  // embed 시에는 외곽 wrapper/padding 제거, MathLearningApp 의 main 영역 안에서 렌더링.
+  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
+    embedded ? <>{children}</> : <div style={pageStyle}><div style={containerStyle}>{children}</div></div>;
 
-        <div style={{ marginTop: 12 }}>
+  return (
+    <Wrapper>
+        {!embedded && (
+          <button onClick={() => navigate('/')} style={backBtnStyle}>
+            <ArrowLeft size={16} /> {lang === 'en' ? 'Back to dashboard' : '대시보드로'}
+          </button>
+        )}
+
+        <div style={{ marginTop: embedded ? 0 : 12 }}>
           <div style={{ fontSize: 11, letterSpacing: '0.2em', color: '#8B95AB' }}>
             CONCEPT LEARNING · NCERT 7–12
           </div>
@@ -142,6 +141,35 @@ export default function ConceptHubPage() {
           <div style={{ textAlign: 'center', color: '#5C6B85', padding: 40 }}>
             {lang === 'en' ? 'Loading…' : '불러오는 중…'}
           </div>
+        ) : isError ? (
+          <div style={{
+            margin: '24px 0', padding: 20, borderRadius: 8,
+            background: '#FEF3C7', border: '1px solid #F59E0B40',
+            color: '#92400E',
+          }}>
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>
+              {lang === 'en'
+                ? 'ConceptLesson table not initialised yet.'
+                : 'ConceptLesson 테이블이 아직 초기화되지 않았습니다.'}
+            </div>
+            <div style={{ fontSize: 13, lineHeight: 1.6, color: '#7C2D12', marginBottom: 10 }}>
+              {lang === 'en'
+                ? 'Run the DB bootstrap once (in backend/):'
+                : '백엔드 디렉토리에서 다음 명령을 한 번 실행하세요:'}
+            </div>
+            <pre style={{
+              background: '#1F2937', color: '#F9FAFB',
+              padding: 12, borderRadius: 6, fontSize: 12,
+              fontFamily: 'monospace', overflow: 'auto', margin: 0,
+            }}>{`# stop the dev server first (Ctrl+C)
+npx prisma generate
+npx prisma migrate dev --name concept_lessons
+npm run db:seed
+npm run start:dev`}</pre>
+            <div style={{ fontSize: 11, color: '#92400E', marginTop: 8, opacity: 0.7 }}>
+              {String((error as any)?.message ?? error ?? '')}
+            </div>
+          </div>
         ) : !lessons || lessons.length === 0 ? (
           <div style={{ textAlign: 'center', color: '#5C6B85', padding: 40 }}>
             {lang === 'en' ? 'No lessons in this class yet.' : '이 학년의 개념학습이 아직 없습니다.'}
@@ -163,8 +191,7 @@ export default function ConceptHubPage() {
             })}
           </div>
         )}
-      </div>
-    </div>
+    </Wrapper>
   );
 }
 
@@ -176,7 +203,7 @@ function LessonCard({
   onOpen,
 }: {
   lesson: ConceptLessonSummary;
-  lang: 'ko' | 'en';
+  lang: 'ko' | 'en' | 'hi';
   loadLabel: readonly string[];
   locked: boolean;
   onOpen: () => void;

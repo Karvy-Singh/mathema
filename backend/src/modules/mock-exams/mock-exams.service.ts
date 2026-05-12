@@ -44,7 +44,7 @@ function shuffle<T>(arr: T[]): T[] {
 function sanitizeForExam(p: any, lang: Lang = 'ko'): any {
   if (!p) return p;
   const { answer, ...rest } = p;
-  if (lang === 'en') {
+  if (lang !== 'ko') {
     const en = PROBLEM_EN[p.source];
     if (en) rest.body = en.body;
     if (SOURCE_EN[p.source]) rest.source = SOURCE_EN[p.source];
@@ -59,12 +59,12 @@ function sanitizeForExam(p: any, lang: Lang = 'ko'): any {
         const choiceEn = CHOICE_EN[`${p.source}:${s.stepIndex}:${c.choiceIndex}`];
         return {
           id: c.id, choiceIndex: c.choiceIndex,
-          text: lang === 'en' && choiceEn ? choiceEn.text : c.text,
+          text: lang !== 'ko' && choiceEn ? choiceEn.text : c.text,
         };
       });
       return {
         id: s.id, stepIndex: s.stepIndex, stepType: s.stepType,
-        prompt: lang === 'en' && promptEn ? promptEn : s.prompt,
+        prompt: lang !== 'ko' && promptEn ? promptEn : s.prompt,
         choices: shuffle(choices),
       };
     });
@@ -85,7 +85,7 @@ export class MockExamsService {
   async trajectory(userId: string, count: number, lang: Lang = 'ko') {
     const rows = await this.repo.findTrajectory(userId, count);
     return rows.map((r: any) => ({
-      name: lang === 'en'
+      name: lang !== 'ko'
         ? translateExamName(r.mockExam.name)
         : r.mockExam.name.replace(/^2024\s+/, '').replace('학력평가', '학평').replace('모의평가', '모평'),
       score: r.score, grade: r.grade, target: 80,
@@ -99,10 +99,10 @@ export class MockExamsService {
       const dateKo = iso.replace(/-/g, '년 ').replace(/년 (\d+)$/, '년 $1월') + '일';
       return {
         id: r.id,
-        name: lang === 'en' ? translateExamName(r.mockExam.name) : r.mockExam.name,
-        date: lang === 'en' ? iso : dateKo,
+        name: lang !== 'ko' ? translateExamName(r.mockExam.name) : r.mockExam.name,
+        date: lang !== 'ko' ? iso : dateKo,
         score: r.score, grade: r.grade, percentile: r.percentile,
-        time: lang === 'en'
+        time: lang !== 'ko'
           ? `${r.durationMin}min / ${r.mockExam.totalMinutes}min`
           : `${r.durationMin}분/${r.mockExam.totalMinutes}분`,
       };
@@ -140,7 +140,7 @@ export class MockExamsService {
 
   async startRecommended(userId: string, lang: Lang = 'ko') {
     const { problems } = await this.aiRec.compose(userId);
-    const name = lang === 'en' ? 'AI-tailored Mock' : 'AI 맞춤 진단 모의고사';
+    const name = lang !== 'ko' ? 'AI-tailored Mock' : 'AI 맞춤 진단 모의고사';
     return this.beginSession(userId, { name, type: 'RECOMMENDED' as any, totalMinutes: 50, problems }, lang);
   }
 
@@ -156,7 +156,7 @@ export class MockExamsService {
       'wrong-redo':{ name: 'Wrong-Redo Exam',    type: 'WRONG_REDO', totalMinutes: 30 },
       real:        { name: 'Full Mock Exam',     type: 'REAL',       totalMinutes: 60 },
     };
-    const m = (lang === 'en' ? metaEn : metaKo)[kind];
+    const m = (lang !== 'ko' ? metaEn : metaKo)[kind];
     return this.beginSession(userId, { ...m, problems }, lang);
   }
 
@@ -223,7 +223,7 @@ export class MockExamsService {
         step: { select: { stepIndex: true, problem: { select: { source: true } } } },
       },
     });
-    if (choice && lang === 'en' && choice.step) {
+    if (choice && lang !== 'ko' && choice.step) {
       const key = `${choice.step.problem.source}:${choice.step.stepIndex}:${choice.choiceIndex}`;
       const en = CHOICE_EN[key];
       if (en) return { ...attempt, choice: { ...choice, text: en.text, rationale: en.rationale ?? null } };

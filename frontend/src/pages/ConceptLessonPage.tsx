@@ -15,6 +15,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CheckCircle2, ChevronRight, Sparkles } from 'lucide-react';
 import MathText from '../components/MathText';
 import { toast } from '../components/Toast';
+import { TopNav, NavKey, NAV_TO_HASH } from '../components/TopNav';
+import { GraphRenderer } from '../components/GraphRenderer';
 import { useT } from '../lib/i18n';
 import {
   fetchConceptLesson,
@@ -40,7 +42,7 @@ const STEP_COLORS: Record<ConceptStepKind, string> = {
   REFLECT: '#a16207',
 };
 
-const STEP_LABELS: Record<'ko' | 'en', Record<ConceptStepKind, string>> = {
+const STEP_LABELS: Record<'ko' | 'en' | 'hi', Record<ConceptStepKind, string>> = {
   ko: {
     HOOK: '왜 배우는가',
     CONCRETE: '구체 예시',
@@ -63,10 +65,26 @@ const STEP_LABELS: Record<'ko' | 'en', Record<ConceptStepKind, string>> = {
     RETRIEVAL: 'Recall check',
     REFLECT: 'My own summary',
   },
+  hi: {
+    HOOK: 'यह क्यों ज़रूरी है',
+    CONCRETE: 'ठोस उदाहरण',
+    PICTORIAL: 'चित्र और आरेख',
+    ABSTRACT: 'प्रतीक और परिभाषा',
+    WORKED_EXAMPLE: 'हल किया गया उदाहरण',
+    GUIDED_PRACTICE: 'मार्गदर्शित अभ्यास',
+    MISCONCEPTION: 'सामान्य भूल',
+    RETRIEVAL: 'स्मरण जाँच',
+    REFLECT: 'मेरा सारांश',
+  },
 };
 
 // UI 마이크로카피
-const UI_LABEL = {
+const UI_LABEL: Record<'ko' | 'en' | 'hi', {
+  backTo: string; chapter: string; mastered: string; loading: string;
+  loadFailed: string; prev: string; nextStep: string; finish: string;
+  completed: string; answerPh: string; confirm: string; passed: string;
+  failed: string; hintLabel: string; finishMust: string; finishPassed: string;
+}> = {
   ko: {
     backTo: '대시보드로',
     chapter: 'Chapter',
@@ -103,7 +121,25 @@ const UI_LABEL = {
     finishMust: 'Pass the final recall check to complete this lesson.',
     finishPassed: 'Passed 🎉 — problem practice unlocked.',
   },
-} as const;
+  hi: {
+    backTo: 'डैशबोर्ड पर',
+    chapter: 'अध्याय',
+    mastered: 'पूर्ण',
+    loading: 'लोड हो रहा है…',
+    loadFailed: 'यह पाठ लोड नहीं हो सका।',
+    prev: 'पिछला',
+    nextStep: 'अगला',
+    finish: 'समाप्त',
+    completed: 'पूर्ण',
+    answerPh: 'अपना उत्तर लिखें',
+    confirm: 'जाँचें',
+    passed: '✅ सही!',
+    failed: '❌ फिर से सोचें।',
+    hintLabel: 'संकेत',
+    finishMust: 'पाठ पूरा करने के लिए अंतिम स्मरण-जाँच पास करें।',
+    finishPassed: 'पास! 🎉 — अब अभ्यास खुल गया।',
+  },
+};
 
 export default function ConceptLessonPage() {
   const { code = '' } = useParams<{ code: string }>();
@@ -193,12 +229,19 @@ export default function ConceptLessonPage() {
     }
   };
 
+  // TopNav 탭 클릭 시 메인 앱의 해당 hash 로 이동 (개념학습 탭은 '개념학습' state).
+  const handleNav = (k: NavKey) => {
+    navigate('/#/' + NAV_TO_HASH[k]);
+  };
+
   return (
-    <div style={pageStyle}>
+    <>
+      <TopNav activeNav="개념학습" setActiveNav={handleNav} />
+      <div style={pageStyle}>
       <div style={containerStyle}>
         {/* HEADER */}
         <div style={headerStyle}>
-          <button onClick={() => navigate('/')} style={backBtnStyle} aria-label="back">
+          <button onClick={() => navigate('/#/concept')} style={backBtnStyle} aria-label="back">
             <ArrowLeft size={18} />
           </button>
           <div style={{ flex: 1 }}>
@@ -266,6 +309,7 @@ export default function ConceptLessonPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
@@ -318,7 +362,7 @@ function StepCard({
 }: {
   step: ConceptStep;
   stepLabels: Record<ConceptStepKind, string>;
-  L: typeof UI_LABEL['ko'] | typeof UI_LABEL['en'];
+  L: (typeof UI_LABEL)['ko' | 'en' | 'hi'];
   retrievalAnswer: string;
   onRetrievalAnswer: (v: string) => void;
   retrievalResult: {
@@ -350,6 +394,13 @@ function StepCard({
         <MathText text={step.body} />
       </div>
 
+      {/* 동적 SVG 그래프 — visualData 가 있으면 GraphRenderer 로 인라인 렌더 */}
+      {step.visualData && (
+        <div style={{ marginTop: 12, textAlign: 'center' }}>
+          <GraphRenderer data={step.visualData} />
+        </div>
+      )}
+
       {/* WORKED_EXAMPLE 풀이 단계 */}
       {step.kind === 'WORKED_EXAMPLE' && step.workedSteps && (
         <ol style={{ marginTop: 16, paddingLeft: 20, lineHeight: 1.8 }}>
@@ -359,28 +410,62 @@ function StepCard({
                 <MathText text={w.math} />
               </div>
               <div style={{ fontSize: 13, color: '#5C6B85' }}>
-                {lang === 'en' ? w.narrationEn : w.narrationKo}
+                {lang === 'ko' ? w.narrationKo : w.narrationEn}
               </div>
             </li>
           ))}
         </ol>
       )}
 
-      {/* RETRIEVAL — 입력 + 채점 */}
-      {step.kind === 'RETRIEVAL' && step.retrievalCheck && (
+      {/* RETRIEVAL — 5지선다 객관식 */}
+      {step.kind === 'RETRIEVAL' && step.retrievalCheck && step.retrievalCheck.choices.length > 0 && (
         <div style={{ marginTop: 16 }}>
-          <input
-            type="text"
-            value={retrievalAnswer}
-            onChange={(e) => onRetrievalAnswer(e.target.value)}
-            placeholder={L.answerPh}
-            style={inputStyle}
-            disabled={retrievalResult?.passed}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {step.retrievalCheck.choices.map((c) => {
+              const selected = retrievalAnswer === String(c.choiceIndex);
+              const submitted = !!retrievalResult;
+              // 결과가 있고 선택했던 보기면 색상 분기 (정답=초록, 오답=빨강)
+              const showResult = submitted && selected;
+              const bg = showResult
+                ? (retrievalResult.passed ? '#DCFCE7' : '#FEE2E2')
+                : (selected ? '#E0F2FE' : '#fff');
+              const border = showResult
+                ? (retrievalResult.passed ? '#166534' : '#991B1B')
+                : (selected ? '#0284C7' : '#DDD7C5');
+              return (
+                <button
+                  key={c.choiceIndex}
+                  onClick={() => {
+                    if (retrievalResult?.passed) return;
+                    onRetrievalAnswer(String(c.choiceIndex));
+                  }}
+                  disabled={retrievalResult?.passed}
+                  style={{
+                    display: 'flex', alignItems: 'flex-start', gap: 12,
+                    padding: '12px 16px', textAlign: 'left',
+                    background: bg, border: `1px solid ${border}`,
+                    borderRadius: 8, cursor: retrievalResult?.passed ? 'default' : 'pointer',
+                    fontFamily: 'inherit', fontSize: 15, color: '#2A3447',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <span style={{
+                    fontWeight: 700, color: '#5C6B85', minWidth: 24,
+                    fontFamily: 'JetBrains Mono, monospace',
+                  }}>
+                    {c.choiceIndex}.
+                  </span>
+                  <span style={{ flex: 1 }}>
+                    <MathText text={c.text} />
+                  </span>
+                </button>
+              );
+            })}
+          </div>
           <button
             onClick={onSubmitRetrieval}
             disabled={!retrievalAnswer.trim() || retrievalResult?.passed}
-            style={{ ...primaryBtnStyle, marginTop: 12, opacity: retrievalAnswer.trim() ? 1 : 0.5 }}
+            style={{ ...primaryBtnStyle, marginTop: 16, opacity: retrievalAnswer.trim() ? 1 : 0.5 }}
           >
             {L.confirm}
           </button>
@@ -417,10 +502,15 @@ function StepCard({
 }
 
 function Center({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+  const handleNav = (k: NavKey) => navigate('/#/' + NAV_TO_HASH[k]);
   return (
-    <div style={pageStyle}>
-      <div style={{ ...cardStyle, textAlign: 'center', color: '#5C6B85' }}>{children}</div>
-    </div>
+    <>
+      <TopNav activeNav="개념학습" setActiveNav={handleNav} />
+      <div style={pageStyle}>
+        <div style={{ ...cardStyle, textAlign: 'center', color: '#5C6B85' }}>{children}</div>
+      </div>
+    </>
   );
 }
 

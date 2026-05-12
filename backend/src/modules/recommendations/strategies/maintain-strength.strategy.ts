@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import { Lang } from '../../../common/i18n/current-lang.decorator';
 import { UNIT_NAME_EN, RECOMMENDATION_EN } from '../../../common/i18n/content-en';
+import { UNIT_NAME_HI, RECOMMENDATION_HI } from '../../../common/i18n/content-hi';
 
 /**
  * "강점 유지" — MasterySnapshot 최상위 단원을 추천.
@@ -23,17 +24,20 @@ export class MaintainStrengthStrategy {
 
     const score = Math.round(top.score);
 
-    if (lang === 'en') {
-      const unitEn = UNIT_NAME_EN[top.unit.name] ?? top.unit.name;
+    if (lang !== 'ko') {
+      const D = lang === 'hi' ? RECOMMENDATION_HI : RECOMMENDATION_EN;
+      const unitLocal = lang === 'hi'
+        ? (UNIT_NAME_HI[top.unit.name] ?? UNIT_NAME_EN[top.unit.name] ?? top.unit.name)
+        : (UNIT_NAME_EN[top.unit.name] ?? top.unit.name);
       return {
-        tag: RECOMMENDATION_EN.tagStrong,
+        tag: D.tagStrong,
         tagColor: '#4A5D3A',
         unitId: top.unitId,
-        unit: RECOMMENDATION_EN.strongUnit(unitEn),
-        title: RECOMMENDATION_EN.strongTitle(unitEn),
-        reason: RECOMMENDATION_EN.strongReason(score),
-        time: '45 min',
-        type: 'Practice',
+        unit: D.strongUnit(unitLocal),
+        title: D.strongTitle(unitLocal),
+        reason: D.strongReason(score),
+        time: lang === 'hi' ? '45 मिनट' : '45 min',
+        type: lang === 'hi' ? 'अभ्यास' : 'Practice',
         icon: 'Zap',
       };
     }
