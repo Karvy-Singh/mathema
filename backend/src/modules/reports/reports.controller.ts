@@ -19,6 +19,18 @@ export class ReportsController {
     return this.weekly.generate(userId);
   }
 
+  /** 명세서 §5 — GET /students/:studentId/weekly-reports (목록). */
+  @Get('weekly')
+  weeklyList(@CurrentUser('id') userId: string) {
+    return this.service.listWeekly(userId);
+  }
+
+  /** 명세서 §5 — GET /weekly-reports/:reportId. */
+  @Get('weekly/by-id/:id')
+  weeklyById(@CurrentUser('id') userId: string, @Param('id') id: string) {
+    return this.service.weeklyById(userId, id);
+  }
+
   // 헤더 4 stat: 주간 학습시간 / 푼 문제 / 정답률 / AI 종합 점수
   @Get('weekly/current')
   current(@CurrentUser('id') userId: string) { return this.service.current(userId); }

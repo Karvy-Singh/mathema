@@ -178,6 +178,27 @@ export class ReportsService {
 
   byWeek(userId: string, week: string) { return this.repo.byWeek(userId, week); }
 
+  /** 명세서 §5 — 학생 본인의 모든 WeeklyReport 목록 (최신순). */
+  listWeekly(userId: string) {
+    return this.prisma.weeklyReport.findMany({
+      where: { userId },
+      orderBy: { weekStart: 'desc' },
+      select: {
+        id: true, isoWeek: true, weekStart: true, weekEnd: true,
+        totalHours: true, problemsSolved: true, accuracyPct: true, aiScore: true,
+        totalSessions: true, totalAttempts: true,
+        generatedAt: true,
+      },
+    });
+  }
+
+  /** 명세서 §5 — GET /weekly-reports/:reportId. 본인 것만 반환 (cross-user 방지). */
+  weeklyById(userId: string, id: string) {
+    return this.prisma.weeklyReport.findFirst({
+      where: { id, userId },
+    });
+  }
+
   /**
    * 메타인지 캘리브레이션 분석.
    *   - Brier score: 자신감(0~1) vs 실제 정답(0/1) 의 평균 제곱오차. 낮을수록 좋음.

@@ -154,6 +154,100 @@ export const fetchBalance = () => get<StudyBalanceResult>('/recommendations/bala
 export const fetchAdaptive = (minutes?: number) =>
   get<AdaptiveResponse>('/recommendations/adaptive', minutes ? { minutes } : undefined);
 
+// ===== AI 처방 시스템 (Phase 2~3) =====
+export type ConceptMastery = {
+  id: string;
+  userId: string;
+  conceptId: string;
+  masteryScore: number;
+  trend: 'UP' | 'DOWN' | 'STABLE';
+  evidenceCount: number;
+  recentAccuracy: number;
+  averageResponseTimeSec: number;
+  hintUsageRate: number;
+  confidenceGap: number;
+  lastAttemptAt: string | null;
+  updatedBy: 'RULE_BASED' | 'LLM' | 'HYBRID' | 'TEACHER_OVERRIDE';
+  concept: { id: string; code: string; name: string; gradeLevel: string | null };
+};
+
+export type MasteryEventRow = {
+  id: string;
+  masteryScore: number;
+  delta: number;
+  evidenceCount: number;
+  createdAt: string;
+};
+
+export type ErrorPatternRow = {
+  id: string;
+  conceptId: string;
+  errorCode: 'SIGN' | 'ALG' | 'CON' | 'FORMULA' | 'GRAPH' | 'UNIT' | 'CALC' | 'LOGIC';
+  frequency: number;
+  recentFrequency: number;
+  severity: 'low' | 'medium' | 'high';
+  status: 'ACTIVE' | 'IMPROVING' | 'RESOLVED';
+  llmSummary: string | null;
+  lastDetectedAt: string;
+  concept: { id: string; code: string; name: string };
+};
+
+export type ReviewScheduleRow = {
+  conceptId: string;
+  conceptName: string;
+  masteryScore: number;
+  daysSinceLast: number | null;
+  forgettingRisk: number;
+  priority: 'high' | 'medium' | 'low';
+};
+
+export type NextProblemRec = {
+  problemId: string;
+  reason: string;
+  targetConceptId: string;
+  targetErrorCode: string | null;
+  expectedDifficulty: number;
+  recommendationLogId: string;
+};
+
+export type SimilarProblemRec = {
+  problemId: string;
+  reason: string;
+  recommendationLogId: string;
+};
+
+export type WeeklyReportFull = {
+  id: string;
+  isoWeek: string;
+  weekStart: string;
+  weekEnd: string | null;
+  totalHours: number; problemsSolved: number; accuracyPct: number; aiScore: number;
+  totalSessions: number; totalAttempts: number; averageStudyDurationSec: number;
+  studentSummary: string | null;
+  parentSummary: string | null;
+  teacherSummary: string | null;
+  topImprovedConcepts: string[];
+  weakConcepts: string[];
+  repeatedErrorPatterns: string[];
+  recommendedNextGoals: string[];
+  generatedAt: string;
+};
+export type WeeklyReportListItem = Pick<WeeklyReportFull,
+  'id' | 'isoWeek' | 'weekStart' | 'weekEnd' | 'totalHours' | 'problemsSolved' |
+  'accuracyPct' | 'aiScore' | 'totalSessions' | 'totalAttempts' | 'generatedAt'>;
+
+export const fetchConceptMastery   = () => get<ConceptMastery[]>('/mastery/trajectory');
+export const fetchConceptHistory   = (conceptId: string, take = 30) =>
+  get<MasteryEventRow[]>(`/mastery/trajectory/${conceptId}/history`, { take });
+export const fetchActivePatterns   = () => get<ErrorPatternRow[]>('/mastery/error-patterns/active');
+export const fetchReviewSchedule   = () => get<ReviewScheduleRow[]>('/recommendations/review-schedule');
+export const fetchNextProblem      = (sessionId?: string) =>
+  get<NextProblemRec | null>('/recommendations/next-problem', sessionId ? { sessionId } : undefined);
+export const fetchSimilarForAttempt = (attemptId: string) =>
+  get<SimilarProblemRec[]>(`/recommendations/similar/${attemptId}`);
+export const fetchWeeklyList       = () => get<WeeklyReportListItem[]>('/reports/weekly');
+export const fetchWeeklyById       = (id: string) => get<WeeklyReportFull>(`/reports/weekly/by-id/${id}`);
+
 // ===== 단건 조회 =====
 export type WrongNoteDetail = WrongNoteCard & { similar: Array<{ id: string; source: string; difficulty: string }> };
 export type ProblemChoice = {
