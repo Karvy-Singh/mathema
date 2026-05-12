@@ -44,11 +44,9 @@ export class VisionProvider {
 
   async parseProblemImage(imageBuffer: Buffer): Promise<VisionParseResult> {
     if (!this.isConfigured()) {
-      this.logger.warn('Vision API not configured — returning stub response.');
-      return {
-        body: '[Vision API not configured] AI_VISION_API_KEY 를 설정하면 이미지에서 문제 본문이 자동 추출됩니다.',
-        confidence: 0,
-      };
+      // 운영에서는 들어오면 안 됨. 호출자가 명확하게 사용자에게 안내하도록 throw.
+      this.logger.error('Vision API not configured.');
+      throw new Error('VISION_PROVIDER_NOT_CONFIGURED');
     }
 
     if (this.provider === 'anthropic' && this.anthropic) {

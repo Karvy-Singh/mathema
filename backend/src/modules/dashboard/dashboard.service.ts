@@ -32,12 +32,13 @@ export class DashboardService {
     const lastWeeklyAccuracy = accuracy(lastWeek);
     const weeklyAccuracyDelta = lastWeek.length === 0 ? 0 : weeklyAccuracy - lastWeeklyAccuracy;
 
-    // 예상 등급 (최근 2개 모의고사 비교)
+    // 예상 등급 — 모의고사 응시 0건이면 null (frontend 가 "—" 로 표시).
+    // 이전엔 시험 안 본 신규 사용자에게도 fake "3등급" 이 보였음.
     const recentResults = await this.prisma.mockExamResult.findMany({
       where: { userId }, orderBy: { takenAt: 'desc' }, take: 2,
     });
-    const expectedGrade = recentResults[0]?.grade ?? 3;
-    const expectedGradeFrom = recentResults[1]?.grade ?? expectedGrade;
+    const expectedGrade: number | null = recentResults[0]?.grade ?? null;
+    const expectedGradeFrom: number | null = recentResults[1]?.grade ?? expectedGrade;
 
     return {
       todayMinutes: todayAct?.durationMin ?? 0,

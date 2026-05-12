@@ -36,15 +36,23 @@ export class WrongNotesService {
   create(userId: string, dto: CreateWrongNoteDto) { return this.repo.create(userId, dto); }
   async uploadPhoto(_userId: string, file: Express.Multer.File, lang: Lang = 'ko') {
     if (!file) return { ok: false, message: 'file required' };
-    return { ok: true,
-      message: lang !== 'ko' ? STATIC_FALLBACK_EN.uploadPhotoOk
-        : '사진 등록 — Vision API 연동(api입력칸) 후 자동 인식됩니다.' };
+    const visionConfigured = !!(process.env.AI_VISION_API_KEY && process.env.AI_VISION_API_KEY !== 'api입력칸');
+    if (!visionConfigured) {
+      return { ok: false, message: lang !== 'ko'
+        ? 'Photo OCR not available right now.'
+        : '사진 자동 인식 서비스가 현재 사용 불가입니다.' };
+    }
+    return { ok: true, message: lang !== 'ko' ? STATIC_FALLBACK_EN.uploadPhotoOk : '사진이 등록되었습니다.' };
   }
   async uploadPdf(_userId: string, file: Express.Multer.File, lang: Lang = 'ko') {
     if (!file) return { ok: false, message: 'file required' };
-    return { ok: true,
-      message: lang !== 'ko' ? STATIC_FALLBACK_EN.uploadPdfOk
-        : 'PDF 일괄 추출 — LLM 연동(api입력칸) 후 자동 분리됩니다.' };
+    const llmConfigured = !!(process.env.AI_LLM_API_KEY && process.env.AI_LLM_API_KEY !== 'api입력칸');
+    if (!llmConfigured) {
+      return { ok: false, message: lang !== 'ko'
+        ? 'PDF batch extraction not available right now.'
+        : 'PDF 자동 분리 서비스가 현재 사용 불가입니다.' };
+    }
+    return { ok: true, message: lang !== 'ko' ? STATIC_FALLBACK_EN.uploadPdfOk : 'PDF 가 등록되었습니다.' };
   }
 
   async updateStatus(userId: string, id: string, status: string) {

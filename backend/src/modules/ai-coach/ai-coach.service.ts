@@ -107,18 +107,19 @@ export class AiCoachService {
       return AI_COACH_EN.errorDna.insightTpl(top.name, top.value, r.advice, r.expected);
     }
     if (total < 3) return '아직 분석할 오답 데이터가 부족합니다. 5문제 이상 풀고 다시 확인해주세요.';
+    // 처방 메시지 — 가짜 효과 수치 ("2주 안에 +12%") 제거. 일반 권고만 제공.
     const RX: Record<string, { advice: string; expected: string }> = {
       CONCEPT_MISUNDERSTANDING: {
         advice: '개념 재구조화 — 정의·정리를 직접 종이에 다시 쓰고, 비슷한 유형 5문제를 풀어 적용 영역을 확장',
-        expected: '2주 안에 정답률 +12%',
+        expected: '재구조화 후 비슷한 유형 다시 풀이로 정착도 확인',
       },
       CALCULATION_MISTAKE: {
         advice: '단계별 풀이 검증 — 풀이 중간에 부호/지수/대입을 한 번씩 체크하는 습관 + 시간 압박 없는 환경에서 정확도 훈련',
-        expected: '1주 안에 계산 오답 -40%',
+        expected: '검산 습관으로 단계별 오답 감소',
       },
       TIME_SHORTAGE: {
-        advice: '표준 풀이 패턴 암기 + 실전 타이머 훈련 — 30번 류 문제의 standard approach를 5개 정착시킨 후 기출 응용',
-        expected: '3주 안에 30번 풀이시간 -25%',
+        advice: '표준 풀이 패턴 암기 + 실전 타이머 훈련 — standard approach를 5개 정착시킨 후 기출 응용',
+        expected: '표준 풀이 정착 후 응용 단계로 전환',
       },
       OTHER: { advice: '오답 5건 이상 누적 시 카테고리 분석 권장', expected: '체크리스트 기반 디버깅' },
     };

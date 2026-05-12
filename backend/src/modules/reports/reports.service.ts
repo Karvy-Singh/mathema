@@ -55,54 +55,124 @@ export class ReportsService {
       }));
   }
 
+  /**
+   * 약점 단원 Top 3 — mastery 낮은 순. impact 는 실 mastery gap 기반.
+   * priority 는 단순히 순위 라벨; impact 는 객관적인 '점수 여력' (100-score).
+   */
   async nextFocus(userId: string, lang: Lang = 'ko') {
     const masteries = await this.prisma.masterySnapshot.findMany({
-      where: { userId }, include: { unit: true }, orderBy: { score: 'asc' }, take: 3,
+      where: { userId, samples: { gte: 3 } },     // 표본 부족한 단원은 제외 — 실제 약점 식별 신뢰도 확보
+      include: { unit: true },
+      orderBy: { score: 'asc' },
+      take: 3,
     });
+    if (masteries.length === 0) return [];
+
     const palette = ['#8B3A1F', '#B45309', '#A16207'];
     const isEn = lang !== 'ko';
     const priorities = isEn ? ['Top', 'High', 'Mid'] : ['최우선', '높음', '중간'];
-    const impacts = isEn ? ['+8 pts est.', '+5 pts est.', '+3 pts est.'] : ['+8점 예상', '+5점 예상', '+3점 예상'];
-    const fallbackPriority = isEn ? 'Mid' : '중간';
-    const fallbackImpact = isEn ? '+1 pt est.' : '+1점 예상';
-    const fallbackArea = isEn ? 'Weak-area review' : '약점 보강';
-    const areaKo: Record<string, string> = {
-      '미적분 II': '회전체의 부피', '확률·통계': '정규분포 표준화', '기하·벡터': '공간좌표 시각화',
-    };
-    const areaEn: Record<string, string> = {
-      '미적분 II': 'Volumes of revolution',
-      '확률·통계': 'Normal-distribution z-scores',
-      '기하·벡터': 'Spatial coordinates',
-      '미적분 I':  'Limits & derivatives',
-      '함수':      'Function transformations',
-    };
-    return masteries.map((m, i) => ({
-      unit: isEn ? (UNIT_NAME_EN[m.unit.name] ?? m.unit.name) : m.unit.name,
-      area: (isEn ? areaEn[m.unit.name] : areaKo[m.unit.name]) ?? fallbackArea,
-      priority: priorities[i] ?? fallbackPriority,
-      color: palette[i] ?? '#A16207',
-      impact: impacts[i] ?? fallbackImpact,
-    }));
+
+    return masteries.map((m, i) => {
+      const gap = Math.max(0, Math.round(100 - m.score));
+      return {
+        unit: isEn ? (UNIT_NAME_EN[m.unit.name] ?? m.unit.name) : m.unit.name,
+        // area: 단원명 그대로 (가짜 sub-단원명 매핑 제거 — 실 SubUnit 로 추후 확장)
+        area: isEn ? (UNIT_NAME_EN[m.unit.name] ?? m.unit.name) : m.unit.name,
+        priority: priorities[i] ?? (isEn ? 'Mid' : '중간'),
+        color: palette[i] ?? '#A16207',
+        impact: isEn ? `${gap} pts to mastery` : `숙련도 ${gap}점 여력`,
+      };
+    });
   }
 
+  /**
+   * 실 데이터 기반 성취 카드 — 조건 미충족 단원은 카드 생략.
+   *   1) 학습 streak (연속 일수, ≥ 3)
+   *   2) 최근 7일 정답률 ≥ 70 (표본 10 이상)
+   *   3) 단원 마스터 (mastery ≥ 90)
+   *   4) 오답노트 정복 (status=MASTERED count ≥ 5)
+   */
   async achievements(userId: string, lang: Lang = 'ko') {
-    const streak = await this.prisma.dailyActivity.count({
-      where: { userId, intensity: { gt: 0 } },
-    });
-    if (lang !== 'ko') {
-      return [
-        { icon: 'Flame', title: `${streak}-day learning streak`, sub: 'New personal record', color: '#B45309' },
-        { icon: 'TrendingUp', title: 'Accuracy passed 70%', sub: 'First 70%+ in 6 weeks', color: '#4A5D3A' },
-        { icon: 'Target', title: 'Calculus I mastered', sub: 'Unit mastery reached 91%', color: '#1F1A14' },
-        { icon: 'CheckCircle2', title: '25 wrong-note retries', sub: '82% correct on re-attempts', color: '#4A5D3A' },
-      ];
+    const isEn = lang !== 'ko';
+    const cards: Array<{ icon: string; title: string; sub: string; color: string }> = [];
+
+    // 1) Streak — 연속 학습 일수
+    const streak = await this.computeStreak(userId);
+    if (streak >= 3) {
+      cards.push({
+        icon: 'Flame',
+        title: isEn ? `${streak}-day learning streak` : `${streak}일 연속 학습`,
+        sub: isEn ? 'Keep it going' : '꾸준한 학습',
+        color: '#B45309',
+      });
     }
-    return [
-      { icon: 'Flame', title: `${streak}일 연속 학습 달성`, sub: '개인 최고 기록 갱신', color: '#B45309' },
-      { icon: 'TrendingUp', title: '정답률 70% 돌파', sub: '6주 만의 첫 70%대 진입', color: '#4A5D3A' },
-      { icon: 'Target', title: '미적분 I 마스터 완료', sub: '단원 숙련도 91% 달성', color: '#1F1A14' },
-      { icon: 'CheckCircle2', title: '오답 재도전 25문제', sub: '재출제 정답률 82%', color: '#4A5D3A' },
-    ];
+
+    // 2) 최근 7일 정답률
+    const since = new Date(Date.now() - 7 * 86_400_000);
+    const recent = await this.prisma.attempt.findMany({
+      where: { userId, createdAt: { gte: since } },
+      select: { isCorrect: true },
+    });
+    if (recent.length >= 10) {
+      const acc = recent.filter((a) => a.isCorrect).length / recent.length;
+      if (acc >= 0.7) {
+        cards.push({
+          icon: 'TrendingUp',
+          title: isEn ? `Accuracy ${Math.round(acc * 100)}% (last 7d)` : `정답률 ${Math.round(acc * 100)}% (최근 7일)`,
+          sub: isEn ? `${recent.length} problems` : `${recent.length}문제`,
+          color: '#4A5D3A',
+        });
+      }
+    }
+
+    // 3) 단원 마스터 — score ≥ 90 인 첫 단원
+    const mastered = await this.prisma.masterySnapshot.findFirst({
+      where: { userId, score: { gte: 90 } },
+      include: { unit: true },
+      orderBy: { score: 'desc' },
+    });
+    if (mastered) {
+      const unitName = isEn ? (UNIT_NAME_EN[mastered.unit.name] ?? mastered.unit.name) : mastered.unit.name;
+      cards.push({
+        icon: 'Target',
+        title: isEn ? `${unitName} mastered` : `${unitName} 마스터`,
+        sub: isEn ? `${Math.round(mastered.score)}% mastery` : `숙련도 ${Math.round(mastered.score)}%`,
+        color: '#1F1A14',
+      });
+    }
+
+    // 4) 오답 정복 — MASTERED count
+    const masteredNotes = await this.prisma.wrongNote.count({
+      where: { userId, status: 'MASTERED' },
+    });
+    if (masteredNotes >= 5) {
+      cards.push({
+        icon: 'CheckCircle2',
+        title: isEn ? `${masteredNotes} wrong notes mastered` : `오답 ${masteredNotes}건 정복`,
+        sub: isEn ? 'Spaced repetition' : '간격 반복 학습',
+        color: '#4A5D3A',
+      });
+    }
+
+    return cards;
+  }
+
+  /** 연속 학습 일수 — DailyActivity 의 날짜 인접성 기반. */
+  private async computeStreak(userId: string): Promise<number> {
+    const rows = await this.prisma.dailyActivity.findMany({
+      where: { userId, intensity: { gt: 0 } },
+      orderBy: { date: 'desc' },
+      select: { date: true },
+      take: 60,
+    });
+    if (rows.length === 0) return 0;
+    let streak = 1;
+    for (let i = 1; i < rows.length; i++) {
+      const diff = Math.round((rows[i - 1].date.getTime() - rows[i].date.getTime()) / 86_400_000);
+      if (diff === 1) streak++;
+      else break;
+    }
+    return streak;
   }
 
   byWeek(userId: string, week: string) { return this.repo.byWeek(userId, week); }

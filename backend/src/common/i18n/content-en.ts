@@ -1039,26 +1039,26 @@ export const AI_COACH_EN = {
       `Just ${remainingMin} more minutes today can recover ${gain} points in ${unit}.`,
     weakUnitText: (unit: string, score: number) =>
       `${unit} mastery ${score}% — needs immediate work`,
-    weakUnitDesc: 'Peer average mastery is around 71%.',
+    weakUnitDesc: 'Below your target mastery level.',
   },
   errorDna: {
     insufficient: 'Not enough wrong-note data yet. Try 5+ problems and check back.',
     advice: {
       CONCEPT_MISUNDERSTANDING: {
         advice: 'Concept rebuilding — rewrite the definitions and theorems by hand, then drill 5 similar problems to extend application range.',
-        expected: '+12% accuracy in 2 weeks',
+        expected: 'Validate retention by re-solving similar problems.',
       },
       CALCULATION_MISTAKE: {
         advice: 'Step-wise verification — check signs/exponents/substitutions mid-solve, plus accuracy practice in low-pressure conditions.',
-        expected: '−40% calc errors in 1 week',
+        expected: 'Verification habit reduces step-level errors.',
       },
       TIME_SHORTAGE: {
-        advice: 'Standard-template memorization + timed practice — internalize 5 standard approaches for "killer-30" problems before applying to past papers.',
-        expected: '−25% time on hard problems in 3 weeks',
+        advice: 'Standard-template memorization + timed practice — internalize 5 standard approaches before applying to past papers.',
+        expected: 'Move from standard templates to applied past-paper drills.',
       },
       OTHER: {
         advice: 'Recommend categorizing once you have 5+ wrong notes.',
-        expected: 'Checklist-driven debugging',
+        expected: 'Checklist-driven debugging.',
       },
     },
     insightTpl: (name: string, value: number, advice: string, expected: string) =>
@@ -1147,7 +1147,7 @@ export const RECOMMENDATION_EN = {
 };
 
 export const STATIC_FALLBACK_EN = {
-  llmNotConfigured: 'AI key not configured — showing a sample response. Fill `AI_LLM_API_KEY` in `backend/.env` to switch to real LLM output.',
-  uploadPhotoOk: 'Photo registration — automatic recognition activates after Vision API key is set.',
-  uploadPdfOk: 'PDF batch extraction — activates after LLM key is set.',
+  llmNotConfigured: 'AI service is temporarily unavailable.',
+  uploadPhotoOk: 'Photo registered.',
+  uploadPdfOk: 'PDF registered.',
 };

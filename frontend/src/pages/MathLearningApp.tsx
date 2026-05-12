@@ -267,8 +267,8 @@ function DashboardPage({ onStartStudy, onGotoWrongNotes }: { onStartStudy: (sess
               sub: t('dashboard.stat.streakBest'), accent: '#5A8A45', icon: 'Flame' },
             { label: t('dashboard.stat.weeklyAccuracy'), value: String(stats?.weeklyAccuracy ?? 0), unit: t('common.percent'),
               sub: t('dashboard.stat.weeklyDelta', { delta: stats?.weeklyAccuracyDelta ?? 0 }), accent: '#5A8A45', icon: undefined },
-            { label: t('dashboard.stat.expectedGrade'), value: String(stats?.expectedGrade ?? '–'), unit: t('common.grade'),
-              sub: t('dashboard.stat.gradeFrom', { from: stats?.expectedGradeFrom ?? 3 }), accent: '#142850', icon: undefined },
+            { label: t('dashboard.stat.expectedGrade'), value: stats?.expectedGrade != null ? String(stats.expectedGrade) : '–', unit: t('common.grade'),
+              sub: stats?.expectedGradeFrom != null ? t('dashboard.stat.gradeFrom', { from: stats.expectedGradeFrom }) : '—', accent: '#142850', icon: undefined },
           ].map((stat, i) => (
             <div key={i} style={{ padding: '24px 28px', borderRight: i < 3 ? '1px solid #14285015' : 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
@@ -1518,7 +1518,7 @@ function MockExamPage({ onStartExam }: { onStartExam: (exam: M.ExamPackage) => v
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #14285015', borderBottom: '1px solid #14285015' }}>
           {[
             { label: t('mock.stat.lastScore'), value: String(summary.data?.lastScore ?? 0), unit: t('common.score'), sub: t('mock.stat.recent'), accent: '#142850' },
-            { label: t('mock.stat.expectedGrade'), value: String(summary.data?.expectedGrade ?? 0), unit: t('common.grade'), sub: t('mock.stat.reliability', { pct: summary.data?.reliability ?? 87 }), accent: '#5A8A45' },
+            { label: t('mock.stat.expectedGrade'), value: summary.data?.expectedGrade ? String(summary.data.expectedGrade) : '–', unit: t('common.grade'), sub: summary.data?.reliability != null ? t('mock.stat.reliability', { pct: summary.data.reliability }) : '—', accent: '#5A8A45' },
             { label: t('mock.stat.toTarget'), value: String(summary.data?.pointsToNextGrade ?? 0), unit: t('common.score'), sub: t('mock.stat.targetGrade', { from: 2, to: 1 }), accent: '#C7791F' },
             { label: t('mock.stat.peerPercentile'), value: String(summary.data?.percentile ?? 0), unit: 'p', sub: t('mock.stat.topPercent', { pct: 100 - (summary.data?.percentile ?? 0) }), accent: '#142850' },
           ].map((stat, i) => (

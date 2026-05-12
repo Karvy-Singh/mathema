@@ -61,15 +61,9 @@ export class LlmProvider {
    */
   async generate(req: LlmRequest): Promise<LlmResponse> {
     if (!this.apiKey || this.apiKey === 'api입력칸') {
-      this.logger.warn('AI_LLM_API_KEY not configured — returning fallback text.');
-      const isKo = /[ㄱ-힝]/.test(req.prompt + (req.system ?? ''));
-      return {
-        text: isKo
-          ? 'AI 키가 설정되지 않아 샘플 응답을 표시합니다. `backend/.env` 의 AI_LLM_API_KEY 를 채우면 실제 LLM 응답으로 전환됩니다.'
-          : 'AI key not configured — showing a sample response. Fill `AI_LLM_API_KEY` in `backend/.env` to switch to real LLM output.',
-        inputTokens: 0,
-        outputTokens: 0,
-      };
+      // 운영에서는 이 분기에 들어오면 안 됨. 서비스 측에 명확히 알리고 호출자가 fallback 처리.
+      this.logger.error('AI_LLM_API_KEY not configured — refusing to return sample text.');
+      throw new Error('LLM_PROVIDER_NOT_CONFIGURED');
     }
 
     if (this.provider === 'anthropic') {

@@ -175,7 +175,7 @@ function buildSteps(
       case 'HOOK': {
         const h = content?.hook;
         if (h) steps.push(stepText(bp, h.ko, h.en, h.hi));
-        else  steps.push(stepText(bp, '이 단원을 왜 배우는지 곧 채워질 예정입니다.', 'Motivation will be added soon.', undefined));
+        // 콘텐츠 없으면 step 자체 생략 — 가짜 "곧 채워질 예정" 문구 노출 X.
         break;
       }
       case 'CONCRETE': {
@@ -191,13 +191,8 @@ function buildSteps(
               ? `उदाहरण: ${content.worked.hi}\n→ ${first?.math ?? ''} ${first?.narrationHi ?? ''}`
               : undefined,
           ));
-        } else {
-          steps.push(stepText(bp,
-            '구체 예시는 곧 추가됩니다.',
-            'A concrete example will be added soon.',
-            'ठोस उदाहरण जल्द जोड़ा जाएगा।',
-          ));
         }
+        // 둘 다 없으면 step 생략 — 가짜 "곧 추가됩니다" 노출 X.
         break;
       }
       case 'PICTORIAL': {
@@ -232,11 +227,12 @@ function buildSteps(
             a.en + ncertEnBlock,
             a.hi ? a.hi + ncertHiBlock : undefined,
           ));
-        } else {
+        } else if (ncert?.excerpt) {
+          // 자체 abstract 정의는 없지만 NCERT 발췌가 있으면 그걸 본문으로 사용 (placeholder 텍스트 없이)
           steps.push(stepText(bp,
-            '기호·정의 정리 예정.' + ncertKoBlock,
-            'Formal definitions coming soon.' + ncertEnBlock,
-            'प्रतीक और परिभाषाएँ जल्द।' + ncertHiBlock,
+            ncertKoBlock.trim(),
+            ncertEnBlock.trim(),
+            ncertHiBlock.trim() || undefined,
           ));
         }
         break;

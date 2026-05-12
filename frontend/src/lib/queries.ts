@@ -3,7 +3,8 @@ import { get } from './api';
 export type DashboardSummary = {
   todayMinutes: number; todayGoalMinutes: number;
   streakDays: number; weeklyAccuracy: number; weeklyAccuracyDelta: number;
-  expectedGrade: number; expectedGradeFrom: number;
+  /** 모의고사 응시 없으면 null — UI 가 "—" 로 표시. */
+  expectedGrade: number | null; expectedGradeFrom: number | null;
 };
 export type Mastery = { subject: string; value: number; unitId: string };
 export type RecommendCard = {
