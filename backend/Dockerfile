@@ -47,4 +47,5 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
 # tini 가 PID 1 — Container Apps 가 보낸 SIGTERM 을 NestJS 까지 전파시켜 graceful shutdown.
 ENTRYPOINT ["/sbin/tini", "--"]
 # 컨테이너 시작 시 마이그레이션 자동 적용 후 서버 기동.
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+# nest build 의 출력 경로는 tsconfig.rootDir=./ + include src/**/* 로 dist/src/main.js.
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
