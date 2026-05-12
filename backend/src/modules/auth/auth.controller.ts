@@ -1,4 +1,4 @@
-import { Body, Controller, Ip, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Ip, Post, Req, UseGuards } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -19,7 +19,11 @@ export class AuthController {
   // 가입: 분당 5회/IP — 신규 botspam 방지.
   @Throttle({ auth: { ttl: 60_000, limit: 5 } })
   @Public() @Post('register')
-  register(@Body() dto: RegisterDto) { return this.service.register(dto); }
+  register(@Body() dto: RegisterDto, @Req() req: any) {
+    const ip = (req?.ip ?? req?.headers?.['x-forwarded-for'] ?? null) as string | null;
+    const ua = (req?.headers?.['user-agent'] ?? null) as string | null;
+    return this.service.register(dto, { ip: ip ?? undefined, ua: ua ?? undefined });
+  }
 
   // 로그인: 분당 5회/IP — credential stuffing 차단.
   @Throttle({ auth: { ttl: 60_000, limit: 5 } })

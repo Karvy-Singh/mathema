@@ -10,7 +10,9 @@
     "lint": "eslint src --ext .ts,.tsx",
     "cap:add:android": "npx cap add android",
     "cap:sync": "npm run build && npx cap sync android",
-    "cap:open": "npx cap open android"
+    "cap:open": "npx cap open android",
+    "e2e": "playwright test",
+    "e2e:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.3",
@@ -30,6 +32,7 @@
     "recharts": "^2.12.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@types/katex": "^0.16.7",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.18",

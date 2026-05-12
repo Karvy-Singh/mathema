@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix":            { "value": "mathema" },
+    "location":              { "value": "centralindia" },
+    "containerImageTag":     { "value": "latest" },
+    "dbAdminUsername":       { "value": "mathemaadmin" },
+    "dbAdminPassword":       { "value": "REPLACE_BEFORE_DEPLOY_OR_USE_KEYVAULT_REF" },
+    "containerCpu":          { "value": "0.5" },
+    "containerMemory":       { "value": "1.0Gi" },
+    "minReplicas":           { "value": 1 },
+    "maxReplicas":           { "value": 5 },
+    "provisionAzureOpenAi":  { "value": true },
+    "anthropicApiKey":       { "value": "" },
+    "jwtAccessSecret":       { "value": "REPLACE_WITH_RANDOM_32CHAR" },
+    "jwtRefreshSecret":      { "value": "REPLACE_WITH_DIFFERENT_RANDOM_32CHAR" }
+  }
+}

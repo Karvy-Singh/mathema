@@ -13,7 +13,7 @@ import { trackUi } from '../lib/analytics';
  *   2. ConceptLessonPage 같은 외부 라우트 — activeNav 는 '개념학습' 고정,
  *      setActiveNav 는 `/#/<hash>` 로 navigate 하여 메인 앱으로 복귀.
  */
-export type NavKey = '대시보드' | '오답노트' | '학습' | '개념학습' | '모의고사' | '리포트';
+export type NavKey = '대시보드' | '오답노트' | '학습' | '개념학습' | '모의고사' | '리포트' | '약점분석';
 
 export const NAV_TO_HASH: Record<NavKey, string> = {
   '대시보드': 'dashboard',
@@ -22,6 +22,7 @@ export const NAV_TO_HASH: Record<NavKey, string> = {
   '개념학습': 'concept',
   '모의고사': 'mock-exam',
   '리포트': 'report',
+  '약점분석': 'weakness',
 };
 
 export function TopNav({
@@ -35,7 +36,7 @@ export function TopNav({
   const { t, lang, setLang } = useT();
   const navigate = useNavigate();
   const goSettings = () => { navigate('/settings'); };
-  const items: NavKey[] = ['대시보드', '오답노트', '개념학습', '학습', '모의고사', '리포트'];
+  const items: NavKey[] = ['대시보드', '오답노트', '개념학습', '학습', '약점분석', '모의고사', '리포트'];
   const navLabel = (k: NavKey): string => ({
     '대시보드': t('nav.dashboard'),
     '오답노트': t('nav.wrongNotes'),
@@ -43,6 +44,7 @@ export function TopNav({
     '개념학습': t('nav.concept'),
     '모의고사': t('nav.mockExam'),
     '리포트': t('nav.report'),
+    '약점분석': t('nav.weakness'),
   } as const)[k];
 
   return (

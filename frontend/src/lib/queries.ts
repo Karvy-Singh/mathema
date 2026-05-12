@@ -95,6 +95,50 @@ export type Calibration = {
 };
 export const fetchCalibration = () => get<Calibration>('/reports/calibration');
 
+// ===== Weakness Dashboard / Adaptive Plan (Phase 2~3) =====
+export type UnitBalance = {
+  unitId: string;
+  unitName: string;
+  order: number;
+  score: number;
+  studyTimeMin: number;
+  samples: number;
+  efficiency: number | null;
+};
+
+export type StudyBalanceResult = {
+  gini: number;
+  balanced: boolean;
+  totalStudyMin: number;
+  perUnit: UnitBalance[];
+  underStudied: UnitBalance[];
+  lowEfficiency: UnitBalance[];
+  warnings: string[];
+};
+
+export type AdaptivePlanTask = {
+  task: string;
+  unitName: string;
+  durationMin: number;
+  type: 'concept' | 'practice' | 'review' | 'mock-exam';
+  reason: string;
+};
+
+export type AdaptivePlan = {
+  summary: string;
+  totalMinutes: number;
+  tasks: AdaptivePlanTask[];
+  balanceTip: string;
+};
+
+export type AdaptiveResponse =
+  | (AdaptivePlan & { fallback?: false })
+  | { fallback: true; cards: RecommendCard[] };
+
+export const fetchBalance = () => get<StudyBalanceResult>('/recommendations/balance');
+export const fetchAdaptive = (minutes?: number) =>
+  get<AdaptiveResponse>('/recommendations/adaptive', minutes ? { minutes } : undefined);
+
 // ===== 단건 조회 =====
 export type WrongNoteDetail = WrongNoteCard & { similar: Array<{ id: string; source: string; difficulty: string }> };
 export type ProblemChoice = {

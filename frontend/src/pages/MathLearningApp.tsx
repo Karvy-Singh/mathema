@@ -27,11 +27,12 @@ import ConfidenceSlider from '../components/ConfidenceSlider';
 import { UnitPicker } from '../components/UnitPicker';
 import MathText from '../components/MathText';
 import ConceptHubPage from './ConceptHubPage';
+import { WeaknessDashboardPage } from './WeaknessDashboardPage';
 import { TopNav } from '../components/TopNav';
 
 const SESSION_KEY = 'mathema.activeSession';
 
-type NavKey = '대시보드' | '오답노트' | '학습' | '개념학습' | '모의고사' | '리포트';
+type NavKey = '대시보드' | '오답노트' | '학습' | '개념학습' | '모의고사' | '리포트' | '약점분석';
 
 // ============ ICON MAP (백엔드가 문자열로 반환) ============
 const ICONS: Record<string, LucideIcon> = {
@@ -60,6 +61,7 @@ const NAV_TO_HASH: Record<NavKey, string> = {
   '개념학습': 'concept',
   '모의고사': 'mock-exam',
   '리포트': 'report',
+  '약점분석': 'weakness',
 };
 const HASH_TO_NAV: Record<string, NavKey> = Object.fromEntries(
   Object.entries(NAV_TO_HASH).map(([k, v]) => [v, k as NavKey]),
@@ -185,6 +187,7 @@ export default function MathLearningApp() {
             {activeNav === '오답노트' && <WrongNotesPage onStartStudy={enterStudy} />}
             {activeNav === '학습' && <StudyPage sessionId={activeSessionId} focusProblemId={focusProblemId} onClear={clearSession} onStartStudy={enterStudy} />}
             {activeNav === '개념학습' && <ConceptHubPage embedded />}
+            {activeNav === '약점분석' && <WeaknessDashboardPage embedded />}
             {activeNav === '모의고사' && <MockExamPage onStartExam={enterExam} />}
             {activeNav === '리포트' && <ReportPage />}
           </>

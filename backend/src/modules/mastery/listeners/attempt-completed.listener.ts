@@ -30,6 +30,8 @@ export class MasteryAttemptListener {
   @OnEvent('attempt.completed')
   async onAttemptCompleted(attempt: {
     userId: string; problemId: string; isCorrect: boolean; durationSec: number; isRetry?: boolean;
+    /** 오답일 때만 채워짐 — 분포 갱신용. */
+    errorTypeForSnapshot?: string;
   }) {
     // 재시도는 BKT 갱신 skip — 학생이 마스터 학습 흐름에서 부담 없이 시도하도록
     if (attempt.isRetry) return;
@@ -51,10 +53,29 @@ export class MasteryAttemptListener {
     const prev = existing ? scoreToProb(existing.score) : params.pInit;
     const next = bktUpdate(prev, attempt.isCorrect, params);
 
+    // ErrorType 분포 갱신 — 최근 누적 카운트 (오답일 때만 +1)
+    const prevDist: Record<string, number> =
+      (existing?.lastErrorTypes as Record<string, number> | null) ?? {};
+    const nextDist = { ...prevDist };
+    if (!attempt.isCorrect && attempt.errorTypeForSnapshot) {
+      nextDist[attempt.errorTypeForSnapshot] = (nextDist[attempt.errorTypeForSnapshot] ?? 0) + 1;
+    }
+
     await this.prisma.masterySnapshot.upsert({
       where: { userId_unitId: { userId: attempt.userId, unitId: problem.unitId } },
-      update: { score: probToScore(next) },
-      create: { userId: attempt.userId, unitId: problem.unitId, score: probToScore(next) },
+      update: {
+        score: probToScore(next),
+        samples: { increment: 1 },
+        lastErrorTypes: nextDist,
+        lastAttemptAt: new Date(),
+      },
+      create: {
+        userId: attempt.userId, unitId: problem.unitId,
+        score: probToScore(next),
+        samples: 1,
+        lastErrorTypes: nextDist,
+        lastAttemptAt: new Date(),
+      },
     });
   }
 

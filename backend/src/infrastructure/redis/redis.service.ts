@@ -39,6 +39,17 @@ export class RedisService implements OnModuleDestroy {
     return this.client.incr(key);
   }
 
+  async expire(key: string, ttlSec: number): Promise<void> {
+    await this.client.expire(key, ttlSec);
+  }
+
+  /** 첫 호출 시 TTL 부여 + 카운트 증가. rate-limit 의 표준 패턴. */
+  async incrWithTtl(key: string, ttlSec: number): Promise<number> {
+    const count = await this.client.incr(key);
+    if (count === 1) await this.client.expire(key, ttlSec);
+    return count;
+  }
+
   async exists(key: string): Promise<boolean> {
     return (await this.client.exists(key)) === 1;
   }

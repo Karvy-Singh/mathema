@@ -110,6 +110,18 @@ enum ConceptStepKind {
   REFLECT
 }
 
+/// DPDP (India Digital Personal Data Protection Act 2023) + GDPR 동의 종류.
+///   DATA_PROCESSING  필수 — 가입 시 자동, 철회 시 계정 비활성
+///   ANALYTICS        선택 — 학습 패턴/오답 분석 (서비스 개선 목적)
+///   MARKETING        선택 — 이메일/푸시 알림
+///   AI_TRAINING      선택 — 학습 데이터로 AI 모델 fine-tune 활용
+enum ConsentKind {
+  DATA_PROCESSING
+  ANALYTICS
+  MARKETING
+  AI_TRAINING
+}
+
 /// 사용자 국가 — 커리큘럼·로케일·통화 매핑의 기준.
 /// 1차 출시: IN(인도). 향후 KR, US, UK, AU 등 순차 추가.
 enum CountryCode {
@@ -150,9 +162,32 @@ model User {
   analyticsEvents AnalyticsEvent[]
   deviceTokens    DeviceToken[]
   conceptProgress ConceptProgress[]
+  consents        Consent[]
 
   @@index([examDate])
   @@index([deletedAt])
+}
+
+/// DPDP/GDPR 동의 기록 — append-only.
+/// 같은 (userId, kind) 에 대해 grant/revoke 가 반복되면 별개 row 로 누적되어 이력 추적 가능.
+/// 현재 유효 상태는 가장 최근 row 의 revokedAt 으로 판정 (NULL = 활성).
+model Consent {
+  id          String       @id @default(uuid())
+  userId      String
+  kind        ConsentKind
+  /// 동의한 정책 버전 — 정책 갱신 시 재동의 트리거. 예: "2026-05-01"
+  policyVersion String     @default("1.0")
+  grantedAt   DateTime     @default(now())
+  /// NULL = 현재 유효. 값이 있으면 철회됨.
+  revokedAt   DateTime?
+  /// 동의 시점의 IP / UA — 법적 증빙용
+  ipAddress   String?
+  userAgent   String?      @db.Text
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, kind, revokedAt])
+  @@index([userId, grantedAt])
 }
 
 // ---------- CURRICULUM ----------
@@ -253,8 +288,16 @@ model Attempt {
   answer      String
   isCorrect   Boolean
   durationSec Int
+  /// 더 정밀한 응답 시간 (밀리초). durationSec 와 병행 — 단계별 정밀 분석용.
+  responseTimeMs Int?
   /// 메타인지 자기평가 — 답 제출 직전 확신도 0~100. NULL = 미입력
   confidence  Int?
+  /// 힌트 사용 여부 — 추천/숙련도 계산 시 보정 인자.
+  hintUsed    Boolean        @default(false)
+  /// 'android' | 'ios' | 'web' — 디바이스별 학습 패턴 분석용.
+  deviceType  String?
+  /// 0~23 — 시간대별 학습 효율 분석. createdAt 의 user-local 시 기준.
+  timeOfDay   Int?
   /// 3단계 객관식 단계 인덱스 (1/2/3). NULL = 단일 답안 모드 (호환성)
   stepIndex   Int?
   /// 학생이 선택한 ProblemChoice. NULL = 서술형/단일답안 모드
@@ -281,7 +324,12 @@ model WrongNote {
   userId       String
   problemId    String
   errorType    ErrorType
-  insight      String     @db.Text   // AI 인사이트
+  insight      String     @db.Text   // AI 인사이트 (요약 텍스트, 호환 유지)
+  /// 구조화된 LLM 산출 — schema:
+  ///   { rootCause: string, correctConcept: string, drillSteps: string[],
+  ///     similarPatterns: string[], confidenceCalibration: 'over'|'under'|'aligned',
+  ///     reviewIntervalDays: number, lang: 'ko'|'en'|'hi' }
+  insightJson  Json?
   status       NoteStatus @default(PENDING)
   similarCount Int        @default(0)
   occurrences  Int        @default(1) // 같은 패턴 누적 횟수
@@ -318,6 +366,10 @@ model StudySession {
   startedAt      DateTime       @default(now())
   endedAt        DateTime?
   durationSec    Int            @default(0)
+  /// 세션 컨텍스트 (STUDY/EXAM/PRACTICE/DIAGNOSTIC). 단원 균형 분석 시 컨텍스트별 가중.
+  context        SessionContext @default(STUDY)
+  /// 'android' | 'ios' | 'web' — 단원별 학습 시간 분석 시 디바이스 차원.
+  deviceType     String?
 
   user     User      @relation(fields: [userId], references: [id])
   unit     Unit      @relation(fields: [unitId], references: [id])
@@ -381,6 +433,14 @@ model MasterySnapshot {
   userId    String
   unitId    String
   score     Float    // 0~100
+  /// score 산출에 사용된 attempt 누적 수 — 신뢰도 게이팅.
+  samples   Int      @default(0)
+  /// 이 단원 누적 학습 시간 (분). StudySession.durationSec 적분. 단원 균형 분석 핵심.
+  studyTimeMin Int   @default(0)
+  /// 최근 N개의 ErrorType 분포 — { CONCEPT_MISUNDERSTANDING: 3, CALCULATION_MISTAKE: 1, ... }
+  lastErrorTypes Json?
+  /// 마지막 attempt 시각 — 회상 곡선 (decay) 계산용. NULL = 시도 전.
+  lastAttemptAt DateTime?
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id])

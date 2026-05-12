@@ -10,6 +10,7 @@ import { RegisterDto } from './dto/register.dto';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { RedisService } from '../../infrastructure/redis/redis.service';
 import { MailService } from '../../infrastructure/mail/mail.service';
+import { PrivacyService } from '../privacy/privacy.service';
 
 const RESET_TOKEN_TTL_MIN = 30;
 const VERIFY_TOKEN_TTL_HOURS = 24;
@@ -28,12 +29,13 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
     private readonly mail: MailService,
+    private readonly privacy: PrivacyService,
   ) {
     const cid = this.config.get<string>('GOOGLE_CLIENT_ID');
     if (cid && cid !== 'api입력칸') this.googleClient = new OAuth2Client(cid);
   }
 
-  async register(dto: RegisterDto) {
+  async register(dto: RegisterDto, ctx: { ip?: string; ua?: string } = {}) {
     const exists = await this.users.findByEmail(dto.email);
     if (exists) throw new UnauthorizedException('email already used');
     const passwordHash = await bcrypt.hash(dto.password, 10);
@@ -45,6 +47,16 @@ export class AuthService {
       targetGrade: dto.targetGrade,
       ...(dto.gradeLevel ? { gradeLevel: dto.gradeLevel } : {}),
     });
+
+    // DPDP/GDPR — 가입 시 필수 동의(DATA_PROCESSING) + 선택 동의(가입 폼에서 보낸 값)
+    await this.privacy.grantInitial(user.id, {
+      analytics:  dto.consentAnalytics  === true,
+      marketing:  dto.consentMarketing  === true,
+      aiTraining: dto.consentAiTraining === true,
+      ipAddress: ctx.ip,
+      userAgent: ctx.ua,
+    });
+
     // 가입 직후 이메일 검증 토큰 발급 — 실패해도 가입은 진행 (fire-and-forget).
     this.issueVerificationToken(user.id, user.email).catch((e) =>
       this.logger.error(`verification token issue failed: ${e?.message}`),

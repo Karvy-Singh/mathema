@@ -1,7 +1,29 @@
+// Application Insights — Azure 모니터링. import 보다 먼저 시작해야 자동 계측이 동작.
+// APPINSIGHTS_CONNECTION_STRING 미설정이면 no-op (안전).
+if (process.env.APPINSIGHTS_CONNECTION_STRING) {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const appInsights = require('applicationinsights');
+  appInsights.setup(process.env.APPINSIGHTS_CONNECTION_STRING)
+    .setAutoDependencyCorrelation(true)
+    .setAutoCollectRequests(true)
+    .setAutoCollectPerformance(true, true)
+    .setAutoCollectExceptions(true)
+    .setAutoCollectDependencies(true)
+    .setAutoCollectConsole(true, false)
+    .setSendLiveMetrics(false)
+    .setInternalLogging(false, false)
+    .start();
+  // 샘플링 — 비용 통제 (production 20%)
+  appInsights.defaultClient.config.samplingPercentage =
+    Number(process.env.APPINSIGHTS_SAMPLING_PCT ?? (process.env.NODE_ENV === 'production' ? 20 : 100));
+  appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = 'mathema-backend';
+}
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Sentry from '@sentry/node';
+import * as promClient from 'prom-client';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -15,6 +37,9 @@ if (process.env.SENTRY_DSN) {
     tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE ?? 0.1),
   });
 }
+
+// Prometheus 기본 메트릭 — 프로세스/Node 런타임 카운터 자동 수집.
+promClient.collectDefaultMetrics({ prefix: 'mathema_' });
 
 // production 빌드에서 JWT 시크릿 placeholder/약한값 사용 금지 — 가드.
 function validateProductionSecrets(logger: Logger) {
@@ -60,6 +85,13 @@ async function bootstrap() {
   // X-Forwarded-For 신뢰 — throttler 가 진짜 client IP 로 카운트하도록.
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
   app.setGlobalPrefix('api/v1');
+
+  // /metrics — Prometheus scrape endpoint (api/v1 prefix 미적용)
+  const server = app.getHttpAdapter().getInstance();
+  server.get('/metrics', async (_req: any, res: any) => {
+    res.set('Content-Type', promClient.register.contentType);
+    res.end(await promClient.register.metrics());
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

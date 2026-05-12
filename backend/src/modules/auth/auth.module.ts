@@ -8,10 +8,12 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshStrategy } from './strategies/refresh.strategy';
 import { UsersModule } from '../users/users.module';
+import { PrivacyModule } from '../privacy/privacy.module';
 
 @Module({
   imports: [
     UsersModule,
+    PrivacyModule,
     PassportModule,
     // /auth/* 엔드포인트 전용 throttler — 글로벌(120/min)보다 훨씬 빡빡하게.
     // login: 5/min/IP 로 brute-force 차단. (per-endpoint 데코레이터로 조정)

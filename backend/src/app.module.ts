@@ -38,6 +38,7 @@ import { HealthModule } from './modules/health/health.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { PushModule } from './modules/push/push.module';
+import { PrivacyModule } from './modules/privacy/privacy.module';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { PushModule } from './modules/push/push.module';
     AnalyticsModule,
     AdminModule,
     PushModule,
+    PrivacyModule,
   ],
 })
 export class AppModule {}
