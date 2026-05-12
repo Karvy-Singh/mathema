@@ -35,8 +35,12 @@ const COLORS = {
   good: '#4A5D3A', warn: '#B45309', bad: '#8B3A1F', accent: '#C7791F',
 };
 
-/** masteryScore → 상태 메시지 (명세서: "거의 안정적이에요", "부호 실수가 반복되고 있어요" 등 코칭 톤) */
-function masteryStatusMessage(score: number, trend: string): string {
+/**
+ * masteryScore → 상태 메시지 (명세서 §4-2: evidenceCount < 3 이면 단정 금지).
+ *   evidenceCount 가 낮으면 "데이터 부족" 표시. 그 외엔 코칭 톤.
+ */
+function masteryStatusMessage(score: number, trend: string, evidenceCount: number): string {
+  if (evidenceCount < 3) return '아직 데이터가 부족해요 (판단 보류)';
   if (score >= 85) return '거의 안정적이에요';
   if (score >= 70) return '잘 가고 있어요';
   if (score >= 50) return '조금 더 다지면 좋겠어요';
@@ -73,7 +77,7 @@ export function StudentDashboardPage({ embedded = false }: { embedded?: boolean 
   });
   const similar = useQuery({
     queryKey: ['student','similar', latestWrong.data],
-    queryFn: () => latestWrong.data ? fetchSimilarForAttempt(latestWrong.data) : Promise.resolve([] as SimilarProblemRec[]),
+    queryFn: () => latestWrong.data ? fetchSimilarForAttempt(latestWrong.data) : Promise.resolve({ items: [], requested: 5, returned: 0 } as any),
     enabled: !!latestWrong.data,
   });
 
@@ -123,10 +127,10 @@ export function StudentDashboardPage({ embedded = false }: { embedded?: boolean 
         )}
 
         {/* (6) 유사문제 5개 — 가장 최근 오답 기준 */}
-        {(similar.data?.length ?? 0) > 0 && (
+        {((similar.data?.items?.length ?? 0) > 0 || similar.data?.shortfallReason) && (
           <>
             <SectionTitle no="06" title={lang === 'ko' ? '유사문제 5개 — 보강 연습' : 'Similar problems'} />
-            <SimilarList rows={similar.data ?? []} />
+            <SimilarList rows={similar.data?.items ?? []} shortfall={similar.data?.shortfallReason} />
           </>
         )}
 
@@ -199,16 +203,26 @@ function MasteryGrid({ rows, loading, lang }: { rows: ConceptMastery[]; loading:
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
       {rows.slice(0, 12).map((m) => {
-        const color = masteryStatusColor(m.masteryScore);
-        const msg = masteryStatusMessage(m.masteryScore, m.trend);
+        const lowEvidence = m.evidenceCount < 3;
+        // 명세서 §9-1: evidenceCount 낮으면 흐리게 표시
+        const color = lowEvidence ? '#AAB4C5' : masteryStatusColor(m.masteryScore);
+        const msg = masteryStatusMessage(m.masteryScore, m.trend, m.evidenceCount);
         return (
-          <div key={m.id} style={{ ...cardStyle, padding: 16, borderLeft: `3px solid ${color}` }}>
+          <div key={m.id} style={{
+            ...cardStyle, padding: 16, borderLeft: `3px solid ${color}`,
+            opacity: lowEvidence ? 0.65 : 1,
+          }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>{m.concept.name}</div>
             <div style={{ fontSize: 12, color, marginBottom: 6 }}>{msg}</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 22, fontWeight: 600, color: COLORS.ink }}>{Math.round(m.masteryScore)}</span>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 22, fontWeight: 600, color: lowEvidence ? '#8B95AB' : COLORS.ink }}>
+                {lowEvidence ? '—' : Math.round(m.masteryScore)}
+              </span>
               <span style={{ fontSize: 11, color: COLORS.sub }}>/100</span>
-              {m.trend === 'UP' && <TrendingUp size={12} color={COLORS.good} style={{ marginLeft: 4 }} />}
+              {m.trend === 'UP' && !lowEvidence && <TrendingUp size={12} color={COLORS.good} style={{ marginLeft: 4 }} />}
+            </div>
+            <div style={{ fontSize: 10, color: COLORS.sub, marginTop: 4, fontFamily: 'JetBrains Mono, monospace' }}>
+              근거 attempt {m.evidenceCount}건
             </div>
           </div>
         );
@@ -258,9 +272,14 @@ function PatternList({ rows, lang }: { rows: ErrorPatternRow[]; lang: 'ko' | 'en
   );
 }
 
-function SimilarList({ rows }: { rows: SimilarProblemRec[] }) {
+function SimilarList({ rows, shortfall }: { rows: SimilarProblemRec[]; shortfall?: string }) {
   return (
     <Card>
+      {shortfall && rows.length < 5 && (
+        <div style={{ fontSize: 12, color: COLORS.sub, fontStyle: 'italic', marginBottom: 10 }}>
+          {rows.length}/5 — {shortfall}
+        </div>
+      )}
       {rows.slice(0, 5).map((s, i) => (
         <div key={s.recommendationLogId} style={{ padding: '10px 0', borderBottom: `1px dashed ${COLORS.line}`, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
           <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: COLORS.sub, fontWeight: 600 }}>0{i + 1}</span>

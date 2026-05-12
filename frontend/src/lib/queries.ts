@@ -223,6 +223,14 @@ export type SimilarProblemRec = {
   recommendationLogId: string;
 };
 
+/** 명세서 §7 — 5개 미만일 때 shortfallReason 명시. */
+export type SimilarProblemResponse = {
+  items: SimilarProblemRec[];
+  requested: number;
+  returned: number;
+  shortfallReason?: string;
+};
+
 export type WeeklyReportFull = {
   id: string;
   isoWeek: string;
@@ -251,7 +259,7 @@ export const fetchReviewSchedule   = () => get<ReviewScheduleRow[]>('/recommenda
 export const fetchNextProblem      = (sessionId?: string) =>
   get<NextProblemRec | null>('/recommendations/next-problem', sessionId ? { sessionId } : undefined);
 export const fetchSimilarForAttempt = (attemptId: string) =>
-  get<SimilarProblemRec[]>(`/recommendations/similar/${attemptId}`);
+  get<SimilarProblemResponse>(`/recommendations/similar/${attemptId}`);
 export const fetchWeeklyList       = () => get<WeeklyReportListItem[]>('/reports/weekly');
 export const fetchWeeklyById       = (id: string) => get<WeeklyReportFull>(`/reports/weekly/by-id/${id}`);
 

@@ -83,7 +83,7 @@ export class AdaptiveNextProblemService {
       const pattern = activePatterns.find((p) => p.conceptId === cand.conceptId);
       const targetErrorCode = pattern?.errorCode ?? null;
 
-      const reason = this.buildReason(cand, activeConceptIds.has(cand.conceptId), targetErrorCode);
+      const reason = this.buildReason(cand, pattern, pick.difficultyLevel);
 
       // RecommendationLog 저장.
       const log = await this.prisma.recommendationLog.create({
@@ -237,19 +237,24 @@ export class AdaptiveNextProblemService {
     return null;
   }
 
+  /**
+   * 명세서 §6-2 합격 예시 — 구체 수치 포함:
+   *   "최근 5회 중 SIGN 오류가 3회 발생했고, 현재 masteryScore가 62점이므로 중간 난이도(3) 문제를 추천합니다."
+   */
   private buildReason(
     cand: { conceptId: string; masteryScore: number; reason: 'weak' | 'prerequisite' },
-    hasActivePattern: boolean,
-    errorCode: string | null,
+    pattern: { errorCode: string; recentFrequency: number; frequency: number } | undefined,
+    difficulty: number,
   ): string {
     const score = Math.round(cand.masteryScore);
     if (cand.reason === 'prerequisite') {
-      return `이 단원의 선수 개념이 ${score}% 로 약해 먼저 다지는 문제를 추천합니다.`;
+      return `이 단원의 선수 개념이 ${score}% 로 약해, 난이도 ${difficulty}/5 문제로 먼저 다집니다.`;
     }
-    if (hasActivePattern && errorCode) {
-      return `이 개념에서 ${errorCode} 오류가 반복되고 있어, 같은 개념의 적정 난이도 문제를 추천합니다.`;
+    if (pattern) {
+      return `최근 5회 중 ${pattern.errorCode} 오류가 ${pattern.recentFrequency}회 발생했고, ` +
+        `현재 masteryScore가 ${score}점이므로 난이도 ${difficulty}/5 문제를 추천합니다.`;
     }
-    return `이 개념의 숙련도가 ${score}% — 적정 난이도 문제로 보강합니다.`;
+    return `이 개념의 masteryScore가 ${score}점 — 난이도 ${difficulty}/5 문제로 보강합니다.`;
   }
 
   /** 추천 결과 회수 — POST /recommendations/:id/result. */

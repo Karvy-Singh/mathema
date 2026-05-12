@@ -40,7 +40,14 @@ import { ErrorPatternService } from '../mastery/error-pattern.service';
 @Injectable()
 export class LLMAnalysisService {
   private readonly logger = new Logger(LLMAnalysisService.name);
-  private static readonly MIN_CONFIDENCE = 0.5;
+  /**
+   * 명세서 §3-4 권장 임계값:
+   *   confidenceScore >= 0.75 → 자동 반영 (VALIDATED)
+   *   0.5 <= score < 0.75    → NEEDS_REVIEW
+   *   score < 0.5             → REJECTED
+   */
+  private static readonly AUTO_APPLY = 0.75;
+  private static readonly NEEDS_REVIEW = 0.5;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -119,9 +126,36 @@ export class LLMAnalysisService {
       } else {
         parsed = validated.data;
         confidenceScore = parsed.confidenceScore;
-        validationStatus = confidenceScore < LLMAnalysisService.MIN_CONFIDENCE
-          ? LLMValidationStatus.NEEDS_REVIEW
-          : LLMValidationStatus.VALIDATED;
+
+        // 명세서 §3-4 검증 1: errorCodes 가 Problem.commonErrorCodes 또는 enum 안에 있는지.
+        const allowedCodes = new Set([
+          ...attempt.problem.commonErrorCodes,
+          // commonErrorCodes 가 비어있어도 enum 8종은 모두 허용 (Zod 가 이미 강제하지만 명시).
+          'SIGN','ALG','CON','FORMULA','GRAPH','UNIT','CALC','LOGIC',
+        ]);
+        const allErrorsAllowed = parsed.errorCodes.every((c) => allowedCodes.has(c));
+
+        // 명세서 §3-4 검증 2: conceptWeakness 가 Problem.concepts (의 code) 와 매칭되는지.
+        // Phase 1 단순화: 최소 1 개라도 매칭되면 OK. 매칭 안 되면 약한 신호 → NEEDS_REVIEW.
+        const conceptCodes = new Set(attempt.problem.concepts.map((pc) => pc.concept.code));
+        const conceptOverlap = parsed.conceptWeakness.length === 0
+          ? true                                       // LLM 이 weakness 보고 X 면 통과
+          : parsed.conceptWeakness.some((w) => conceptCodes.has(w));
+
+        // 명세서 §3-4 임계값:
+        //   confidence >= 0.75 AND 검증 통과 → VALIDATED (자동 반영)
+        //   0.5 ~ 0.75 또는 conceptWeakness 매칭 X → NEEDS_REVIEW
+        //   confidence < 0.5 또는 errorCodes 범위 밖 → REJECTED
+        if (!allErrorsAllowed) {
+          validationStatus = LLMValidationStatus.REJECTED;
+          parseErrorMessage = `LLM errorCodes outside allowed set: ${parsed.errorCodes.join(',')}`;
+        } else if (confidenceScore < LLMAnalysisService.NEEDS_REVIEW) {
+          validationStatus = LLMValidationStatus.REJECTED;
+        } else if (confidenceScore < LLMAnalysisService.AUTO_APPLY || !conceptOverlap) {
+          validationStatus = LLMValidationStatus.NEEDS_REVIEW;
+        } else {
+          validationStatus = LLMValidationStatus.VALIDATED;
+        }
       }
     } catch (err) {
       raw = JSON.stringify({ error: (err as Error).message });

@@ -126,12 +126,19 @@ export class AttemptsRepository {
     }
 
     // 이벤트 페이로드 — mastery-trajectory.listener 가 이걸로 갱신 수행.
+    //   명세서 §1-2: conceptTags / difficultyLevel 도 API 응답에 명시 노출 (Attempt 자체에는 정규화 안 됨, Problem 참조).
+    const conceptIds = problem.concepts.map((c) => c.conceptId);
+    const conceptCodes = await this.prisma.concept.findMany({
+      where: { id: { in: conceptIds } }, select: { code: true },
+    });
     return Object.assign(attempt, {
       isRetry,
       errorTypeForSnapshot: legacyErrorType,
       errorCodes,
       tenantId,
-      conceptIds: problem.concepts.map((c) => c.conceptId),
+      conceptIds,
+      conceptTags: conceptCodes.map((c) => c.code),       // 명세서 §1-2
+      difficultyLevel: problem.difficultyLevel,           // 명세서 §1-2
     });
   }
 }

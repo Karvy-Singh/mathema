@@ -10,6 +10,10 @@ export class StudySessionsRepository {
   create(userId: string, dto: StartSessionDto) {
     const deviceType = dto.deviceType && ['android', 'ios', 'web'].includes(dto.deviceType)
       ? dto.deviceType : null;
+    // 명세서 §1-1: timeOfDay 0~23 — 클라이언트 user-local hour 우선, 없으면 서버 UTC.
+    const timeOfDay = typeof (dto as any).timeOfDay === 'number'
+      ? Math.max(0, Math.min(23, Math.floor((dto as any).timeOfDay)))
+      : new Date().getHours();
     return this.prisma.studySession.create({
       data: {
         userId,
@@ -18,6 +22,7 @@ export class StudySessionsRepository {
         totalSessions: dto.totalSessions ?? 5,
         context: (dto.context as SessionContext) ?? SessionContext.STUDY,
         deviceType,
+        timeOfDay,
       },
     });
   }

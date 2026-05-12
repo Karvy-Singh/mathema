@@ -117,9 +117,13 @@ test.describe('AI 처방 시스템 — 명세서 §11 검수', () => {
       expect(rec.status()).toBeLessThan(300);
     }
 
-    // 7) Similar problems
+    // 7) Similar problems — 명세서 §7: items + shortfallReason (5개 미만 시)
     const sim = await request.get(`${API}/recommendations/similar/${attempt.id}`, { headers });
     expect(sim.status()).toBe(200);
+    const simBody = (await sim.json()).data;
+    expect(simBody).toHaveProperty('items');
+    expect(simBody).toHaveProperty('requested');
+    expect(simBody).toHaveProperty('returned');
 
     // 8) Review schedule
     const review = await request.get(`${API}/recommendations/review-schedule`, { headers });

@@ -31,11 +31,13 @@ export class SimilarProblemService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async getSimilar(userId: string, attemptId: string): Promise<Array<{
-    problemId: string;
-    reason: string;
-    recommendationLogId: string;
-  }>> {
+  async getSimilar(userId: string, attemptId: string): Promise<{
+    items: Array<{ problemId: string; reason: string; recommendationLogId: string }>;
+    requested: number;
+    returned: number;
+    /** 5개 미만일 때 부족 사유 — 명세서 §7. */
+    shortfallReason?: string;
+  }> {
     const attempt = await this.prisma.attempt.findUnique({
       where: { id: attemptId },
       include: {
@@ -44,10 +46,14 @@ export class SimilarProblemService {
         },
       },
     });
-    if (!attempt) return [];
+    if (!attempt) {
+      return { items: [], requested: TARGET_COUNT, returned: 0, shortfallReason: 'Attempt not found.' };
+    }
 
     const conceptIds = attempt.problem.concepts.map((c) => c.conceptId);
-    if (conceptIds.length === 0) return [];
+    if (conceptIds.length === 0) {
+      return { items: [], requested: TARGET_COUNT, returned: 0, shortfallReason: 'This problem is not linked to any concept.' };
+    }
 
     const targetDiff = attempt.problem.difficultyLevel;
     const errorCodes = attempt.errorCodes;
@@ -85,13 +91,17 @@ export class SimilarProblemService {
     scored.sort((a, b) => b.score - a.score);
 
     const picked = scored.slice(0, TARGET_COUNT);
-    if (picked.length === 0) return [];
+    if (picked.length === 0) {
+      return {
+        items: [], requested: TARGET_COUNT, returned: 0,
+        shortfallReason: '같은 개념의 다른 문제를 데이터베이스에서 찾지 못했습니다.',
+      };
+    }
 
     const tenantId = attempt.tenantId;
     const sessionId = attempt.studySessionId;
     const targetConceptId = conceptIds[0];
 
-    // RecommendationLog 5건 일괄 저장.
     const logs = await Promise.all(picked.map((p) =>
       this.prisma.recommendationLog.create({
         data: {
@@ -106,11 +116,20 @@ export class SimilarProblemService {
       })
     ));
 
-    return picked.map((p, i) => ({
+    const items = picked.map((p, i) => ({
       problemId: p.problem.id,
       reason: logs[i].reason,
       recommendationLogId: logs[i].id,
     }));
+
+    return {
+      items,
+      requested: TARGET_COUNT,
+      returned: items.length,
+      ...(items.length < TARGET_COUNT && {
+        shortfallReason: `해당 개념(${conceptIds.length}개)의 적정 난이도 후보가 ${candidates.length}개 — 5개를 모두 채우지 못했습니다.`,
+      }),
+    };
   }
 
   private buildReason(problem: { commonErrorCodes: string[] }, errorCodes: string[]): string {

@@ -519,6 +519,8 @@ model StudySession {
   /// 'low' | 'medium' | 'high' — 세션 후반 응답시간 증가·정답률 하락 시 'high'.
   /// 요구사항 fatigueSignal. 세션 종료 시 후처리로 계산.
   fatigueSignal          String?
+  /// 0~23 시간대 — 명세서 §1-1. 세션 시작 시 UTC hour 자동 채움 (클라가 보낸 user-local hour 우선).
+  timeOfDay              Int?
   /// 세션 통계 (요구사항 SessionService).
   problemCount           Int            @default(0)
   correctCount           Int            @default(0)
