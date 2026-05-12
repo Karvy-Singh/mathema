@@ -812,7 +812,9 @@ function StudyPage({ sessionId, focusProblemId, onClear, onStartStudy }: {
 function StudyPlaceholder({ onStartStudy }: { onStartStudy?: (id: string) => void }) {
   const { t } = useT();
   const navigate = useNavigate();
-  const [recGrade, setRecGrade] = useState<string>('__mine__');
+  // 추천 단원은 항상 사용자 본인 학년('__mine__')으로 조회 — UnitPicker 안의 학년 셀렉터와
+  // 중복되어 두 번 표시되던 문제를 제거.
+  const recGrade = '__mine__';
   const startSessionMut = useMutation({
     mutationFn: (unitId: string) => M.startStudySession({ unitId }),
     onSuccess: (s) => {
@@ -858,60 +860,17 @@ function StudyPlaceholder({ onStartStudy }: { onStartStudy?: (id: string) => voi
       <div style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B95AB', textTransform: 'uppercase', marginBottom: '12px' }}>
         {t('study.placeholder.label')}
       </div>
-      <h2 className="serif" style={{ fontSize: '32px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0, marginBottom: '12px' }}>
+      <h2 className="serif" style={{ fontSize: '32px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0, marginBottom: '20px' }}>
         {t('study.placeholder.title')}
       </h2>
-      <div style={{ fontSize: '14px', color: '#5C6B85', lineHeight: 1.65, marginBottom: 20 }}>
-        {t('study.placeholder.desc')}
-      </div>
 
-      {/* 사전 개념학습 진입 배너 — 문제풀기 전, 인지심리 6원칙으로 짧게 빅 아이디어를 잡는다 */}
-      <button
-        onClick={() => { trackClick('open_concept_hub'); navigate('/learn'); }}
-        className="hover-lift"
-        style={{
-          display: 'block', width: '100%', textAlign: 'left',
-          padding: '18px 20px', marginBottom: 28,
-          background: 'linear-gradient(135deg, #142850 0%, #1FB8C4 100%)',
-          color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer',
-          fontFamily: 'inherit',
-        }}
-      >
-        <div style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 6 }}>
-          {t('study.concept.banner.label')}
-        </div>
-        <div className="serif" style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>
-          {t('study.concept.banner.title')}
-        </div>
-        <div style={{ fontSize: 13, lineHeight: 1.55, opacity: 0.85 }}>
-          {t('study.concept.banner.desc')}
-        </div>
-      </button>
-
-      {/* 가중치 기반 추천 단원 카드 */}
+      {/* 가중치 기반 추천 단원 카드 — 데이터가 있을 때만 표시. */}
+      {(recommended.data?.length ?? 0) > 0 && (
       <div style={{ marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div style={{ marginBottom: 12 }}>
           <div style={{ fontSize: '11px', letterSpacing: '0.18em', color: '#8B95AB', textTransform: 'uppercase', fontWeight: 600 }}>
             {t('study.recommend.title')}
           </div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#5C6B85' }}>
-            <span style={{ letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('unitPicker.gradeFilter')}</span>
-            <select
-              value={recGrade}
-              onChange={(e) => setRecGrade(e.target.value)}
-              style={{
-                padding: '6px 10px', fontSize: 12,
-                border: '1px solid #14285030', borderRadius: 4,
-                backgroundColor: '#EFEBDF', outline: 'none', fontFamily: 'inherit',
-              }}
-            >
-              {(['__mine__', 'G_MIDDLE_1', 'G_MIDDLE_2', 'G_MIDDLE_3', 'G_HIGH_1', 'G_HIGH_2', 'G_HIGH_3', '__all__'] as const).map((g) => (
-                <option key={g} value={g}>
-                  {g === '__mine__' ? t('unitPicker.gradeMine') : g === '__all__' ? t('unitPicker.allGrades') : t(`grade.${g}`)}
-                </option>
-              ))}
-            </select>
-          </label>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
           {(recommended.data ?? []).map((r) => (
@@ -939,13 +898,9 @@ function StudyPlaceholder({ onStartStudy }: { onStartStudy?: (id: string) => voi
               <div style={{ fontSize: 11, color: '#5C6B85', lineHeight: 1.55 }}>{r.reason}</div>
             </button>
           ))}
-          {(recommended.data ?? []).length === 0 && (
-            <div style={{ fontSize: 12, color: '#8B95AB', padding: 16 }}>
-              {t('study.recommend.empty')}
-            </div>
-          )}
         </div>
       </div>
+      )}
 
       {/* 수동 학년·단원 선택 */}
       <UnitPicker
@@ -1552,22 +1507,31 @@ function MockExamPage({ onStartExam }: { onStartExam: (exam: M.ExamPackage) => v
           <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('mock.section.trajectory')}</h2>
         </div>
         <div style={{ height: '320px' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={trajectory.data ?? []} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#C25E2E" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="#C25E2E" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="2 4" stroke="#14285018" vertical={false} />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#5C6B85', fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#5C6B85', fontSize: 11 }} domain={[40, 100]} />
-              <Tooltip contentStyle={{ backgroundColor: '#142850', border: 'none', borderRadius: '4px', color: '#EFEBDF', fontSize: '12px' }} />
-              <Area type="monotone" dataKey="target" stroke="#5A8A45" strokeDasharray="4 4" strokeWidth={1.5} fill="none" />
-              <Area type="monotone" dataKey="score" stroke="#C25E2E" strokeWidth={2.5} fill="url(#scoreGrad)" />
-            </AreaChart>
-          </ResponsiveContainer>
+          {(trajectory.data?.length ?? 0) === 0 ? (
+            <div style={{
+              height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#8B95AB', fontSize: 13, border: '1px dashed #14285025', borderRadius: 4,
+            }}>
+              {t('mock.headline.empty')}
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={trajectory.data ?? []} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#C25E2E" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#C25E2E" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="2 4" stroke="#14285018" vertical={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#5C6B85', fontSize: 12 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#5C6B85', fontSize: 11 }} domain={[0, 100]} />
+                <Tooltip contentStyle={{ backgroundColor: '#142850', border: 'none', borderRadius: '4px', color: '#EFEBDF', fontSize: '12px' }} />
+                <Area type="monotone" dataKey="target" stroke="#5A8A45" strokeDasharray="4 4" strokeWidth={1.5} fill="none" connectNulls={false} />
+                <Area type="monotone" dataKey="score" stroke="#C25E2E" strokeWidth={2.5} fill="url(#scoreGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
 
@@ -1578,6 +1542,11 @@ function MockExamPage({ onStartExam }: { onStartExam: (exam: M.ExamPackage) => v
             <h2 className="serif" style={{ fontSize: '28px', fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>{t('mock.section.recent')}</h2>
           </div>
           <div style={{ borderTop: '1px solid #14285015' }}>
+            {(results.data?.length ?? 0) === 0 && (
+              <div style={{ padding: '32px 0', color: '#8B95AB', fontSize: 13, textAlign: 'center' }}>
+                {t('mock.headline.empty')}
+              </div>
+            )}
             {(results.data ?? []).map((exam) => (
               <div key={exam.id} style={{
                 display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
@@ -1689,13 +1658,17 @@ function ReportPage() {
           <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#142850' }} className="pulse-warm" />
           <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#8B95AB', textTransform: 'uppercase' }}>Weekly Performance Report</span>
         </div>
-        <h1 className="serif" style={{ fontSize: '48px', lineHeight: 1.15, letterSpacing: '-0.025em', fontWeight: 400, margin: 0, maxWidth: '880px' }}>
-          {t('report.headline.line1')}<br />
-          <span style={{ color: '#5C6B85' }}>{t('report.headline.line2')}</span>
+        <h1 className="serif" style={{
+          fontSize: '48px', lineHeight: 1.15, letterSpacing: '-0.025em', fontWeight: 400, margin: 0, maxWidth: '880px',
+          color: (current.data?.totalHours ?? 0) > 0 ? '#142850' : '#8B95AB',
+        }}>
+          {(current.data?.totalHours ?? 0) > 0 ? t('report.headline.line1') : t('report.headline.empty')}
         </h1>
-        <div style={{ marginTop: '16px', fontSize: '14px', color: '#5C6B85', maxWidth: '680px', lineHeight: 1.6 }}>
-          {t('report.subtitle', { week: mentor.data?.week ?? '—' })}
-        </div>
+        {(current.data?.totalHours ?? 0) > 0 && (
+          <div style={{ marginTop: '16px', fontSize: '14px', color: '#5C6B85', maxWidth: '680px', lineHeight: 1.6 }}>
+            {t('report.subtitle', { week: mentor.data?.week ?? '—' })}
+          </div>
+        )}
 
         <div className="deco-line" style={{ height: '1px', marginTop: '32px', marginBottom: '24px' }} />
 

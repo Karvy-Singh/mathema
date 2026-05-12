@@ -4,6 +4,7 @@ import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { AdminAuditInterceptor } from './admin-audit.interceptor';
+import { LegacySeedCleanupBootstrap } from './legacy-seed-cleanup.bootstrap';
 
 @Module({
   controllers: [AdminController],
@@ -11,6 +12,7 @@ import { AdminAuditInterceptor } from './admin-audit.interceptor';
     AdminService,
     AdminGuard,
     AdminAuditInterceptor,
+    LegacySeedCleanupBootstrap,
   ],
 })
 export class AdminModule {}

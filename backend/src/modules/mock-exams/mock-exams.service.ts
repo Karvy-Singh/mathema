@@ -84,11 +84,17 @@ export class MockExamsService {
 
   async trajectory(userId: string, count: number, lang: Lang = 'ko') {
     const rows = await this.repo.findTrajectory(userId, count);
+    // 목표선 — 사용자 targetGrade 기반 동적 환산. 가짜 고정값 80 제거.
+    // 등급당 ~8점 (1등급=96, 2등급=88, 3등급=80, 4등급=72 ...)
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId }, select: { targetGrade: true },
+    });
+    const target = user?.targetGrade ? Math.max(40, 100 - (user.targetGrade - 1) * 8) : null;
     return rows.map((r: any) => ({
       name: lang !== 'ko'
         ? translateExamName(r.mockExam.name)
         : r.mockExam.name.replace(/^2024\s+/, '').replace('학력평가', '학평').replace('모의평가', '모평'),
-      score: r.score, grade: r.grade, target: 80,
+      score: r.score, grade: r.grade, target,
     }));
   }
 

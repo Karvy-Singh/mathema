@@ -208,7 +208,9 @@ function LessonCard({
   locked: boolean;
   onOpen: () => void;
 }) {
-  const load = Math.min(3, Math.max(0, lesson.cognitiveLoad ?? 1));
+  // 학습 시간/난이도 라벨(가벼움/보통/집중/심화)은 시드 단계에서 부여한 임의 값이라
+  // 사용자에게 환각으로 보임. 카드에서 제거하고 챕터 번호·타이틀·빅 아이디어·단원만 표시.
+  void loadLabel;
   return (
     <button
       onClick={onOpen}
@@ -233,17 +235,11 @@ function LessonCard({
       </div>
       <h3 style={cardTitleStyle}>{lesson.title}</h3>
       <p style={cardIdeaStyle}>{lesson.bigIdea}</p>
-      <div style={cardFooterStyle}>
-        <span style={{ ...metaItemStyle, color: '#5C6B85' }}>
-          <Clock size={12} /> {lesson.estimatedMin}{lang === 'en' ? ' min' : '분'}
-        </span>
-        <span style={{ ...metaItemStyle, color: LOAD_COLOR[load] }}>
-          <Sparkles size={12} /> {loadLabel[load]}
-        </span>
-        {lesson.unit && (
-          <span style={{ ...metaItemStyle, color: '#0e7490' }}>· {lesson.unit.name}</span>
-        )}
-      </div>
+      {lesson.unit && (
+        <div style={cardFooterStyle}>
+          <span style={{ ...metaItemStyle, color: '#0e7490' }}>{lesson.unit.name}</span>
+        </div>
+      )}
     </button>
   );
 }

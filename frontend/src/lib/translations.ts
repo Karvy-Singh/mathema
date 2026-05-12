@@ -207,7 +207,7 @@ const ko = {
   // ===== Study Page =====
   'study.placeholder.label': 'Active Session · None',
   'study.placeholder.title': '진행 중인 학습 세션이 없어요',
-  'study.placeholder.desc': '대시보드의 「오늘의 맞춤 학습」 카드를 클릭하면 AI가 약점 단원에 맞춰 학습 세션을 시작합니다.',
+  'study.placeholder.desc': '',
   'study.session.label': 'Session {n} of {total}',
   'study.session.endBtn': '세션 종료',
   'study.session.endBusy': '종료 중…',
@@ -318,8 +318,9 @@ const ko = {
 
   // ===== Report Page =====
   'report.label': 'Weekly Performance Report',
-  'report.headline.line1': '이번 주 꾸준함이',
-  'report.headline.line2': '당신의 가장 강력한 무기예요',
+  'report.headline.line1': '이번 주 학습 리포트',
+  'report.headline.line2': '',
+  'report.headline.empty': '아직 분석할 학습 데이터가 부족합니다',
   'report.subtitle': '{week} — AI가 분석한 학습 패턴과 실력 변화를 정리했어요',
   'report.stat.weeklyHours': '주간 학습시간',
   'report.stat.hoursDelta': '지난주 대비 +{delta}%',
@@ -620,7 +621,7 @@ const en: typeof ko = {
   // Study Page
   'study.placeholder.label': 'No active session',
   'study.placeholder.title': 'No study session in progress',
-  'study.placeholder.desc': 'Click a card under "Today\'s Focus" on the dashboard, and AI will start a session targeted at your weak unit.',
+  'study.placeholder.desc': '',
   'study.session.label': 'Session {n} of {total}',
   'study.session.endBtn': 'End session',
   'study.session.endBusy': 'Ending…',
@@ -731,8 +732,9 @@ const en: typeof ko = {
 
   // Report Page
   'report.label': 'Weekly Performance Report',
-  'report.headline.line1': 'Consistency this week',
-  'report.headline.line2': 'is your strongest weapon',
+  'report.headline.line1': 'Weekly study report',
+  'report.headline.line2': '',
+  'report.headline.empty': 'Not enough study data to analyse yet',
   'report.subtitle': '{week} — AI summary of your study patterns and progress',
   'report.stat.weeklyHours': 'Weekly hours',
   'report.stat.hoursDelta': '+{delta}% vs last week',

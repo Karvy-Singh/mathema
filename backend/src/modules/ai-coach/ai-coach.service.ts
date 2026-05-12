@@ -78,27 +78,38 @@ export class AiCoachService {
       where: { userId, createdAt: { gte: since } },
       _count: true,
     });
-    const total = rows.reduce((s, r) => s + r._count, 0) || 1;
+    const totalRaw = rows.reduce((s, r) => s + r._count, 0);
+
+    // 표본 부족 — 빈 distribution 반환 (가짜 0% 막대 4개 안 보임)
+    if (totalRaw < 3) {
+      return {
+        distribution: [],
+        insight: this.buildErrorDnaInsight({ key: 'OTHER', name: '', value: 0 }, totalRaw, lang),
+      };
+    }
+
     const COLORS: Record<string, string> = {
       CONCEPT_MISUNDERSTANDING: '#8B3A1F',
       CALCULATION_MISTAKE: '#B5552B',
       TIME_SHORTAGE: '#C97B4A',
       OTHER: '#A89684',
     };
-    const distribution = (['CONCEPT_MISUNDERSTANDING', 'CALCULATION_MISTAKE', 'TIME_SHORTAGE', 'OTHER'] as const).map((k) => {
-      const found = rows.find((r) => r.errorType === k);
-      return {
-        key: k,
-        name: lang === 'ko' ? ERROR_TYPE_LABEL_KO[k as keyof typeof ERROR_TYPE_LABEL_KO] : pickErrorType(k, lang),
-        value: Math.round(((found?._count ?? 0) / total) * 100),
-        color: COLORS[k],
-      };
-    });
-    const top = [...distribution].sort((a, b) => b.value - a.value)[0];
+    const distribution = (['CONCEPT_MISUNDERSTANDING', 'CALCULATION_MISTAKE', 'TIME_SHORTAGE', 'OTHER'] as const)
+      .map((k) => {
+        const found = rows.find((r) => r.errorType === k);
+        return {
+          key: k,
+          name: lang === 'ko' ? ERROR_TYPE_LABEL_KO[k as keyof typeof ERROR_TYPE_LABEL_KO] : pickErrorType(k, lang),
+          value: Math.round(((found?._count ?? 0) / totalRaw) * 100),
+          color: COLORS[k],
+        };
+      })
+      .filter((d) => d.value > 0);   // 0% 카테고리는 표시 안 함
 
+    const top = [...distribution].sort((a, b) => b.value - a.value)[0];
     return {
       distribution,
-      insight: this.buildErrorDnaInsight(top, total, lang),
+      insight: this.buildErrorDnaInsight(top, totalRaw, lang),
     };
   }
 

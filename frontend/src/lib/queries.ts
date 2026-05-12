@@ -52,7 +52,7 @@ export type Diagnosis = {
 export type MentorMessage = { week: string; generatedAt: string; message: string; strength: string; nextGoal: string };
 export type Heatmap = Array<{ day: number; intensity: number }>;
 export type ActivityStats = { avgMinutesPerDay: number; totalProblems: number; avgAccuracy: number };
-export type Trajectory = Array<{ name: string; score: number; grade: number; target: number }>;
+export type Trajectory = Array<{ name: string; score: number; grade: number; target: number | null }>;
 export type ExamResult = { id: string; name: string; date: string; score: number; grade: number; percentile: number; time: string };
 export type MockSummary = {
   lastScore: number | null; expectedGrade: number | null;
