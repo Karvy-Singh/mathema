@@ -15,17 +15,17 @@ datasource db {
 // ---------- ENUMS (src/common/enums/* 와 1:1) ----------
 
 enum Difficulty {
-  MIDDLE          // 중
-  UPPER_MIDDLE    // 중상
-  SEMI_KILLER     // 준킬러
-  KILLER          // 킬러
+  MIDDLE // 중
+  UPPER_MIDDLE // 중상
+  SEMI_KILLER // 준킬러
+  KILLER // 킬러
 }
 
 enum ErrorType {
-  CONCEPT_MISUNDERSTANDING  // 개념 오해
-  CALCULATION_MISTAKE       // 계산 실수
-  TIME_SHORTAGE             // 시간 부족
-  OTHER                     // 기타
+  CONCEPT_MISUNDERSTANDING // 개념 오해
+  CALCULATION_MISTAKE // 계산 실수
+  TIME_SHORTAGE // 시간 부족
+  OTHER // 기타
 }
 
 enum NoteStatus {
@@ -42,39 +42,39 @@ enum SessionContext {
 }
 
 enum MockExamType {
-  HAKPYEONG     // 학평
-  MOPYEONG      // 모평
-  SUNEUNG       // 수능
-  RECOMMENDED   // AI 맞춤 진단
-  MINI          // 단원별 미니
-  WRONG_REDO    // 오답 재출제
-  REAL          // 실전 모의고사
+  HAKPYEONG // 학평
+  MOPYEONG // 모평
+  SUNEUNG // 수능
+  RECOMMENDED // AI 맞춤 진단
+  MINI // 단원별 미니
+  WRONG_REDO // 오답 재출제
+  REAL // 실전 모의고사
 }
 
 /// 3단계 객관식 풀이의 단계 종류
 enum StepType {
-  CONCEPT       // 1단계: 어떤 개념을 쓸 것인가
-  PROCESS       // 2단계: 풀이 과정
-  ANSWER        // 3단계: 최종 정답
+  CONCEPT // 1단계: 어떤 개념을 쓸 것인가
+  PROCESS // 2단계: 풀이 과정
+  ANSWER // 3단계: 최종 정답
 }
 
 /// 매력적 오답(distractor)의 분석용 분류 — 데이터로 학생 사고 패턴 추적
 enum DistractorType {
-  CONCEPT_CONFUSION       // 다른 개념과 혼동 (예: 회전체 vs 셸)
-  CALC_ERROR              // 계산 단계 실수 (부호·지수·대입)
-  PROCESS_SKIP            // 풀이 단계 누락 (제곱·π·구간 변환 빠뜨림)
-  TIME_PRESSURE_GUESS     // 시간 압박 시 흔한 오선택 (다른 문제 답 혼입)
+  CONCEPT_CONFUSION // 다른 개념과 혼동 (예: 회전체 vs 셸)
+  CALC_ERROR // 계산 단계 실수 (부호·지수·대입)
+  PROCESS_SKIP // 풀이 단계 누락 (제곱·π·구간 변환 빠뜨림)
+  TIME_PRESSURE_GUESS // 시간 압박 시 흔한 오선택 (다른 문제 답 혼입)
 }
 
 /// 가입 시 학년. 단원 매핑은 Unit.gradeLevels 참조.
 /// 1차 출시: 인도 NCERT (Class 7~12) ↔ G_MIDDLE_1~G_HIGH_3 mapping
 enum GradeLevel {
-  G_MIDDLE_1   // Class 7  (한국 중1)
-  G_MIDDLE_2   // Class 8  (한국 중2)
-  G_MIDDLE_3   // Class 9  (한국 중3)
-  G_HIGH_1     // Class 10 (한국 고1)
-  G_HIGH_2     // Class 11 (한국 고2)
-  G_HIGH_3     // Class 12 (한국 고3)
+  G_MIDDLE_1 // Class 7  (한국 중1)
+  G_MIDDLE_2 // Class 8  (한국 중2)
+  G_MIDDLE_3 // Class 9  (한국 중3)
+  G_HIGH_1 // Class 10 (한국 고1)
+  G_HIGH_2 // Class 11 (한국 고2)
+  G_HIGH_3 // Class 12 (한국 고3)
 }
 
 /// NCERT 학년 — 개념학습(ConceptLesson) 분류 차원.
@@ -122,67 +122,167 @@ enum ConsentKind {
   AI_TRAINING
 }
 
+/// 학교 단계 — 요구사항 Student.schoolLevel.
+enum SchoolLevel {
+  ELEMENTARY
+  MIDDLE
+  HIGH
+}
+
+/// 오답 원인 코드 — 요구사항 errorCodes. ErrorPatternProfile / Attempt 양쪽에서 사용.
+enum ErrorCode {
+  SIGN // 부호 처리
+  ALG // 대수 변형
+  CON // 개념 오해 / 잘못된 정의 적용
+  FORMULA // 공식 오용
+  GRAPH // 그래프 해석
+  UNIT // 단위 변환
+  CALC // 계산 실수
+  LOGIC // 논리 흐름 / 케이스 분리
+}
+
+/// 반복 실수 패턴의 상태 — 학생에게 고정 능력이 아니라 "개선 가능 상태"로 표현.
+enum ErrorPatternStatus {
+  ACTIVE // 최근 3회 이상 반복 발생
+  IMPROVING // 최근 5회 중 빈도 감소
+  RESOLVED // 최근 5회 이상 미발생
+}
+
+/// LLM 분석 결과의 검증 상태. rawOutput 을 비즈니스 로직에 직접 쓰지 않기 위함.
+enum LLMValidationStatus {
+  PENDING
+  VALIDATED
+  REJECTED
+  NEEDS_REVIEW
+}
+
+/// 추천 종류 — RecommendationLog.recommendationType.
+enum RecommendationType {
+  ADAPTIVE_NEXT // 다음 문제 1개 (현 풀이 흐름)
+  SIMILAR_PROBLEM // 유사문제 5개 중 하나
+  REVIEW_PROBLEM // SM-2 forgettingRisk 기반 복습
+}
+
+enum RecommendationResult {
+  CORRECT
+  INCORRECT
+  SKIPPED
+}
+
+/// MasteryTrajectory.trend.
+enum MasteryTrend {
+  UP
+  DOWN
+  STABLE
+}
+
+/// MasteryTrajectory.updatedBy — 누가 갱신했는지 출처 추적.
+enum MasteryUpdateSource {
+  RULE_BASED
+  LLM
+  HYBRID
+  TEACHER_OVERRIDE
+}
+
+/// Feedback.targetType — AI 산출물 4종.
+enum FeedbackTargetType {
+  AI_INSIGHT
+  WEEKLY_REPORT
+  NEXT_PROBLEM
+  EXPLANATION
+}
+
+/// Feedback.raterType — 평가 주체. 같은 1~5점이라도 의미가 다르다.
+enum FeedbackRaterType {
+  STUDENT
+  TEACHER
+  PARENT
+  ADMIN
+}
+
+/// TeacherOverride.targetType — 강사가 수정할 AI 판단 종류.
+enum TeacherOverrideTargetType {
+  MASTERY
+  ERROR_PATTERN
+  RECOMMENDATION
+}
+
 /// 사용자 국가 — 커리큘럼·로케일·통화 매핑의 기준.
 /// 1차 출시: IN(인도). 향후 KR, US, UK, AU 등 순차 추가.
 enum CountryCode {
-  IN   // India (NCERT/CBSE) — 1st launch
-  KR   // Korea (수능)
-  US   // United States (Common Core / SAT)
-  UK   // United Kingdom (GCSE)
-  AU   // Australia (ACARA)
-  SG   // Singapore (MOE)
+  IN // India (NCERT/CBSE) — 1st launch
+  KR // Korea (수능)
+  US // United States (Common Core / SAT)
+  UK // United Kingdom (GCSE)
+  AU // Australia (ACARA)
+  SG // Singapore (MOE)
   GLOBAL // 미지정/기타
 }
 
 // ---------- USER ----------
 
 model User {
-  id           String      @id @default(uuid())
-  email        String      @unique
+  id           String       @id @default(uuid())
+  email        String       @unique
   passwordHash String
-  name         String      // 예: 민준
-  examDate     DateTime    // 수능 날짜 → D-day 계산
-  targetGrade  Int         // 목표 등급 (1~9)
+  name         String // 예: 민준
+  examDate     DateTime // 수능 날짜 → D-day 계산
+  targetGrade  Int // 목표 등급 (1~9)
   /// 가입 시 선택한 학년 — 단원 추천·필터에 사용. 기존 사용자 호환을 위해 nullable.
-  gradeLevel   GradeLevel? @default(G_HIGH_3)
+  gradeLevel   GradeLevel?  @default(G_HIGH_3)
   /// 사용자 국가 — 커리큘럼·통화·날짜 형식 결정. 미지정시 GLOBAL.
-  country      CountryCode @default(IN)
+  country      CountryCode  @default(IN)
+  /// 학교 단계 — 요구사항 Student.schoolLevel. 학년에서 유도되지만 명시 저장이 분석에 편리.
+  schoolLevel  SchoolLevel?
+  /// 학원/기관 (multi-tenant). null = solo 학생.
+  tenantId     String?
   /// 소프트 삭제 — null이면 활성 사용자. 값이 있으면 인증 차단되며 분석 자산은 보존.
   deletedAt    DateTime?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
-  attempts        Attempt[]
-  wrongNotes      WrongNote[]
-  studySessions   StudySession[]
-  mockExamResults MockExamResult[]
-  activities      DailyActivity[]
-  masteries       MasterySnapshot[]
-  weeklyReports   WeeklyReport[]
-  analyticsEvents AnalyticsEvent[]
-  deviceTokens    DeviceToken[]
-  conceptProgress ConceptProgress[]
-  consents        Consent[]
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  attempts                Attempt[]
+  wrongNotes              WrongNote[]
+  studySessions           StudySession[]
+  mockExamResults         MockExamResult[]
+  activities              DailyActivity[]
+  masteries               MasterySnapshot[]
+  weeklyReports           WeeklyReport[]
+  analyticsEvents         AnalyticsEvent[]
+  deviceTokens            DeviceToken[]
+  conceptProgress         ConceptProgress[]
+  consents                Consent[]
+  masteryTrajectories     MasteryTrajectory[]
+  masteryEvents           MasteryEvent[]
+  errorPatterns           ErrorPatternProfile[]
+  llmAnalysisLogs         LLMAnalysisLog[]
+  recommendationLogs      RecommendationLog[]
+  feedbacks               Feedback[]
+  teacherOverridesGiven   TeacherOverride[]     @relation("TeacherOverrider")
+  teacherOverridesApplied TeacherOverride[]     @relation("StudentTarget")
 
   @@index([examDate])
   @@index([deletedAt])
+  @@index([tenantId])
 }
 
 /// DPDP/GDPR 동의 기록 — append-only.
 /// 같은 (userId, kind) 에 대해 grant/revoke 가 반복되면 별개 row 로 누적되어 이력 추적 가능.
 /// 현재 유효 상태는 가장 최근 row 의 revokedAt 으로 판정 (NULL = 활성).
 model Consent {
-  id          String       @id @default(uuid())
-  userId      String
-  kind        ConsentKind
+  id            String      @id @default(uuid())
+  userId        String
+  kind          ConsentKind
   /// 동의한 정책 버전 — 정책 갱신 시 재동의 트리거. 예: "2026-05-01"
-  policyVersion String     @default("1.0")
-  grantedAt   DateTime     @default(now())
+  policyVersion String      @default("1.0")
+  grantedAt     DateTime    @default(now())
   /// NULL = 현재 유효. 값이 있으면 철회됨.
-  revokedAt   DateTime?
+  revokedAt     DateTime?
   /// 동의 시점의 IP / UA — 법적 증빙용
-  ipAddress   String?
-  userAgent   String?      @db.Text
+  ipAddress     String?
+  userAgent     String?     @db.Text
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -193,26 +293,27 @@ model Consent {
 // ---------- CURRICULUM ----------
 
 model Unit {
-  id        String       @id @default(uuid())
-  name      String       @unique // 미적분 II
-  order     Int
+  id             String            @id @default(uuid())
+  name           String            @unique // 미적분 II
+  order          Int
   /// 이 단원을 학습 가능한 학년 목록 (예: [G_HIGH_1, G_HIGH_2])
-  gradeLevels GradeLevel[] @default([])
-  subUnits  SubUnit[]
-  problems  Problem[]
-  studySessions StudySession[]
-  masteries MasterySnapshot[]
+  gradeLevels    GradeLevel[]      @default([])
+  subUnits       SubUnit[]
+  problems       Problem[]
+  studySessions  StudySession[]
+  masteries      MasterySnapshot[]
   conceptLessons ConceptLesson[]
+  concepts       Concept[]
 }
 
 model SubUnit {
-  id       String    @id @default(uuid())
-  unitId   String
-  name     String    // 정적분의 활용
-  order    Int
+  id     String @id @default(uuid())
+  unitId String
+  name   String // 정적분의 활용
+  order  Int
 
-  unit     Unit      @relation(fields: [unitId], references: [id])
-  problems Problem[]
+  unit           Unit            @relation(fields: [unitId], references: [id])
+  problems       Problem[]
   conceptLessons ConceptLesson[]
 
   @@unique([unitId, name])
@@ -221,39 +322,55 @@ model SubUnit {
 // ---------- PROBLEM ----------
 
 model Problem {
-  id          String     @id @default(uuid())
-  source      String     // "2024 9월 모의평가 30번"
-  unitId      String
-  subUnitId   String?
-  difficulty  Difficulty
-  body        String     @db.Text   // 문제 본문 (LaTeX)
-  formula     String?    @db.Text   // 정답 공식/풀이 핵심
+  id         String     @id @default(uuid())
+  source     String // "2024 9월 모의평가 30번"
+  unitId     String
+  subUnitId  String?
+  difficulty Difficulty
+  body       String     @db.Text // 문제 본문 (LaTeX)
+  formula    String?    @db.Text // 정답 공식/풀이 핵심
   /// 핵심 개념 설명 — 학습 정답/오답 피드백, 오답노트 상세에 노출
-  concept     String?    @db.Text
-  answer      String                // 최종 정답 (호환성 유지, steps[]가 없을 때 fallback)
-  imageUrl    String?
-  hint        String?    @db.Text
-  createdAt   DateTime   @default(now())
+  concept    String?    @db.Text
+  answer     String // 최종 정답 (호환성 유지, steps[]가 없을 때 fallback)
+  imageUrl   String?
+  hint       String?    @db.Text
 
-  unit        Unit       @relation(fields: [unitId], references: [id])
-  subUnit     SubUnit?   @relation(fields: [subUnitId], references: [id])
-  attempts    Attempt[]
-  wrongNotes  WrongNote[]
-  steps       ProblemStep[]
+  /// 수치 난이도 1~5 (요구사항 difficultyLevel). Difficulty enum 과 별도 — 추천 엔진 score 계산용.
+  difficultyLevel       Int         @default(3)
+  /// 풀기 위해 필요한 스킬 (요구사항 requiredSkills). 예: ['chain_rule', 'composite_function']
+  requiredSkills        String[]    @default([])
+  /// 전형적 풀이 단계 (요구사항 expectedSolutionSteps). LLM 분석 시 stepByStepInput 과 비교.
+  expectedSolutionSteps Json?
+  /// 자주 발생하는 오답 코드 (요구사항 commonErrorCodes). LLM 1차 추정에 hint.
+  commonErrorCodes      ErrorCode[] @default([])
+  /// 예상 풀이 시간 (초). 응답 시간 비교에 사용.
+  expectedTimeSec       Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  unit            Unit                @relation(fields: [unitId], references: [id])
+  subUnit         SubUnit?            @relation(fields: [subUnitId], references: [id])
+  attempts        Attempt[]
+  wrongNotes      WrongNote[]
+  steps           ProblemStep[]
+  concepts        ProblemConcept[] // Concept 다대다
+  recommendations RecommendationLog[] @relation("RecommendedProblem")
 
   @@index([unitId, difficulty])
+  @@index([difficultyLevel])
 }
 
 /// 한 문제의 3단계 객관식 (CONCEPT → PROCESS → ANSWER)
 model ProblemStep {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   problemId String
-  stepIndex Int       // 1, 2, 3
+  stepIndex Int // 1, 2, 3
   stepType  StepType
-  prompt    String    @db.Text   // "이 문제를 풀기 위한 핵심 개념은?" 등
+  prompt    String   @db.Text // "이 문제를 풀기 위한 핵심 개념은?" 등
 
-  problem   Problem        @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  choices   ProblemChoice[]
+  problem Problem         @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  choices ProblemChoice[]
 
   @@unique([problemId, stepIndex])
   @@index([problemId])
@@ -261,18 +378,18 @@ model ProblemStep {
 
 /// 단계별 5지선다 보기. 정답 1개 + 매력적 오답 4개.
 model ProblemChoice {
-  id             String           @id @default(uuid())
+  id             String          @id @default(uuid())
   stepId         String
-  choiceIndex    Int              // 1~5
-  text           String           @db.Text
-  isCorrect      Boolean          @default(false)
+  choiceIndex    Int // 1~5
+  text           String          @db.Text
+  isCorrect      Boolean         @default(false)
   /// 매력적 오답 분류 (정답이면 NULL)
   distractorType DistractorType?
   /// 분석가용 주석 — 왜 학생이 이 오답을 고를 수 있는지의 가설
-  rationale      String?          @db.Text
+  rationale      String?         @db.Text
 
-  step           ProblemStep      @relation(fields: [stepId], references: [id], onDelete: Cascade)
-  selectedBy     Attempt[]
+  step       ProblemStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  selectedBy Attempt[]
 
   @@unique([stepId, choiceIndex])
   @@index([stepId])
@@ -281,40 +398,52 @@ model ProblemChoice {
 // ---------- ATTEMPT (모든 통계의 원천) ----------
 
 model Attempt {
-  id          String         @id @default(uuid())
-  userId      String
-  problemId   String
-  context     SessionContext
-  answer      String
-  isCorrect   Boolean
-  durationSec Int
+  id                  String         @id @default(uuid())
+  userId              String
+  problemId           String
+  /// 학원/기관 (multi-tenant). User.tenantId 와 동일 (denormalized — tenant 별 통계 빠르게).
+  tenantId            String?
+  context             SessionContext
+  answer              String
+  isCorrect           Boolean
+  durationSec         Int
   /// 더 정밀한 응답 시간 (밀리초). durationSec 와 병행 — 단계별 정밀 분석용.
-  responseTimeMs Int?
+  responseTimeMs      Int?
   /// 메타인지 자기평가 — 답 제출 직전 확신도 0~100. NULL = 미입력
-  confidence  Int?
+  confidence          Int?
+  /// 1~5 스케일 자기 자신감 (요구사항 selfConfidenceScore). confidence(0~100) 와 별도.
+  selfConfidenceScore Int?
   /// 힌트 사용 여부 — 추천/숙련도 계산 시 보정 인자.
-  hintUsed    Boolean        @default(false)
+  hintUsed            Boolean        @default(false)
+  /// 힌트를 본 횟수 (요구사항 hintCount).
+  hintCount           Int            @default(0)
+  /// 학생이 입력한 단계별 풀이 (요구사항 stepByStepInput). LLM 분석 핵심 입력.
+  stepByStepInput     Json?
+  /// 규칙 기반 1차 추정 + LLM 검증 후 확정된 오답 원인 코드들 (요구사항 errorCodes).
+  errorCodes          ErrorCode[]    @default([])
   /// 'android' | 'ios' | 'web' — 디바이스별 학습 패턴 분석용.
-  deviceType  String?
+  deviceType          String?
   /// 0~23 — 시간대별 학습 효율 분석. createdAt 의 user-local 시 기준.
-  timeOfDay   Int?
+  timeOfDay           Int?
   /// 3단계 객관식 단계 인덱스 (1/2/3). NULL = 단일 답안 모드 (호환성)
-  stepIndex   Int?
+  stepIndex           Int?
   /// 학생이 선택한 ProblemChoice. NULL = 서술형/단일답안 모드
-  choiceId    String?
-  studySessionId String?
-  mockExamResultId String?
-  createdAt   DateTime       @default(now())
+  choiceId            String?
+  studySessionId      String?
+  mockExamResultId    String?
+  createdAt           DateTime       @default(now())
 
-  user            User           @relation(fields: [userId], references: [id])
-  problem         Problem        @relation(fields: [problemId], references: [id])
-  choice          ProblemChoice? @relation(fields: [choiceId], references: [id])
-  studySession    StudySession?  @relation(fields: [studySessionId], references: [id])
-  mockExamResult  MockExamResult?@relation(fields: [mockExamResultId], references: [id])
+  user            User             @relation(fields: [userId], references: [id])
+  problem         Problem          @relation(fields: [problemId], references: [id])
+  choice          ProblemChoice?   @relation(fields: [choiceId], references: [id])
+  studySession    StudySession?    @relation(fields: [studySessionId], references: [id])
+  mockExamResult  MockExamResult?  @relation(fields: [mockExamResultId], references: [id])
+  llmAnalysisLogs LLMAnalysisLog[]
 
   @@index([userId, createdAt])
   @@index([userId, problemId])
   @@index([choiceId])
+  @@index([tenantId, createdAt])
 }
 
 // ---------- WRONG NOTE (오답노트) ----------
@@ -324,7 +453,7 @@ model WrongNote {
   userId       String
   problemId    String
   errorType    ErrorType
-  insight      String     @db.Text   // AI 인사이트 (요약 텍스트, 호환 유지)
+  insight      String     @db.Text // AI 인사이트 (요약 텍스트, 호환 유지)
   /// 구조화된 LLM 산출 — schema:
   ///   { rootCause: string, correctConcept: string, drillSteps: string[],
   ///     similarPatterns: string[], confidenceCalibration: 'over'|'under'|'aligned',
@@ -338,12 +467,12 @@ model WrongNote {
   updatedAt    DateTime   @updatedAt
 
   // SM-2 spaced repetition (간격 반복)
-  easinessFactor   Float     @default(2.5)  // 1.3 이상
-  repetitionCount  Int       @default(0)    // 연속 정답 카운트
-  intervalDays     Int       @default(0)    // 마지막 부여된 복습 간격(일)
-  nextReviewAt     DateTime?                // 다음 복습 예정일 (NULL = 미복습)
-  lastReviewedAt   DateTime?                // 마지막 복습 시각
-  lapseCount       Int       @default(0)    // 실패(quality<3) 누적 횟수
+  easinessFactor  Float     @default(2.5) // 1.3 이상
+  repetitionCount Int       @default(0) // 연속 정답 카운트
+  intervalDays    Int       @default(0) // 마지막 부여된 복습 간격(일)
+  nextReviewAt    DateTime? // 다음 복습 예정일 (NULL = 미복습)
+  lastReviewedAt  DateTime? // 마지막 복습 시각
+  lapseCount      Int       @default(0) // 실패(quality<3) 누적 횟수
 
   user    User    @relation(fields: [userId], references: [id])
   problem Problem @relation(fields: [problemId], references: [id])
@@ -357,19 +486,30 @@ model WrongNote {
 // ---------- STUDY SESSION ----------
 
 model StudySession {
-  id             String         @id @default(uuid())
-  userId         String
-  unitId         String
-  sessionNumber  Int            // 03
-  totalSessions  Int            // 05
-  currentStep    Int            @default(1) // 1~5
-  startedAt      DateTime       @default(now())
-  endedAt        DateTime?
-  durationSec    Int            @default(0)
+  id                     String         @id @default(uuid())
+  userId                 String
+  unitId                 String
+  tenantId               String?
+  sessionNumber          Int // 03
+  totalSessions          Int // 05
+  currentStep            Int            @default(1) // 1~5
+  startedAt              DateTime       @default(now())
+  endedAt                DateTime?
+  durationSec            Int            @default(0)
   /// 세션 컨텍스트 (STUDY/EXAM/PRACTICE/DIAGNOSTIC). 단원 균형 분석 시 컨텍스트별 가중.
-  context        SessionContext @default(STUDY)
+  context                SessionContext @default(STUDY)
   /// 'android' | 'ios' | 'web' — 단원별 학습 시간 분석 시 디바이스 차원.
-  deviceType     String?
+  deviceType             String?
+  /// 0~100, 응답 시간 안정성·정답률·힌트 사용 등을 종합한 집중도 지표.
+  /// 요구사항 focusScore. 세션 종료 시 후처리로 계산.
+  focusScore             Float?
+  /// 'low' | 'medium' | 'high' — 세션 후반 응답시간 증가·정답률 하락 시 'high'.
+  /// 요구사항 fatigueSignal. 세션 종료 시 후처리로 계산.
+  fatigueSignal          String?
+  /// 세션 통계 (요구사항 SessionService).
+  problemCount           Int            @default(0)
+  correctCount           Int            @default(0)
+  averageResponseTimeSec Int?
 
   user     User      @relation(fields: [userId], references: [id])
   unit     Unit      @relation(fields: [unitId], references: [id])
@@ -382,7 +522,7 @@ model StudySession {
 
 model MockExam {
   id            String       @id @default(uuid())
-  name          String       // "2024 10월 학력평가"
+  name          String // "2024 10월 학력평가"
   type          MockExamType
   scheduledAt   DateTime?
   totalProblems Int          @default(30)
@@ -393,17 +533,17 @@ model MockExam {
 }
 
 model MockExamResult {
-  id         String   @id @default(uuid())
-  userId     String
-  mockExamId String
-  score      Int
-  grade      Int      // 1~9
-  percentile Int      // 0~100
+  id          String   @id @default(uuid())
+  userId      String
+  mockExamId  String
+  score       Int
+  grade       Int // 1~9
+  percentile  Int // 0~100
   durationMin Int
-  takenAt    DateTime @default(now())
+  takenAt     DateTime @default(now())
 
-  user     User     @relation(fields: [userId], references: [id])
-  mockExam MockExam @relation(fields: [mockExamId], references: [id])
+  user     User      @relation(fields: [userId], references: [id])
+  mockExam MockExam  @relation(fields: [mockExamId], references: [id])
   attempts Attempt[]
 
   @@index([userId, takenAt])
@@ -412,13 +552,13 @@ model MockExamResult {
 // ---------- DAILY ACTIVITY (heatmap + streak) ----------
 
 model DailyActivity {
-  id              String   @id @default(uuid())
-  userId          String
-  date            DateTime @db.Date
-  durationMin     Int      @default(0)
-  problemsSolved  Int      @default(0)
-  accuracyPct     Float    @default(0) // 0~100
-  intensity       Int      @default(0) // 0~3 (heatmap)
+  id             String   @id @default(uuid())
+  userId         String
+  date           DateTime @db.Date
+  durationMin    Int      @default(0)
+  problemsSolved Int      @default(0)
+  accuracyPct    Float    @default(0) // 0~100
+  intensity      Int      @default(0) // 0~3 (heatmap)
 
   user User @relation(fields: [userId], references: [id])
 
@@ -429,19 +569,19 @@ model DailyActivity {
 // ---------- MASTERY (단원별 숙련도) ----------
 
 model MasterySnapshot {
-  id        String   @id @default(uuid())
-  userId    String
-  unitId    String
-  score     Float    // 0~100
+  id             String    @id @default(uuid())
+  userId         String
+  unitId         String
+  score          Float // 0~100
   /// score 산출에 사용된 attempt 누적 수 — 신뢰도 게이팅.
-  samples   Int      @default(0)
+  samples        Int       @default(0)
   /// 이 단원 누적 학습 시간 (분). StudySession.durationSec 적분. 단원 균형 분석 핵심.
-  studyTimeMin Int   @default(0)
+  studyTimeMin   Int       @default(0)
   /// 최근 N개의 ErrorType 분포 — { CONCEPT_MISUNDERSTANDING: 3, CALCULATION_MISTAKE: 1, ... }
   lastErrorTypes Json?
   /// 마지막 attempt 시각 — 회상 곡선 (decay) 계산용. NULL = 시도 전.
-  lastAttemptAt DateTime?
-  updatedAt DateTime @updatedAt
+  lastAttemptAt  DateTime?
+  updatedAt      DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id])
   unit Unit @relation(fields: [unitId], references: [id])
@@ -453,13 +593,13 @@ model MasterySnapshot {
 // 모바일 앱이 FCM token 을 등록 → 학습 streak / SM-2 due 알림 송신용.
 
 model DeviceToken {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   userId     String
-  token      String   @unique
-  platform   String   // 'android' | 'ios' | 'web'
+  token      String    @unique
+  platform   String // 'android' | 'ios' | 'web'
   appVersion String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
   /// 마지막 송신 성공 시각 (실패 누적 → 비활성 토큰 자동 정리)
   lastSentAt DateTime?
   /// 토큰이 무효화된 경우 (FCM 응답 NotRegistered 등)
@@ -476,12 +616,12 @@ model DeviceToken {
 
 model AnalyticsEvent {
   id        String   @id @default(uuid())
-  userId    String?  // null = 비로그인 (랜딩·회원가입 등)
-  eventType String   // 'page.view' | 'cta.click' | 'api.call' | 'perspective.change' 등
-  payload   Json     // 자유 메타: path/button/exam_kind/perspective/...
-  sessionId String?  // 브라우저 세션 UUID (sessionStorage 부여)
+  userId    String? // null = 비로그인 (랜딩·회원가입 등)
+  eventType String // 'page.view' | 'cta.click' | 'api.call' | 'perspective.change' 등
+  payload   Json // 자유 메타: path/button/exam_kind/perspective/...
+  sessionId String? // 브라우저 세션 UUID (sessionStorage 부여)
   userAgent String?  @db.Text
-  source    String?  // 'frontend' | 'backend' (자동 로깅 구분)
+  source    String? // 'frontend' | 'backend' (자동 로깅 구분)
   createdAt DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -496,25 +636,25 @@ model AnalyticsEvent {
 // 토큰 자체는 hash 만 저장하고, 평문은 발송만 — DB 유출시에도 재사용 방지.
 
 model PasswordResetToken {
-  id         String   @id @default(uuid())
-  userId     String
-  tokenHash  String   @unique  // SHA-256(평문 토큰)
-  expiresAt  DateTime
-  usedAt     DateTime?
-  requestIp  String?
-  createdAt  DateTime @default(now())
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique // SHA-256(평문 토큰)
+  expiresAt DateTime
+  usedAt    DateTime?
+  requestIp String?
+  createdAt DateTime  @default(now())
 
   @@index([userId, expiresAt])
 }
 
 model EmailVerificationToken {
-  id         String   @id @default(uuid())
-  userId     String
-  email      String   // 변경 이메일 검증도 같은 테이블 (현재는 가입 시점)
-  tokenHash  String   @unique
-  expiresAt  DateTime
-  usedAt     DateTime?
-  createdAt  DateTime @default(now())
+  id        String    @id @default(uuid())
+  userId    String
+  email     String // 변경 이메일 검증도 같은 테이블 (현재는 가입 시점)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([userId, expiresAt])
 }
@@ -522,17 +662,17 @@ model EmailVerificationToken {
 /// 어드민 액션 감사 로그 — 누가 언제 어떤 사용자 데이터를 조회/변경했는지.
 /// 분쟁·규제 대응 시 추적용. 이메일 allowlist 변경 이력도 포함.
 model AdminAccessLog {
-  id          String   @id @default(uuid())
-  adminEmail  String   // 호출 시점 ADMIN_EMAILS allowlist 통과한 이메일
-  method      String   // GET / POST / PATCH / DELETE
-  path        String   // /api/v1/admin/users/{id}
-  query       String?  @db.Text   // JSON.stringify(query)
-  body        String?  @db.Text   // JSON.stringify(body) — 민감 필드 마스킹
-  statusCode  Int
-  ip          String?
-  userAgent   String?  @db.Text
-  durationMs  Int
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  adminEmail String // 호출 시점 ADMIN_EMAILS allowlist 통과한 이메일
+  method     String // GET / POST / PATCH / DELETE
+  path       String // /api/v1/admin/users/{id}
+  query      String?  @db.Text // JSON.stringify(query)
+  body       String?  @db.Text // JSON.stringify(body) — 민감 필드 마스킹
+  statusCode Int
+  ip         String?
+  userAgent  String?  @db.Text
+  durationMs Int
+  createdAt  DateTime @default(now())
 
   @@index([adminEmail, createdAt])
   @@index([path, createdAt])
@@ -552,102 +692,102 @@ model AdminAccessLog {
 // 사용자가 문제풀이/모의고사로 진입하기 전, 해당 단원의 RETRIEVAL 단계까지 통과해야 unlock.
 
 model ConceptLesson {
-  id              String       @id @default(uuid())
+  id                String     @id @default(uuid())
   /// NCERT 학년 (1차 출시 인도). 한국 학년은 unitId 의 Unit.gradeLevels 로 보조 매핑.
-  ncertClass      NcertClass
+  ncertClass        NcertClass
   /// NCERT 챕터 번호 (해당 학년 안에서 1~N)
-  chapterNumber   Int
+  chapterNumber     Int
   /// 안정 식별자 (예: C7-CH01-INTEGERS). seed/migration 동일성 보장용.
-  chapterCode     String       @unique
-  titleKo         String       // "정수"
-  titleEn         String       // "Integers"
+  chapterCode       String     @unique
+  titleKo           String // "정수"
+  titleEn           String // "Integers"
   /// 힌디어 챕터명 — 인도 PoC 1차 출시 언어. 누락 시 service 가 titleEn 으로 fallback.
-  titleHi         String?      // "पूर्णांक"
+  titleHi           String? // "पूर्णांक"
   /// 빅 아이디어 — 학습자가 이번 차시에서 가져가야 할 핵심 통찰 (1~2 문장).
-  bigIdeaKo       String       @db.Text
-  bigIdeaEn       String       @db.Text
-  bigIdeaHi       String?      @db.Text
+  bigIdeaKo         String     @db.Text
+  bigIdeaEn         String     @db.Text
+  bigIdeaHi         String?    @db.Text
   /// 예상 학습 시간 (분). 기본 15.
-  estimatedMin    Int          @default(15)
+  estimatedMin      Int        @default(15)
   /// 학습 강도 0~3 (인지부하 추정). 0=가벼움, 3=킬러 챕터.
-  cognitiveLoad   Int          @default(1)
+  cognitiveLoad     Int        @default(1)
   /// 선수 학습 chapterCode 리스트 (DAG 의존 그래프). 빈 배열이면 진입 가능.
   prerequisiteCodes String[]   @default([])
   /// 한국 단원과의 매핑 (선택). 문제풀이/오답노트와 연결되는 다리.
-  unitId          String?
-  subUnitId       String?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  unitId            String?
+  subUnitId         String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
 
-  steps           ConceptStep[]
-  unit            Unit?        @relation(fields: [unitId], references: [id])
-  subUnit         SubUnit?     @relation(fields: [subUnitId], references: [id])
-  progress        ConceptProgress[]
+  steps    ConceptStep[]
+  unit     Unit?             @relation(fields: [unitId], references: [id])
+  subUnit  SubUnit?          @relation(fields: [subUnitId], references: [id])
+  progress ConceptProgress[]
 
   @@index([ncertClass, chapterNumber])
   @@index([unitId])
 }
 
 model ConceptStep {
-  id              String           @id @default(uuid())
-  lessonId        String
+  id             String          @id @default(uuid())
+  lessonId       String
   /// 1부터 시작. 단계 순서.
-  stepIndex       Int
-  kind            ConceptStepKind
-  titleKo         String
-  titleEn         String
-  titleHi         String?          // 인도 PoC. 없으면 titleEn fallback.
+  stepIndex      Int
+  kind           ConceptStepKind
+  titleKo        String
+  titleEn        String
+  titleHi        String? // 인도 PoC. 없으면 titleEn fallback.
   /// 본문 (Markdown + LaTeX 허용)
-  bodyKo          String           @db.Text
-  bodyEn          String           @db.Text
-  bodyHi          String?          @db.Text
+  bodyKo         String          @db.Text
+  bodyEn         String          @db.Text
+  bodyHi         String?         @db.Text
   /// 시각 자료 — Pictorial/Concrete 단계용. URL 또는 SVG 데이터.
-  visualType      String?          // 'figure' | 'video' | 'manipulative' | 'graph' | 'svg'
-  visualUrl       String?
+  visualType     String? // 'figure' | 'video' | 'manipulative' | 'graph' | 'svg'
+  visualUrl      String?
   /// 동적 그래프 렌더링용 JSON 파라미터 — visualType='graph' 일 때 사용.
   ///   { type: 'unit-circle', angle: 120 }
   ///   { type: 'parabola', a: 1, b: 0, c: -3, range: [-3, 3] }
   ///   { type: 'number-line', marks: [-3, 0, 5], highlight: 5 }
   ///   { type: 'venn-2set', a: 18, b: 14, both: 6, labelA: 'Football', labelB: 'Basketball' }
   ///   { type: 'sine-wave', amplitude: 1, period: 360, marked: [{x: 30, y: 0.5}] }
-  visualData      Json?
+  visualData     Json?
   /// MISCONCEPTION 단계 페이로드:
   ///   { wrong: "흔한 오답", why: "왜 헷갈리는지", correct: "올바른 사고" }
-  misconception   Json?
+  misconception  Json?
   /// WORKED_EXAMPLE 단계 페이로드:
   ///   [{ step: 1, math: "...", narration: "..." }, ...]
-  workedSteps     Json?
+  workedSteps    Json?
   /// RETRIEVAL / GUIDED_PRACTICE 단계 페이로드:
   ///   { prompt: "...", accept: ["정답1", "정답2"], hint?: "...", explainKo?, explainEn? }
-  retrievalCheck  Json?
+  retrievalCheck Json?
   /// REFLECT 단계 페이로드: { prompts: ["...", "..."] } — 자기설명/요약 유도 질문
-  reflectPrompts  Json?
+  reflectPrompts Json?
 
-  lesson          ConceptLesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lesson ConceptLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([lessonId, stepIndex])
   @@index([lessonId])
 }
 
 model ConceptProgress {
-  id              String   @id @default(uuid())
-  userId          String
-  lessonId        String
+  id             String    @id @default(uuid())
+  userId         String
+  lessonId       String
   /// 현재 진행 단계 인덱스 (1부터).
-  currentStep     Int      @default(1)
+  currentStep    Int       @default(1)
   /// 완료한 단계 인덱스 배열.
-  completedSteps  Int[]    @default([])
+  completedSteps Int[]     @default([])
   /// 마지막 RETRIEVAL 통과 시각. 한 번 이상 통과해야 unit 의 문제풀이 unlock.
-  masteredAt      DateTime?
+  masteredAt     DateTime?
   /// 최근 RETRIEVAL 점수 (0~100).
-  retrievalScore  Float?
+  retrievalScore Float?
   /// 학습 누적 초.
-  durationSec     Int      @default(0)
-  startedAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  durationSec    Int       @default(0)
+  startedAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  user            User           @relation(fields: [userId], references: [id])
-  lesson          ConceptLesson  @relation(fields: [lessonId], references: [id])
+  user   User          @relation(fields: [userId], references: [id])
+  lesson ConceptLesson @relation(fields: [lessonId], references: [id])
 
   @@unique([userId, lessonId])
   @@index([userId, masteredAt])
@@ -656,18 +796,321 @@ model ConceptProgress {
 // ---------- WEEKLY REPORT ----------
 
 model WeeklyReport {
-  id              String   @id @default(uuid())
-  userId          String
-  isoWeek         String   // "2024-W45"
-  weekStart       DateTime @db.Date
-  totalHours      Float
-  problemsSolved  Int
-  accuracyPct     Float
-  aiScore         Float    // 0~10
-  mentorMessage   String   @db.Text
-  generatedAt     DateTime @default(now())
+  id             String    @id @default(uuid())
+  userId         String
+  isoWeek        String // "2024-W45"
+  weekStart      DateTime  @db.Date
+  weekEnd        DateTime? @db.Date // 요구사항 weekEndDate
+  totalHours     Float
+  problemsSolved Int
+  accuracyPct    Float
+  aiScore        Float // 0~10
+  mentorMessage  String    @db.Text
+  generatedAt    DateTime  @default(now())
+
+  // ---- 요구사항 추가 필드 (학생/학부모/강사 분리 요약) ----
+  tenantId                String?
+  studentSummary          String?  @db.Text
+  parentSummary           String?  @db.Text
+  teacherSummary          String?  @db.Text
+  topImprovedConcepts     String[] @default([]) // conceptId 목록
+  weakConcepts            String[] @default([]) // conceptId 목록
+  repeatedErrorPatterns   String[] @default([]) // ErrorPatternProfile id 목록
+  totalSessions           Int      @default(0)
+  totalAttempts           Int      @default(0)
+  averageStudyDurationSec Int      @default(0)
+  recommendedNextGoals    String[] @default([]) // 다음 주 목표 (자유 텍스트 1~3개)
 
   user User @relation(fields: [userId], references: [id])
 
   @@unique([userId, isoWeek])
+  @@index([tenantId, weekStart])
+}
+
+// =============================================================
+//  AI 처방 시스템 — 신규 모델 (Phase 1.1)
+// =============================================================
+
+/// 학원/기관. multi-tenant 의 기본 단위. solo 학생은 tenantId=null.
+model Tenant {
+  id           String   @id @default(uuid())
+  name         String // "Mathēma Academy"
+  /// URL/로그인용 short code (예: "mathema", "demo-academy").
+  code         String   @unique
+  /// 학원 운영자 연락처 (선택).
+  contactEmail String?
+  /// 'active' | 'suspended' — 학원 단위 비활성화.
+  status       String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  users User[]
+}
+
+/// 개념(Concept) — 추천 엔진의 핵심.
+/// Unit 보다 더 세분화된 단위 (예: Unit "미적분 II" → Concept "연쇄법칙").
+/// 같은 Concept이 여러 Unit/SubUnit 에 매핑될 수 있어 N:M 은 problemConcepts 로 처리.
+model Concept {
+  id         String      @id @default(uuid())
+  /// 안정 식별자 — 예: "chain_rule", "composite_function". 시드/임포트 일관성.
+  code       String      @unique
+  name       String // "연쇄법칙"
+  /// 과목 — 'math', 'physics' 등. 1차 PoC 는 'math' 만.
+  subject    String      @default("math")
+  /// 학년 단계 — Concept 추천을 학년에 맞게 필터.
+  gradeLevel GradeLevel?
+
+  /// 상위 Concept (예: '연쇄법칙' → parent='미분'). Tree 구조의 부모.
+  parentConceptId String?
+  parent          Concept?  @relation("ConceptParent", fields: [parentConceptId], references: [id])
+  children        Concept[] @relation("ConceptParent")
+
+  /// 선수 Concept ID 배열 (DAG). chain_rule 의 prerequisite = [composite_function, derivative].
+  /// 학생이 chain_rule 을 못 풀면 → 추천 엔진이 prerequisite 부터 진단.
+  prerequisiteConceptIds String[] @default([])
+  /// 관련 Concept (양방향 약한 연관). 추천 다양성 확보용.
+  relatedConceptIds      String[] @default([])
+
+  /// 한국 Unit 과의 다리 (호환 — 점진 마이그레이션).
+  unitId String?
+  unit   Unit?   @relation(fields: [unitId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  problems            ProblemConcept[]
+  masteryTrajectories MasteryTrajectory[]
+  masteryEvents       MasteryEvent[]
+  errorPatterns       ErrorPatternProfile[]
+
+  @@index([subject, gradeLevel])
+  @@index([parentConceptId])
+}
+
+/// Problem ↔ Concept 다대다 + weight (이 문제가 이 개념을 얼마나 측정하는지 0~1).
+model ProblemConcept {
+  problemId String
+  conceptId String
+  /// 0~1. 1이면 이 개념을 직접 묻는 문제. 0.3이면 부수적으로 필요한 개념.
+  weight    Float  @default(1.0)
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  concept Concept @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, conceptId])
+  @@index([conceptId])
+}
+
+/// 개념별 숙련도의 현재 스냅샷 + 트렌드 (요구사항 MasteryTrajectory).
+/// MasteryEvent 가 시계열 이력이고, MasteryTrajectory 는 그 결과 현재값.
+/// 기존 MasterySnapshot 은 unit 단위로 유지 (호환). 신규 MasteryTrajectory 는 concept 단위.
+model MasteryTrajectory {
+  id        String  @id @default(uuid())
+  userId    String
+  conceptId String
+  tenantId  String?
+
+  /// 0~100. 정답률 단독이 아니라 응답시간·힌트·자신감·최근성·반복 오답을 종합.
+  masteryScore       Float        @default(0)
+  /// 평균±표준오차 형태의 신뢰구간 (선택). evidenceCount 가 작으면 넓음.
+  confidenceInterval Float?
+  trend              MasteryTrend @default(STABLE)
+
+  /// 누적 attempt 수 — 점수 신뢰도 게이트.
+  evidenceCount          Int   @default(0)
+  /// 최근 N attempt 의 정답률 (0~1).
+  recentAccuracy         Float @default(0)
+  averageResponseTimeSec Int   @default(0)
+  hintUsageRate          Float @default(0)
+  /// 자신감(selfConfidenceScore) ↔ 실제 정답률 차이 — overconfidence 진단.
+  confidenceGap          Float @default(0)
+
+  lastAttemptAt DateTime?
+  /// 'rule_based' | 'llm' | 'hybrid' | 'teacher_override' — 누가 갱신했는지.
+  updatedBy     MasteryUpdateSource @default(RULE_BASED)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  concept Concept @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, conceptId])
+  @@index([tenantId, masteryScore])
+  @@index([userId, lastAttemptAt])
+}
+
+/// MasteryTrajectory 의 시계열 이력 — heatmap/그래프용.
+/// 각 Attempt 가 끝날 때 1 row 생성. masteryScore 의 시간변화 추적.
+model MasteryEvent {
+  id            String   @id @default(uuid())
+  userId        String
+  conceptId     String
+  tenantId      String?
+  attemptId     String?
+  /// 갱신 후 점수 (0~100).
+  masteryScore  Float
+  /// 이번 attempt 로 인한 점수 변화량 (+5, -6 등).
+  delta         Float
+  evidenceCount Int
+  createdAt     DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  concept Concept @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+
+  @@index([userId, conceptId, createdAt])
+}
+
+/// 반복 실수 패턴의 누적 통계 + 상태.
+/// 학생 UI 표현: "반복 실수 패턴" / "학습 습관 신호" / "개념별 막힘 지점".
+model ErrorPatternProfile {
+  id        String    @id @default(uuid())
+  userId    String
+  conceptId String
+  tenantId  String?
+  errorCode ErrorCode
+
+  /// 누적 발생 횟수.
+  frequency       Int    @default(0)
+  /// 최근 N(=5) attempt 안에서의 발생 횟수.
+  recentFrequency Int    @default(0)
+  severity        String @default("low") // 'low' | 'medium' | 'high'
+
+  firstDetectedAt DateTime @default(now())
+  lastDetectedAt  DateTime @default(now())
+
+  /// LLM 이 작성한 1~2 문장 인사이트 (요구사항 llmSummary).
+  llmSummary         String?  @db.Text
+  /// 증거가 되는 Attempt.id 목록 (최대 ~20).
+  evidenceAttemptIds String[] @default([])
+
+  status ErrorPatternStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  concept Concept @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, conceptId, errorCode])
+  @@index([tenantId, status])
+  @@index([userId, status])
+}
+
+/// LLM 분석 결과의 versioned log.
+/// rawOutput / parsedOutput / promptVersion / inputHash 를 모두 저장 →
+/// 나중에 prompt v3 ↔ v4 판단 차이를 회귀 분석 가능.
+model LLMAnalysisLog {
+  id        String  @id @default(uuid())
+  userId    String
+  attemptId String
+  problemId String
+  tenantId  String?
+
+  modelName     String // 'claude-opus-4-5' | 'gpt-4o'
+  promptVersion String // 'attempt-analyze@v1'
+  /// SHA-256 of canonical input — 같은 입력 캐시·중복 호출 회피.
+  inputHash     String
+
+  rawOutput    Json
+  /// rawOutput 을 우리 스키마로 정규화한 결과.
+  /// { errorCodes: ErrorCode[], conceptWeakness: string[],
+  ///   reasoningSummary: string, recommendedAction: string }
+  parsedOutput Json
+
+  confidenceScore  Float // LLM 자기보고 0~1
+  validationStatus LLMValidationStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attempt Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([attemptId])
+  @@index([promptVersion, modelName])
+}
+
+/// AI 추천이 실제로 효과가 있었는지 추적.
+/// 한 attempt 가 추천에서 시작됐는지 — accepted/solved/result 로 회수.
+model RecommendationLog {
+  id        String  @id @default(uuid())
+  userId    String
+  sessionId String?
+  tenantId  String?
+
+  recommendedProblemId String
+  recommendationType   RecommendationType
+  /// 학생 / 교사 / 부모용 노출용 한 줄 사유 (요구사항 reason).
+  reason               String             @db.Text
+
+  /// 추천이 겨냥한 개념 / 오답 코드 / 예상 난이도.
+  targetConceptId    String?
+  targetErrorCode    ErrorCode?
+  expectedDifficulty Int        @default(3)
+
+  accepted Boolean               @default(false)
+  solved   Boolean               @default(false)
+  result   RecommendationResult?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recommendedProblem Problem @relation("RecommendedProblem", fields: [recommendedProblemId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([userId, accepted, solved])
+}
+
+/// 강사가 AI 판단을 덮어쓴 이력.
+/// "이 학생은 개념을 모르는 것이 아니라 풀이 중 부호 실수가 반복되는 상태다" 같은 정정 기록.
+model TeacherOverride {
+  id        String  @id @default(uuid())
+  /// 강사 User.id.
+  teacherId String
+  /// 대상 학생 User.id.
+  userId    String
+  tenantId  String?
+
+  targetType TeacherOverrideTargetType
+  /// 수정 대상 row id (MasteryTrajectory.id / ErrorPatternProfile.id / RecommendationLog.id).
+  targetId   String
+
+  beforeValue Json
+  afterValue  Json
+  reason      String @db.Text
+
+  createdAt DateTime @default(now())
+
+  teacher User @relation("TeacherOverrider", fields: [teacherId], references: [id], onDelete: Cascade)
+  user    User @relation("StudentTarget", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([teacherId, createdAt])
+  @@index([tenantId, createdAt])
+}
+
+/// AI 산출물에 대한 평가 (학생 / 교사 / 학부모 / 관리자).
+/// raterType 으로 의미 차이 보존.
+model Feedback {
+  id         String             @id @default(uuid())
+  targetType FeedbackTargetType
+  /// 대상 row id (LLMAnalysisLog / WeeklyReport / RecommendationLog / Problem.explanation 등).
+  targetId   String
+
+  raterType FeedbackRaterType
+  /// 평가자 User.id (관리자/강사/부모는 별도 계정 가정. 학생은 자기 user.id).
+  raterId   String
+
+  aiInsightRating Int // 1~5
+  comment         String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  rater User @relation(fields: [raterId], references: [id], onDelete: Cascade)
+
+  @@index([targetType, targetId])
+  @@index([raterId, createdAt])
 }
