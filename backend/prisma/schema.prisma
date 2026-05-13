@@ -1175,3 +1175,42 @@ model Feedback {
   @@index([targetType, targetId])
   @@index([raterId, createdAt])
 }
+
+model CurriculumNode {
+  id         String   @id @default(uuid())
+  classLevel Int
+  subject    String   @default("MATH")
+  chapter    String
+  topic      String
+  subtopic   String?
+  concept    String?
+  order      Int?
+  parentId   String?
+  status     String   @default("PUBLISHED")
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([classLevel, subject])
+  @@index([chapter, topic])
+  @@index([status])
+}
+
+model AiRunLog {
+  id           String   @id @default(uuid())
+  feature      String
+  node         String
+  input        Json
+  output       Json?
+  model        String?
+  status       String
+  error        String?  @db.Text
+  inputTokens  Int?
+  outputTokens Int?
+  durationMs   Int?
+  createdAt    DateTime @default(now())
+
+  @@index([feature, createdAt])
+  @@index([node, createdAt])
+  @@index([status, createdAt])
+}
