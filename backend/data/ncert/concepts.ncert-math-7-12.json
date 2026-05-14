@@ -1,0 +1,109 @@
+{
+  "version": "ncert-concepts@2026-05",
+  "concepts": [
+    {
+      "conceptCode": "C7_INT_NUMBER_LINE",
+      "classLevel": 7,
+      "chapterCode": "C7-CH01-INTEGERS",
+      "topicCode": "C7-CH01-T01",
+      "name": "Integers on the Number Line",
+      "shortName": "Number Line",
+      "description": "Represent positive, zero, and negative integers on a number line.",
+      "studentExplanation": "Numbers increase as you move right on the number line and decrease as you move left.",
+      "prerequisiteConceptCodes": [],
+      "skills": ["read_number_line", "locate_integer", "compare_position"],
+      "commonMisconceptions": [
+        {
+          "misconceptionCode": "C7_INT_NUMBER_LINE_M01",
+          "wrongIdea": "A larger digit always means a larger number, even for negative numbers.",
+          "whyItHappens": "The student compares absolute values instead of positions on the number line.",
+          "correction": "For negative numbers, the number farther left is smaller.",
+          "errorCodes": ["SIGN", "CON"]
+        }
+      ],
+      "workedExamples": [
+        {
+          "exampleCode": "C7_INT_NUMBER_LINE_EX01",
+          "question": "Which is greater: -3 or -8?",
+          "answer": "-3",
+          "steps": [
+            "Place -3 and -8 on the number line.",
+            "-3 is to the right of -8.",
+            "The number to the right is greater, so -3 is greater."
+          ]
+        }
+      ],
+      "revisionMaterial": {
+        "summary": "Use the number line to compare integers. Right means greater, left means smaller.",
+        "quickRules": [
+          "Every positive integer is greater than zero.",
+          "Every negative integer is less than zero.",
+          "Among negative integers, the one with smaller absolute value is greater."
+        ],
+        "memoryHook": "Right is greater, left is smaller."
+      }
+    },
+    {
+      "conceptCode": "C7_INT_COMPARE",
+      "classLevel": 7,
+      "chapterCode": "C7-CH01-INTEGERS",
+      "topicCode": "C7-CH01-T01",
+      "name": "Comparing and Ordering Integers",
+      "shortName": "Compare Integers",
+      "description": "Compare integers and arrange them in ascending or descending order.",
+      "studentExplanation": "Ascending order means smallest to largest. Think of moving from left to right on the number line.",
+      "prerequisiteConceptCodes": ["C7_INT_NUMBER_LINE"],
+      "skills": ["compare_integers", "order_numbers"],
+      "commonMisconceptions": [],
+      "workedExamples": [],
+      "revisionMaterial": {
+        "summary": "Order integers by their positions on the number line.",
+        "quickRules": ["Ascending means smallest to largest.", "Descending means largest to smallest."],
+        "memoryHook": "Ascending climbs upward."
+      }
+    },
+    {
+      "conceptCode": "C7_INT_SIGN_RULES",
+      "classLevel": 7,
+      "chapterCode": "C7-CH01-INTEGERS",
+      "topicCode": "C7-CH01-T02",
+      "name": "Sign Rules for Integer Operations",
+      "shortName": "Integer Sign Rules",
+      "description": "Apply sign rules while adding, subtracting, multiplying, and dividing integers.",
+      "studentExplanation": "The sign of the answer depends on the operation and the signs of the numbers involved.",
+      "prerequisiteConceptCodes": ["C7_INT_NUMBER_LINE"],
+      "skills": ["identify_sign", "apply_integer_operation", "simplify_integer_expression"],
+      "commonMisconceptions": [
+        {
+          "misconceptionCode": "C7_INT_SIGN_M01",
+          "wrongIdea": "A negative sign always makes the final answer negative.",
+          "whyItHappens": "The student remembers the symbol but not the operation rule.",
+          "correction": "The final sign depends on the operation and the number of negative factors.",
+          "errorCodes": ["SIGN", "CON"]
+        }
+      ],
+      "workedExamples": [
+        {
+          "exampleCode": "C7_INT_SIGN_EX01",
+          "question": "Simplify: -3 + 8",
+          "answer": "5",
+          "steps": [
+            "Start at -3 on the number line.",
+            "Adding 8 means move 8 steps to the right.",
+            "You land on 5."
+          ]
+        }
+      ],
+      "revisionMaterial": {
+        "summary": "For addition, think movement on the number line. For multiplication and division, count negative signs.",
+        "quickRules": [
+          "Negative plus positive depends on which absolute value is larger.",
+          "Subtracting a negative means adding the positive.",
+          "Negative times negative is positive.",
+          "Positive times negative is negative."
+        ],
+        "memoryHook": "Two direction reversals bring you back to positive."
+      }
+    }
+  ]
+}

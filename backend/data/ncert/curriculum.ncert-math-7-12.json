@@ -1,0 +1,47 @@
+{
+  "version": "ncert-math-7-12@2026-05",
+  "country": "IN",
+  "board": "NCERT",
+  "subject": "MATH",
+  "classes": [
+    {
+      "classLevel": 7,
+      "ncertClass": "CLASS_7",
+      "title": "Class 7 Mathematics",
+      "chapters": [
+        {
+          "chapterCode": "C7-CH01-INTEGERS",
+          "chapterNumber": 1,
+          "titleEn": "Integers",
+          "titleHi": "पूर्णांक",
+          "unitName": "Integers",
+          "bigIdea": "Integers extend whole numbers to include negative values and can be represented on a number line.",
+          "estimatedMinutes": 180,
+          "difficultyLevel": 1,
+          "prerequisiteChapterCodes": [],
+          "topics": [
+            {
+              "topicCode": "C7-CH01-T01",
+              "title": "Integers on the Number Line",
+              "order": 1,
+              "conceptCodes": [
+                "C7_INT_NUMBER_LINE",
+                "C7_INT_COMPARE"
+              ]
+            },
+            {
+              "topicCode": "C7-CH01-T02",
+              "title": "Addition and Subtraction of Integers",
+              "order": 2,
+              "conceptCodes": [
+                "C7_INT_ADD",
+                "C7_INT_SUBTRACT",
+                "C7_INT_SIGN_RULES"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

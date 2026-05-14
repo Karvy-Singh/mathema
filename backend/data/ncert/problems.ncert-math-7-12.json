@@ -1,0 +1,87 @@
+{
+  "version": "ncert-problems@2026-05",
+  "problems": [
+    {
+      "problemKey": "NCERT-C7-CH01-EX1.1-Q1",
+      "source": "NCERT",
+      "classLevel": 7,
+      "ncertClass": "CLASS_7",
+      "chapterCode": "C7-CH01-INTEGERS",
+      "topicCode": "C7-CH01-T01",
+      "exercise": "1.1",
+      "questionNumber": "1",
+      "questionType": "FREE_RESPONSE",
+      "body": "Write the following integers in ascending order: -3, 5, 0, -8, 2.",
+      "answer": "-8, -3, 0, 2, 5",
+      "acceptedAnswers": ["-8,-3,0,2,5", "-8, -3, 0, 2, 5"],
+      "difficultyLevel": 1,
+      "estimatedTimeSec": 60,
+      "conceptCodes": ["C7_INT_NUMBER_LINE", "C7_INT_COMPARE"],
+      "requiredSkills": ["compare_integers", "order_numbers"],
+      "expectedSolutionSteps": [
+        "Place the numbers mentally on the number line.",
+        "Numbers farther left are smaller.",
+        "Arrange from smallest to largest."
+      ],
+      "hints": [
+        "Negative numbers are less than zero.",
+        "Among negative numbers, the number with bigger absolute value is smaller."
+      ],
+      "commonErrorCodes": ["SIGN", "CON"],
+      "distractors": [
+        {
+          "answer": "-3, -8, 0, 2, 5",
+          "errorCode": "SIGN",
+          "reason": "Student compared negative numbers as if they were positive."
+        }
+      ],
+      "solution": {
+        "finalAnswer": "-8, -3, 0, 2, 5",
+        "steps": [
+          "On the number line, -8 is left of -3.",
+          "Both negative numbers are less than 0.",
+          "The positive numbers are 2 and 5, and 2 < 5.",
+          "So the ascending order is -8, -3, 0, 2, 5."
+        ],
+        "explanation": "Ascending order means smallest to largest. On a number line, values increase from left to right."
+      }
+    },
+    {
+      "problemKey": "NCERT-C7-CH01-EX1.1-Q2",
+      "source": "NCERT",
+      "classLevel": 7,
+      "ncertClass": "CLASS_7",
+      "chapterCode": "C7-CH01-INTEGERS",
+      "topicCode": "C7-CH01-T02",
+      "exercise": "1.1",
+      "questionNumber": "2",
+      "questionType": "FREE_RESPONSE",
+      "body": "Simplify: -15 - (-8)",
+      "answer": "-7",
+      "acceptedAnswers": ["-7"],
+      "difficultyLevel": 2,
+      "estimatedTimeSec": 45,
+      "conceptCodes": ["C7_INT_SIGN_RULES"],
+      "requiredSkills": ["subtract_negative", "simplify_integer_expression"],
+      "expectedSolutionSteps": [
+        "Rewrite subtraction of a negative as addition.",
+        "Compute -15 + 8.",
+        "Keep the sign of the number with larger absolute value."
+      ],
+      "hints": ["Subtracting a negative means adding the positive.", "Compare 15 and 8 to decide the sign."],
+      "commonErrorCodes": ["SIGN", "CALC"],
+      "distractors": [
+        {
+          "answer": "-23",
+          "errorCode": "SIGN",
+          "reason": "Student treated -15 - (-8) as -15 - 8."
+        }
+      ],
+      "solution": {
+        "finalAnswer": "-7",
+        "steps": ["-15 - (-8) = -15 + 8", "15 is larger than 8, so the result is negative.", "15 - 8 = 7, so the answer is -7."],
+        "explanation": "When subtracting a negative number, change it to addition of the positive number."
+      }
+    }
+  ]
+}

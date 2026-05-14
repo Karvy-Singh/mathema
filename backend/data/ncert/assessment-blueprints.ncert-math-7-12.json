@@ -1,0 +1,45 @@
+{
+  "version": "ncert-assessment-blueprints@2026-05",
+  "blueprints": [
+    {
+      "blueprintCode": "CHAPTER_TEST_DEFAULT",
+      "assessmentType": "CHAPTER_TEST",
+      "title": "Default Chapter Test",
+      "questionCount": 10,
+      "durationMinutes": 20,
+      "difficultyDistribution": {
+        "1": 3,
+        "2": 3,
+        "3": 2,
+        "4": 1,
+        "5": 1
+      },
+      "selectionPolicy": {
+        "weakConceptWeight": 0.45,
+        "recentlyStudiedWeight": 0.2,
+        "newConceptWeight": 0.2,
+        "revisionWeight": 0.15
+      }
+    },
+    {
+      "blueprintCode": "WEEKLY_ADAPTIVE_DEFAULT",
+      "assessmentType": "WEEKLY_ADAPTIVE",
+      "title": "Weekly Adaptive Assessment",
+      "questionCount": 15,
+      "durationMinutes": 30,
+      "difficultyDistribution": {
+        "1": 2,
+        "2": 4,
+        "3": 5,
+        "4": 3,
+        "5": 1
+      },
+      "selectionPolicy": {
+        "weakConceptWeight": 0.5,
+        "frequentlyWrongUnitWeight": 0.2,
+        "frequentlyStudiedUnitWeight": 0.15,
+        "spacedRevisionWeight": 0.15
+      }
+    }
+  ]
+}
