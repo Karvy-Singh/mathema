@@ -39,3 +39,46 @@ class SolveResponse(BaseModel):
     hints: List[str]
     nextPractice: List[str]
     verification: Verification
+
+
+class ChapterTestRequest(BaseModel):
+    userId: Optional[str] = None
+    classLevel: int = Field(ge=7, le=12)
+    chapterCode: Optional[str] = None
+    chapter: Optional[str] = None
+    questionCount: Optional[int] = Field(default=None, ge=1, le=30)
+
+
+class WeeklyAssessmentRequest(BaseModel):
+    userId: Optional[str] = None
+    classLevel: Optional[int] = Field(default=None, ge=7, le=12)
+    questionCount: Optional[int] = Field(default=None, ge=1, le=40)
+
+
+class AssessmentQuestion(BaseModel):
+    questionId: str
+    source: str
+    classLevel: int
+    chapterCode: Optional[str] = None
+    topicCode: Optional[str] = None
+    conceptCodes: List[str] = []
+    difficultyLevel: int = Field(ge=1, le=5)
+    estimatedTimeSec: int = 60
+    questionType: str = "FREE_RESPONSE"
+    body: str
+    answer: Optional[str] = None
+    hints: List[str] = []
+    solution: Optional[dict] = None
+    adaptiveReason: Optional[str] = None
+
+
+class AssessmentResponse(BaseModel):
+    assessmentType: str
+    title: str
+    classLevel: Optional[int] = None
+    chapterCode: Optional[str] = None
+    durationMinutes: int
+    questionCount: int
+    adaptiveBasis: dict
+    revisionFocus: List[str]
+    questions: List[AssessmentQuestion]

@@ -20,6 +20,7 @@ def load_ncert_data() -> dict[str, Any]:
     curriculum = _read_json("curriculum.ncert-math-7-12.json")
     concepts = _read_json("concepts.ncert-math-7-12.json")
     problems = _read_json("problems.ncert-math-7-12.json")
+    blueprints = _read_json("assessment-blueprints.ncert-math-7-12.json")
 
     concept_by_code = {c["conceptCode"]: c for c in concepts.get("concepts", [])}
     chapter_by_code: dict[str, dict[str, Any]] = {}
@@ -40,6 +41,7 @@ def load_ncert_data() -> dict[str, Any]:
         "curriculum": curriculum,
         "concepts": concepts,
         "problems": problems,
+        "blueprints": blueprints,
         "conceptByCode": concept_by_code,
         "chapterByCode": chapter_by_code,
         "topicByCode": topic_by_code,
