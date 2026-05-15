@@ -1,5 +1,7 @@
 import { BadGatewayException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { GenerateChapterTestDto } from './dto/generate-chapter-test.dto';
+import { GenerateWeeklyAssessmentDto } from './dto/generate-weekly-assessment.dto';
 import { SolveMathHelperDto } from './dto/solve-math-helper.dto';
 
 @Injectable()
@@ -11,10 +13,22 @@ export class MathHelperService {
   }
 
   async solve(userId: string, dto: SolveMathHelperDto) {
-    const response = await fetch(`${this.serviceUrl}/solve`, {
+    return this.post('/solve', { ...dto, userId });
+  }
+
+  async generateChapterTest(userId: string, dto: GenerateChapterTestDto) {
+    return this.post('/assessments/chapter-test', { ...dto, userId });
+  }
+
+  async generateWeeklyAssessment(userId: string, dto: GenerateWeeklyAssessmentDto) {
+    return this.post('/assessments/weekly', { ...dto, userId });
+  }
+
+  private async post(path: string, body: unknown) {
+    const response = await fetch(`${this.serviceUrl}${path}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...dto, userId }),
+      body: JSON.stringify(body),
     }).catch((error: unknown) => {
       throw new BadGatewayException(`Math helper service unavailable: ${String(error)}`);
     });
